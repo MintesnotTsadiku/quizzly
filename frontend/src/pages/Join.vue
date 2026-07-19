@@ -1,6 +1,6 @@
 <template>
 	<div class="flex h-full flex-col overflow-y-auto bg-night px-5 py-10">
-		<div class="m-auto w-full max-w-sm">
+		<div class="m-auto w-full max-w-sm md:max-w-2xl">
 			<p
 				class="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-gold"
 			>
@@ -14,7 +14,10 @@
 				Type the PIN on the big screen, pick a face, and you're in.
 			</p>
 
-			<form class="mt-9 flex flex-col gap-6" @submit.prevent="join">
+			<form
+				class="mt-9 flex flex-col gap-6 md:grid md:grid-cols-2 md:items-start md:gap-x-8"
+				@submit.prevent="join"
+			>
 				<label class="flex flex-col gap-2">
 					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
 						Game PIN
@@ -60,7 +63,7 @@
 					</span>
 				</label>
 
-				<div class="flex flex-col gap-3">
+				<div class="flex flex-col gap-3 md:col-start-2 md:row-span-2 md:row-start-1">
 					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
 						Your face
 					</span>
@@ -86,12 +89,12 @@
 
 				<button
 					type="submit"
-					class="rounded-2xl bg-ember py-4 font-display text-xl font-extrabold text-night transition hover:brightness-110 disabled:opacity-50"
+					class="rounded-2xl bg-ember py-4 font-display text-xl font-extrabold text-night transition hover:brightness-110 disabled:opacity-50 md:col-span-2"
 					:disabled="joining"
 				>
 					{{ joining ? "Joining…" : "Join game" }}
 				</button>
-				<p v-if="error" class="text-center text-sm text-ember">{{ error }}</p>
+				<p v-if="error" class="text-center text-sm text-ember md:col-span-2">{{ error }}</p>
 			</form>
 		</div>
 	</div>
