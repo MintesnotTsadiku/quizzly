@@ -14,8 +14,6 @@ from quizzly.profanity import is_profane
 
 NICKNAME_MAX_LENGTH = 20
 
-# Host APIs
-
 
 @frappe.whitelist()
 def create_session(quiz: str) -> dict:
@@ -163,14 +161,6 @@ def end_session(session: str) -> dict:
 	return {"ok": True}
 
 
-# Quiz authoring APIs
-
-
-# The editor reads, saves and deletes a quiz through frappe.client.*: `if_owner` on
-# QZ Quiz enforces ownership, the controller enforces content, and the QZ Session link
-# refuses the delete of a played quiz. Only the question count needs a query of its own.
-
-
 @frappe.whitelist()
 def list_quizzes() -> list[dict]:
 	quizzes = frappe.get_list("QZ Quiz", fields=["name", "title"], order_by="modified desc")
@@ -178,9 +168,6 @@ def list_quizzes() -> list[dict]:
 		# ponytail: one count per quiz; group them if a host ever owns hundreds
 		quiz["question_count"] = frappe.db.count("QZ Question", {"parent": quiz.name})
 	return quizzes
-
-
-# Guest APIs
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -335,9 +322,6 @@ def leave_session(pin: str, token: str) -> None:
 	if session.status == "Lobby":
 		frappe.delete_doc("QZ Participant", participant.name, ignore_permissions=True, force=True)
 		publish_lobby_update(session)
-
-
-# Helpers
 
 
 def get_host_session(session: str) -> Document:

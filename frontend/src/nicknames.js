@@ -1,5 +1,3 @@
-// Words come from the boot context so the server-side profanity test covers
-// exactly the combinations this generator can produce.
 const { adjectives = [], nouns = [] } = window.nickname_words || {};
 
 function pick(list) {

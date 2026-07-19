@@ -2,8 +2,6 @@ import { onBeforeUnmount, ref } from "vue";
 
 const SILENCE_LIMIT_MS = 20000;
 
-// Night-sky answer marks. Each option gets a hue and a silhouette, so players can
-// call out an answer across a room without reading it. Index = canonical option id - 1.
 // Colors are spelled out as full class names: Tailwind only generates what it can see.
 export const SHAPES = [
 	{
