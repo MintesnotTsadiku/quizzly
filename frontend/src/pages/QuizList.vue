@@ -1,15 +1,17 @@
 <template>
 	<div class="flex h-full flex-col overflow-y-auto bg-night">
 		<HostBar />
-		<div class="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 p-8">
+		<div class="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 p-5 sm:p-8">
 			<div class="flex items-end justify-between gap-4">
 				<div>
 					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">Host</p>
-					<h1 class="mt-2 font-display text-5xl font-extrabold text-paper">
+					<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">
 						Your quizzes
 					</h1>
 				</div>
-				<RouterLink class="ctl ctl-go" to="/host/quizzes/new">New quiz</RouterLink>
+				<RouterLink class="ctl ctl-go shrink-0 whitespace-nowrap" to="/host/quizzes/new">
+					New quiz
+				</RouterLink>
 			</div>
 
 			<p v-if="error" class="text-ember">{{ error }}</p>
@@ -18,9 +20,9 @@
 				<div
 					v-for="quiz in quizzes"
 					:key="quiz.name"
-					class="flex items-center gap-4 rounded-2xl border border-haze bg-dusk px-5 py-4"
+					class="flex flex-wrap items-center gap-3 rounded-2xl border border-haze bg-dusk px-5 py-4 sm:gap-4"
 				>
-					<div class="min-w-0 flex-1">
+					<div class="min-w-0 flex-1 basis-full sm:basis-0">
 						<p class="truncate font-display text-xl font-bold text-paper">
 							{{ quiz.title }}
 						</p>

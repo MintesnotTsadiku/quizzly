@@ -1,7 +1,7 @@
 <template>
 	<div class="flex h-full flex-col overflow-y-auto bg-night">
 		<HostBar />
-		<div class="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
+		<div class="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-5 sm:p-8">
 			<div class="flex items-end justify-between gap-4">
 				<div class="min-w-0 flex-1">
 					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">
@@ -9,7 +9,7 @@
 					</p>
 					<input
 						v-model="title"
-						class="field mt-2 font-display text-3xl font-extrabold"
+						class="field mt-2 font-display text-2xl font-extrabold sm:text-3xl"
 						placeholder="Quiz title"
 					/>
 				</div>
@@ -36,7 +36,7 @@
 				</label>
 				<input
 					v-model="description"
-					class="field flex-1"
+					class="field flex-1 basis-full sm:basis-0"
 					placeholder="Description (optional)"
 				/>
 			</div>
@@ -46,10 +46,12 @@
 			<div
 				v-for="(question, index) in questions"
 				:key="index"
-				class="flex flex-col gap-4 rounded-2xl border border-haze bg-dusk p-5"
+				class="flex flex-col gap-4 rounded-2xl border border-haze bg-dusk p-4 sm:p-5"
 			>
-				<div class="flex items-center gap-3">
-					<span class="font-mono text-xs uppercase tracking-[0.2em] text-paper/40">
+				<div class="flex flex-wrap items-center gap-3">
+					<span
+						class="w-full font-mono text-xs uppercase tracking-[0.2em] text-paper/40 sm:w-auto"
+					>
 						Question {{ index + 1 }}
 					</span>
 					<span class="flex-1" />
@@ -66,12 +68,12 @@
 
 				<textarea
 					v-model="question.question_text"
-					rows="2"
+					rows="3"
 					class="field font-display text-xl font-bold"
 					placeholder="What do you want to ask?"
 				/>
 
-				<div class="flex items-center gap-4">
+				<div class="flex flex-wrap items-center gap-4">
 					<img
 						v-if="question.image"
 						:src="question.image"
