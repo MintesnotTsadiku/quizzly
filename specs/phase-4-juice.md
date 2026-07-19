@@ -4,6 +4,19 @@
 
 Quizizz-inspired fun layer plus host conveniences. Everything here is additive; the v1 game must stay fully playable without it.
 
+## Slices
+
+Phase 4 ships as four independent slices, each with its own spec and its own branch:
+
+| Slice | Spec | Contents |
+| ----- | ---- | -------- |
+| 4a | `phase-4a-content-authoring.md` | Question images, SPA quiz authoring |
+| 4b | `phase-4b-host-conveniences.md` | CSV export, session history |
+| 4c | `phase-4c-player-fun.md` | Avatars, nickname generator, sound |
+| 4d | `phase-4d-game-modes.md` | Shared-screen mode, team mode |
+
+Memes and power-ups are deliberately unscheduled. Memes need a curated asset library that does not exist yet, and power-ups change scoring, so both wait until 4d proves the mode-flag pattern.
+
 ## Features
 
 ### Player fun
