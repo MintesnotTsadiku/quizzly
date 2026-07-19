@@ -134,14 +134,14 @@
 
 			<dialog
 				ref="qrDialog"
-				class="qz-dialog border-0 bg-transparent p-0"
+				class="qz-dialog max-h-none overflow-hidden border-0 bg-transparent p-0"
 				@cancel.prevent="qrFullscreen = false"
 				@click="qrFullscreen = false"
 			>
 				<img
 					:src="qrDataUrl"
 					alt="Join QR code"
-					class="size-[min(72vh,88vw)] rounded-3xl bg-paper p-4"
+					class="size-[min(78vh,88vw)] rounded-3xl bg-paper p-4"
 				/>
 				<p class="mt-4 text-center font-mono text-2xl tracking-[0.08em] text-paper">
 					{{ session.game_pin }}
