@@ -20,7 +20,7 @@ Quizzly is a live multiplayer quiz application built on Frappe. Guests join a ga
 - Always write tests, and make sure they work.
 - Build the minimum working app, then iterate towards your goals.
 
-## Development and Testing
+## After every bug fix or feature:
 
 - use the `/agent-browser` skill to test in the browser. site: quizzly.localhost
 - use Administrator/admin as credentials.
