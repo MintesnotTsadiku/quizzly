@@ -1,5 +1,28 @@
 # Progress
 
+## Phase 3: Game UX (2026-07-19)
+
+### Done
+
+- Player screen (`Play.vue`) is one state machine: lobby -> get-ready -> question -> locked-in -> result -> podium, plus a kicked terminal state. Kahoot shapes (triangle/diamond/circle/square, colour keyed to the canonical option id), local countdown bar, per-player answer shuffle seeded by the participant token, result interstitial with correct/wrong, points, streak, rank and top-5.
+- Host screen (`Host.vue`): lobby with giant PIN, client-side QR (`qrcode`), join URL, name grid, lock/kick/auto-advance/start; game view with live answer count, timer bar, correct-answer reveal, distribution bar chart, top-5 and streak callouts, next/skip/end; podium with a 1-2-3 stand and the full leaderboard.
+- Engine: a 3-second `get_ready` read-the-question pause before each question (own Redis phase, so reconnect lands in it too). `question` payloads now carry `window_ms` (clients count down from receipt, so client clock skew cannot matter) and `randomize_answer_order`.
+- New APIs: `get_host_state` (whole host screen in one call; finds the host's live session when no name is passed, so a reload restores mid-game), `get_result` (own outcome for the interstitial, keeping per-player data out of the broadcast), `set_auto_advance` (loop re-reads the flag each pause, so it can flip mid-game). `get_state` gained rank/leaderboard and now resolves Ended sessions so a player who reloads on the podium keeps it.
+- Nickname profanity filter in `quizzly/profanity.py`, applied in `join_session`: leetspeak folded, matched as a substring against a curated wordlist.
+- Tests: 9 new in `tests/test_game_ux.py` (filter both ways, host state in lobby/mid-question/non-host, own result and rank, podium after reload). 36 green across the app.
+
+### Exit criteria verified
+
+Full 4-question game driven in headless Chrome with three browser sessions (host + two players) against the live site and a real RQ worker: get-ready countdown, shapes, per-player shuffle confirmed different for each player, correct/wrong interstitials with points, distribution chart, "Ada is on a 3 answer streak" callout, podium. Player and host both reloaded mid-question and landed back in the right phase with the right remaining time; both also restored the podium after reload. Profanity filter rejected `Sh1tLord` in the real join form.
+
+### Notes
+
+- Socket reconnects used to go silently deaf: socket.io reconnects on its own but the server-side room membership is gone, and `qz_join` was only emitted on mount. Found in E2E when a backgrounded host tab stopped receiving events and missed the podium. `useSessionRoom` now re-emits `qz_join` on every `connect` and resyncs from the state API.
+- A centered flex column (`justify-center`) clips its own top when the content overflows; the host game view uses `m-auto` on an inner wrapper instead.
+- Percentage heights collapse inside an `items-end` flex row (the parent's height is content-derived), which is why the first distribution chart rendered blank.
+- frappe-ui's tailwind preset caps `fontSize` at `3xl`; `5xl` and `6xl` joined the existing `4xl`/`8xl` overrides.
+- The game loop occupies one `long`-queue worker for the whole game. On this bench a single shared worker serves short/default/long, so an unrelated stuck job stalls every game; deployment wants dedicated long workers.
+
 ## Phase 2: Game Engine (2026-07-19)
 
 ### Done

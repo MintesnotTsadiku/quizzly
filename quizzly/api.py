@@ -9,6 +9,7 @@ from frappe.utils import now_datetime, strip_html_tags
 
 from quizzly import engine
 from quizzly.engine import publish_session_event
+from quizzly.profanity import is_profane
 
 NICKNAME_MAX_LENGTH = 20
 
@@ -60,6 +61,57 @@ def get_lobby(session: str) -> dict:
 
 
 @frappe.whitelist()
+def get_host_state(session: str | None = None) -> dict:
+	"""Whole host screen in one call, for first paint and for reload mid-game."""
+	session_doc = get_host_session(session) if session else get_live_host_session()
+	if not session_doc or session_doc.status == "Cancelled":
+		return {}
+	result = {
+		"session": session_doc.name,
+		"game_pin": session_doc.game_pin,
+		"quiz_title": frappe.db.get_value("QZ Quiz", session_doc.quiz, "title"),
+		"auto_advance": session_doc.auto_advance,
+		**get_lobby_state(session_doc),
+	}
+	if session_doc.status == "Lobby":
+		return result
+
+	leaderboard = get_leaderboard(session_doc.name)
+	result["top_5"] = leaderboard[:5]
+
+	state = engine.get_state(session_doc.name)
+	if not state:
+		result["leaderboard"] = leaderboard
+		return result
+
+	question = get_question_row(session_doc, state["question_row"])
+	answers = frappe.get_all(
+		"QZ Answer",
+		filters={"session": session_doc.name, "question_row": question.name},
+		fields=["selected_option"],
+	)
+	result.update(
+		{
+			"phase": state["status"],
+			"remaining_seconds": max(0.0, state["deadline_ts"] - time.time()),
+			"answer_count": len(answers),
+			"question": {
+				**engine.question_payload(
+					session_doc, question, state["q_index"], state["total"], state["deadline_ts"]
+				),
+				"correct_option": question.correct_option,
+			},
+		}
+	)
+	if state["status"] == "closed":
+		distribution = {"1": 0, "2": 0, "3": 0, "4": 0}
+		for answer in answers:
+			distribution[str(answer.selected_option)] += 1
+		result["distribution"] = distribution
+	return result
+
+
+@frappe.whitelist()
 def start_session(session: str) -> dict:
 	session_doc = get_host_session(session)
 	if session_doc.status != "Lobby":
@@ -72,6 +124,13 @@ def start_session(session: str) -> dict:
 	engine.enqueue_game_loop(session_doc)
 	publish_session_event(session_doc, {"type": "session_started"})
 	return {"ok": True}
+
+
+@frappe.whitelist()
+def set_auto_advance(session: str, enabled: int) -> dict:
+	session_doc = get_host_session(session)
+	session_doc.db_set("auto_advance", int(enabled))
+	return {"auto_advance": session_doc.auto_advance}
 
 
 @frappe.whitelist()
@@ -111,12 +170,16 @@ def join_session(pin: str, nickname: str) -> dict:
 	if session.lobby_locked:
 		frappe.throw(_("Lobby is locked"))
 
+	nickname = strip_html_tags(nickname or "").strip()[:NICKNAME_MAX_LENGTH]
+	if is_profane(nickname):
+		frappe.throw(_("Pick a nickname everyone can see on the big screen"))
+
 	token = secrets.token_hex(32)
 	participant = frappe.get_doc(
 		{
 			"doctype": "QZ Participant",
 			"session": session.name,
-			"nickname": strip_html_tags(nickname or "")[:NICKNAME_MAX_LENGTH],
+			"nickname": nickname,
 			"token_hash": hash_token(token),
 			"joined_at": now_datetime(),
 		}
@@ -187,9 +250,12 @@ def get_state(pin: str, token: str) -> dict:
 		"nickname": participant.nickname,
 		"score": participant.score,
 		"streak": participant.streak,
+		"rank": get_rank(session.name, participant),
 	}
 	if session.status == "Lobby":
 		return {**result, **get_lobby_state(session)}
+	if session.status == "Ended":
+		return {**result, "leaderboard": get_leaderboard(session.name)}
 
 	state = engine.get_state(session.name)
 	if not state:
@@ -204,11 +270,35 @@ def get_state(pin: str, token: str) -> dict:
 			"remaining_seconds": max(0.0, state["deadline_ts"] - time.time()),
 			"answered": engine.has_answered(session.name, state["question_row"], participant.name),
 			"question": engine.question_payload(
-				question, state["q_index"], state["total"], state["deadline_ts"]
+				session, question, state["q_index"], state["total"], state["deadline_ts"]
 			),
 		}
 	)
 	return result
+
+
+@frappe.whitelist(allow_guest=True)
+@rate_limit(key="token", limit=60, seconds=60)
+def get_result(pin: str, token: str, question_row: str) -> dict:
+	"""Own outcome for the result interstitial; the broadcast stays free of per-player data."""
+	session = get_session_by_pin(pin)
+	participant = get_participant_by_token(session, token)
+	answer = frappe.db.get_value(
+		"QZ Answer",
+		{"session": session.name, "participant": participant.name, "question_row": question_row},
+		["is_correct", "points", "selected_option"],
+		as_dict=True,
+	)
+	return {
+		"answered": bool(answer),
+		"is_correct": bool(answer and answer.is_correct),
+		"points": (answer and answer.points) or 0,
+		"selected_option": answer and answer.selected_option,
+		"score": participant.score,
+		"streak": participant.streak,
+		"rank": get_rank(session.name, participant),
+		"top_5": get_leaderboard(session.name)[:5],
+	}
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -232,9 +322,21 @@ def get_host_session(session: str) -> "frappe.model.document.Document":
 	return doc
 
 
+def get_live_host_session() -> "frappe.model.document.Document | None":
+	name = frappe.db.get_value(
+		"QZ Session",
+		{"host": frappe.session.user, "status": ("in", ("Lobby", "Active"))},
+		order_by="creation desc",
+	)
+	return frappe.get_doc("QZ Session", name) if name else None
+
+
 def get_session_by_pin(pin: str) -> "frappe.model.document.Document":
 	pin = (pin or "").strip()
-	name = pin and frappe.db.get_value("QZ Session", {"game_pin": pin, "status": ("in", ("Lobby", "Active"))})
+	# Ended is allowed so a player who reloads on the podium still gets it back
+	name = pin and frappe.db.get_value(
+		"QZ Session", {"game_pin": pin, "status": ("in", ("Lobby", "Active", "Ended"))}
+	)
 	if not name:
 		frappe.throw(_("Invalid game PIN"), frappe.DoesNotExistError)
 	return frappe.get_doc("QZ Session", name)
@@ -250,6 +352,22 @@ def get_participant_by_token(
 	if not name:
 		frappe.throw(_("Not a participant of this session"), frappe.PermissionError)
 	return frappe.get_doc("QZ Participant", name)
+
+
+def get_leaderboard(session: str) -> list[dict]:
+	participants = engine.get_live_participants(session)
+	participants.sort(key=lambda p: -p.score)
+	return [
+		{"nickname": p.nickname, "score": p.score, "rank": rank}
+		for rank, p in enumerate(participants, start=1)
+	]
+
+
+def get_rank(session: str, participant: "frappe.model.document.Document") -> int:
+	ahead = frappe.db.count(
+		"QZ Participant", {"session": session, "kicked": 0, "score": (">", participant.score)}
+	)
+	return ahead + 1
 
 
 def get_lobby_state(session: "frappe.model.document.Document") -> dict:
