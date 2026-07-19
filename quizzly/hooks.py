@@ -9,6 +9,12 @@ app_license = "mit"
 # bodies instead of form-encoded, per-key JSON-stringified values.
 use_json_request_body = True
 
+fixtures = [{"dt": "Role", "filters": [["name", "in", ["Quiz Host"]]]}]
+
+website_route_rules = [
+	{"from_route": "/quizzly/<path:app_path>", "to_route": "quizzly"},
+]
+
 # Apps
 # ------------------
 
@@ -274,4 +280,3 @@ require_type_annotated_api_methods = True
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
-
