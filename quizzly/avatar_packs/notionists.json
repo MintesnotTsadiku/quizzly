@@ -1,0 +1,49 @@
+{
+	"id": "notionists",
+	"name": "Notionists",
+	"kind": "dicebear",
+	"style": "notionists",
+	"license": "CC0 1.0",
+	"attribution": null,
+	"source": "https://www.dicebear.com/styles/notionists/",
+	"framing": {
+		"scale": 140,
+		"translateY": 25
+	},
+	"background_colors": [
+		"2dae5c",
+		"f2820a",
+		"3b6ef5",
+		"0fa89a",
+		"7c3aed",
+		"e0247d",
+		"d92d20",
+		"0891b2"
+	],
+	"avatars": [
+		"fox",
+		"otter",
+		"panda",
+		"tiger",
+		"koala",
+		"lemur",
+		"walrus",
+		"badger",
+		"heron",
+		"marlin",
+		"puffin",
+		"gecko",
+		"cobra",
+		"ocelot",
+		"quokka",
+		"narwhal",
+		"toucan",
+		"meerkat",
+		"pangolin",
+		"axolotl",
+		"raccoon",
+		"wombat",
+		"ibex",
+		"tapir"
+	]
+}

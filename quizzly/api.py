@@ -163,7 +163,7 @@ def end_session(session: str) -> dict:
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
-def join_session(pin: str, nickname: str) -> dict:
+def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
 	session = get_session_by_pin(pin)
 	if session.status != "Lobby":
 		frappe.throw(_("Game has already started"))
@@ -180,6 +180,7 @@ def join_session(pin: str, nickname: str) -> dict:
 			"doctype": "QZ Participant",
 			"session": session.name,
 			"nickname": nickname,
+			"avatar": avatar,
 			"token_hash": hash_token(token),
 			"joined_at": now_datetime(),
 		}
@@ -189,6 +190,7 @@ def join_session(pin: str, nickname: str) -> dict:
 		"participant_token": token,
 		"participant": participant.name,
 		"nickname": participant.nickname,
+		"avatar": participant.avatar,
 		"session": session.name,
 		"game_pin": session.game_pin,
 		**get_lobby_state(session),
@@ -248,6 +250,7 @@ def get_state(pin: str, token: str) -> dict:
 	result = {
 		"status": session.status,
 		"nickname": participant.nickname,
+		"avatar": participant.avatar,
 		"score": participant.score,
 		"streak": participant.streak,
 		"rank": get_rank(session.name, participant),
@@ -358,7 +361,7 @@ def get_leaderboard(session: str) -> list[dict]:
 	participants = engine.get_live_participants(session)
 	participants.sort(key=lambda p: -p.score)
 	return [
-		{"nickname": p.nickname, "score": p.score, "rank": rank}
+		{"nickname": p.nickname, "avatar": p.avatar, "score": p.score, "rank": rank}
 		for rank, p in enumerate(participants, start=1)
 	]
 
@@ -374,7 +377,7 @@ def get_lobby_state(session: "frappe.model.document.Document") -> dict:
 	participants = frappe.get_all(
 		"QZ Participant",
 		filters={"session": session.name, "kicked": 0},
-		fields=["name", "nickname"],
+		fields=["name", "nickname", "avatar"],
 		order_by="joined_at asc",
 	)
 	return {

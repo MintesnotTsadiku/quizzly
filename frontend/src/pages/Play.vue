@@ -4,13 +4,26 @@
 			v-if="player && phase !== 'kicked'"
 			class="flex items-center justify-between border-b border-outline-gray-1 px-4 py-2"
 		>
-			<span class="truncate text-base font-semibold text-ink-gray-8">{{
-				player.nickname
-			}}</span>
-			<span
-				class="rounded-full bg-surface-gray-3 px-3 py-1 text-sm font-bold text-ink-gray-8"
-			>
-				{{ score }}
+			<span class="flex min-w-0 items-center gap-2">
+				<AvatarPic :id="player.avatar" :nickname="player.nickname" :size="32" />
+				<span class="truncate text-base font-semibold text-ink-gray-8">{{
+					player.nickname
+				}}</span>
+			</span>
+			<span class="flex items-center gap-2">
+				<button
+					type="button"
+					class="text-lg leading-none text-ink-gray-6 hover:text-ink-gray-9"
+					:aria-label="muted ? 'Unmute sound' : 'Mute sound'"
+					@click="toggleMute"
+				>
+					{{ muted ? "🔇" : "🔊" }}
+				</button>
+				<span
+					class="rounded-full bg-surface-gray-3 px-3 py-1 text-sm font-bold text-ink-gray-8"
+				>
+					{{ score }}
+				</span>
 			</span>
 		</header>
 
@@ -116,14 +129,17 @@
 					<li
 						v-for="(entry, index) in result.top_5"
 						:key="entry.nickname"
-						class="flex justify-between border-b border-outline-gray-1 py-1 text-sm"
+						class="flex items-center justify-between border-b border-outline-gray-1 py-1 text-sm"
 						:class="
 							entry.nickname === player.nickname
 								? 'font-bold text-ink-gray-9'
 								: 'text-ink-gray-6'
 						"
 					>
-						<span>{{ index + 1 }}. {{ entry.nickname }}</span>
+						<span class="flex items-center gap-2">
+							<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="24" />
+							{{ index + 1 }}. {{ entry.nickname }}
+						</span>
 						<span>{{ entry.score }}</span>
 					</li>
 				</ul>
@@ -138,14 +154,17 @@
 					<li
 						v-for="entry in leaderboard.slice(0, 5)"
 						:key="entry.nickname"
-						class="flex justify-between border-b border-outline-gray-1 py-1"
+						class="flex items-center justify-between border-b border-outline-gray-1 py-1"
 						:class="
 							entry.nickname === player.nickname
 								? 'font-bold text-ink-gray-9'
 								: 'text-ink-gray-6'
 						"
 					>
-						<span>{{ entry.rank }}. {{ entry.nickname }}</span>
+						<span class="flex items-center gap-2">
+							<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="24" />
+							{{ entry.rank }}. {{ entry.nickname }}
+						</span>
 						<span>{{ entry.score }}</span>
 					</li>
 				</ul>
@@ -160,12 +179,14 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { Button, ErrorMessage } from "frappe-ui";
 import { call } from "@/api";
 import { clearPlayer, loadPlayer } from "@/player";
 import { optionOrder, shapeFor, useCountdown, useSessionRoom } from "@/game";
+import AvatarPic from "@/components/AvatarPic.vue";
+import { initSound, muted, playCue, toggleMute } from "@/sound";
 
 const router = useRouter();
 const socket = inject("$socket");
@@ -189,6 +210,13 @@ const result = ref({});
 const leaderboard = ref([]);
 const myRank = ref(0);
 const error = ref("");
+
+watch(
+	() => Math.ceil(remaining.value),
+	(secondsLeft) => {
+		if (phase.value === "question" && secondsLeft > 0 && secondsLeft <= 5) playCue("tick");
+	}
+);
 
 const timerPercent = computed(() =>
 	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
@@ -245,6 +273,7 @@ async function showResult(closedMessage) {
 	});
 	score.value = result.value.score;
 	phase.value = "result";
+	playCue(result.value.is_correct ? "correct" : "wrong");
 }
 
 function showPodium(entries) {
@@ -253,12 +282,14 @@ function showPodium(entries) {
 	myRank.value =
 		leaderboard.value.find((entry) => entry.nickname === player.value.nickname)?.rank || 0;
 	phase.value = "podium";
+	playCue("podium");
 }
 
 async function answer(optionId) {
 	selected.value = optionId;
 	phase.value = "locked";
 	stopCountdown();
+	playCue("submit");
 	try {
 		await call("quizzly.api.submit_answer", {
 			pin: player.value.pin,
@@ -308,6 +339,7 @@ async function restore() {
 }
 
 onMounted(() => {
+	initSound("player");
 	if (!player.value) {
 		router.replace("/join");
 		return;

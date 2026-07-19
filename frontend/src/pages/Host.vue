@@ -47,6 +47,9 @@
 					>
 						Auto-advance {{ autoAdvance ? "on" : "off" }}
 					</Button>
+					<Button variant="outline" @click="toggleMute">
+						{{ muted ? "🔇 Sound off" : "🔊 Sound on" }}
+					</Button>
 					<Button
 						variant="solid"
 						theme="green"
@@ -61,11 +64,16 @@
 					<button
 						v-for="participant in participants"
 						:key="participant.name"
-						class="rounded-full bg-surface-gray-2 px-4 py-2 text-lg font-medium text-ink-gray-8 hover:bg-surface-red-2 hover:line-through"
+						class="group flex items-center gap-3 rounded-full bg-surface-gray-2 py-1 pl-1 pr-5 text-2xl font-medium text-ink-gray-8 hover:bg-surface-red-2"
 						title="Click to kick"
 						@click="kick(participant)"
 					>
-						{{ participant.nickname }}
+						<AvatarPic
+							:id="participant.avatar"
+							:nickname="participant.nickname"
+							:size="48"
+						/>
+						<span class="group-hover:line-through">{{ participant.nickname }}</span>
 					</button>
 				</div>
 				<p v-if="!participants.length" class="text-ink-gray-5">Waiting for players…</p>
@@ -83,6 +91,11 @@
 						:key="entry.nickname"
 						class="flex w-32 flex-col items-center gap-2"
 					>
+						<AvatarPic
+							:id="entry.avatar"
+							:nickname="entry.nickname"
+							:size="entry.rank === 1 ? 88 : 64"
+						/>
 						<span class="text-xl font-bold text-ink-gray-9">{{ entry.nickname }}</span>
 						<span class="text-ink-gray-6">{{ entry.score }}</span>
 						<div
@@ -98,9 +111,12 @@
 					<li
 						v-for="entry in leaderboard"
 						:key="entry.nickname"
-						class="flex justify-between border-b border-outline-gray-1 py-2 text-lg text-ink-gray-7"
+						class="flex items-center justify-between border-b border-outline-gray-1 py-2 text-lg text-ink-gray-7"
 					>
-						<span>{{ entry.rank }}. {{ entry.nickname }}</span>
+						<span class="flex items-center gap-2">
+							<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="28" />
+							{{ entry.rank }}. {{ entry.nickname }}
+						</span>
 						<span class="font-bold">{{ entry.score }}</span>
 					</li>
 				</ol>
@@ -189,14 +205,30 @@
 								<li
 									v-for="(entry, index) in top5"
 									:key="entry.nickname"
-									class="flex justify-between border-b border-outline-gray-1 py-2 text-lg text-ink-gray-7"
+									class="flex items-center justify-between border-b border-outline-gray-1 py-2 text-lg text-ink-gray-7"
 								>
-									<span>{{ index + 1 }}. {{ entry.nickname }}</span>
+									<span class="flex items-center gap-2">
+										<AvatarPic
+											:id="entry.avatar"
+											:nickname="entry.nickname"
+											:size="28"
+										/>
+										{{ index + 1 }}. {{ entry.nickname }}
+									</span>
 									<span class="font-bold">{{ entry.score }}</span>
 								</li>
 							</ol>
 							<ul class="flex-1 space-y-1 text-lg text-ink-gray-7">
-								<li v-for="entry in streaks" :key="entry.nickname">
+								<li
+									v-for="entry in streaks"
+									:key="entry.nickname"
+									class="flex items-center gap-2"
+								>
+									<AvatarPic
+										:id="entry.avatar"
+										:nickname="entry.nickname"
+										:size="28"
+									/>
 									🔥 {{ entry.nickname }} is on a {{ entry.streak }} answer
 									streak
 								</li>
@@ -227,11 +259,13 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import { Button, ErrorMessage } from "frappe-ui";
 import QRCode from "qrcode";
 import { call } from "@/api";
 import { SHAPES, useCountdown, useSessionRoom } from "@/game";
+import AvatarPic from "@/components/AvatarPic.vue";
+import { initSound, muted, playCue, toggleMute } from "@/sound";
 
 const PODIUM_STYLE = { 1: "bg-amber-400", 2: "bg-gray-400", 3: "bg-orange-400" };
 // remembered so a reload on the podium restores it: get_host_state only auto-finds live sessions
@@ -268,6 +302,13 @@ const joinUrl = computed(
 
 const timerPercent = computed(() =>
 	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
+);
+
+watch(
+	() => Math.ceil(remaining.value),
+	(secondsLeft) => {
+		if (phase.value === "question" && secondsLeft > 0 && secondsLeft <= 5) playCue("tick");
+	}
 );
 
 // tallest bar fills the chart; the rest scale against it
@@ -311,6 +352,7 @@ function onSessionEvent(message) {
 		stopCountdown();
 		leaderboard.value = message.leaderboard;
 		phase.value = "podium";
+		playCue("podium");
 	}
 }
 
@@ -363,6 +405,7 @@ async function loadHostState() {
 }
 
 onMounted(async () => {
+	initSound("host");
 	try {
 		const state = await loadHostState();
 		if (state.session) {
