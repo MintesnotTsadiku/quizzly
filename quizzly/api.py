@@ -1,10 +1,14 @@
 import hashlib
 import secrets
+import time
 
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
 from frappe.utils import now_datetime, strip_html_tags
+
+from quizzly import engine
+from quizzly.engine import publish_session_event
 
 NICKNAME_MAX_LENGTH = 20
 
@@ -55,6 +59,46 @@ def get_lobby(session: str) -> dict:
 	return get_lobby_state(session_doc)
 
 
+@frappe.whitelist()
+def start_session(session: str) -> dict:
+	session_doc = get_host_session(session)
+	if session_doc.status != "Lobby":
+		frappe.throw(_("Session has already started"))
+	if not frappe.db.exists("QZ Participant", {"session": session_doc.name, "kicked": 0}):
+		frappe.throw(_("No participants have joined yet"))
+	session_doc.status = "Active"
+	session_doc.started_at = now_datetime()
+	session_doc.save()
+	engine.enqueue_game_loop(session_doc)
+	publish_session_event(session_doc, {"type": "session_started"})
+	return {"ok": True}
+
+
+@frappe.whitelist()
+def next_question(session: str) -> dict:
+	engine.set_control(get_host_session(session).name, "advance")
+	return {"ok": True}
+
+
+@frappe.whitelist()
+def skip_question(session: str) -> dict:
+	engine.set_control(get_host_session(session).name, "skip")
+	return {"ok": True}
+
+
+@frappe.whitelist()
+def end_session(session: str) -> dict:
+	session_doc = get_host_session(session)
+	if session_doc.status == "Lobby":
+		session_doc.status = "Cancelled"
+		session_doc.ended_at = now_datetime()
+		session_doc.save()
+		publish_session_event(session_doc, {"type": "session_ended"})
+	elif session_doc.status == "Active":
+		engine.set_control(session_doc.name, "end")
+	return {"ok": True}
+
+
 # Guest APIs
 
 
@@ -89,6 +133,85 @@ def join_session(pin: str, nickname: str) -> dict:
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(key="token", limit=30, seconds=60)
+def submit_answer(pin: str, token: str, question_row: str, selected_option: str) -> dict:
+	received_at = time.time()
+	session = get_session_by_pin(pin)
+	if session.status != "Active":
+		frappe.throw(_("Game is not active"))
+	participant = get_participant_by_token(session, token)
+
+	state = engine.get_state(session.name)
+	if not state or state.get("status") != "question" or state.get("question_row") != question_row:
+		frappe.throw(_("This question is not open"))
+	if received_at > state["deadline_ts"] + engine.GRACE_SECONDS:
+		frappe.throw(_("Too late, the question is closed"))
+	if str(selected_option) not in ("1", "2", "3", "4"):
+		frappe.throw(_("Invalid option"))
+
+	if not engine.mark_answered(
+		session.name, question_row, participant.name, ttl=state["window_ms"] / 1000 + 300
+	):
+		frappe.throw(_("Already answered"))
+	try:
+		frappe.get_doc(
+			{
+				"doctype": "QZ Answer",
+				"session": session.name,
+				"participant": participant.name,
+				"question_row": question_row,
+				"selected_option": str(selected_option),
+				"response_ms": int((received_at - state["opened_at"]) * 1000),
+			}
+		).insert(ignore_permissions=True)
+	except frappe.UniqueValidationError:
+		frappe.throw(_("Already answered"))
+	publish_session_event(
+		session,
+		{
+			"type": "answer_count",
+			"question_row": question_row,
+			"count": engine.answered_count(session.name, question_row),
+		},
+	)
+	return {"ok": True}
+
+
+@frappe.whitelist(allow_guest=True)
+@rate_limit(key="token", limit=60, seconds=60)
+def get_state(pin: str, token: str) -> dict:
+	session = get_session_by_pin(pin)
+	participant = get_participant_by_token(session, token)
+	result = {
+		"status": session.status,
+		"nickname": participant.nickname,
+		"score": participant.score,
+		"streak": participant.streak,
+	}
+	if session.status == "Lobby":
+		return {**result, **get_lobby_state(session)}
+
+	state = engine.get_state(session.name)
+	if not state:
+		return result
+	question = get_question_row(session, state["question_row"])
+	result.update(
+		{
+			"phase": state["status"],
+			"q_index": state["q_index"],
+			"total": state["total"],
+			"deadline_ts": state["deadline_ts"],
+			"remaining_seconds": max(0.0, state["deadline_ts"] - time.time()),
+			"answered": engine.has_answered(session.name, state["question_row"], participant.name),
+			"question": engine.question_payload(
+				question, state["q_index"], state["total"], state["deadline_ts"]
+			),
+		}
+	)
+	return result
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def leave_session(pin: str, token: str) -> None:
 	session = get_session_by_pin(pin)
@@ -111,9 +234,7 @@ def get_host_session(session: str) -> "frappe.model.document.Document":
 
 def get_session_by_pin(pin: str) -> "frappe.model.document.Document":
 	pin = (pin or "").strip()
-	name = pin and frappe.db.get_value(
-		"QZ Session", {"game_pin": pin, "status": ("in", ("Lobby", "Active"))}
-	)
+	name = pin and frappe.db.get_value("QZ Session", {"game_pin": pin, "status": ("in", ("Lobby", "Active"))})
 	if not name:
 		frappe.throw(_("Invalid game PIN"), frappe.DoesNotExistError)
 	return frappe.get_doc("QZ Session", name)
@@ -157,9 +278,13 @@ def publish_lobby_update(session: "frappe.model.document.Document") -> None:
 	publish_session_event(session, {"type": "lobby_update", **get_lobby_state(session)})
 
 
-def publish_session_event(session: "frappe.model.document.Document", message: dict) -> None:
-	room = f"qz_session_{session.game_pin}"
-	frappe.publish_realtime(event=room, message=message, room=room, after_commit=True)
+def get_question_row(
+	session: "frappe.model.document.Document", question_row: str
+) -> "frappe.model.document.Document":
+	for question in engine.get_quiz_questions(session):
+		if question.name == question_row:
+			return question
+	frappe.throw(_("Question not found"))
 
 
 def hash_token(token: str) -> str:
