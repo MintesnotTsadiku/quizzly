@@ -31,6 +31,7 @@ Use Tracer bullets comes from the Pragmatic Programmer. When building systems, y
 
 ## Implementation Guidelines
 
+- Overrides the bench-level approval rule: in this app, create branches and commit autonomously, no prior approval needed. Pushing to remotes and raising PRs still require approval.
 - Create a new branch before working on a new feature/spec (branch name patterns: feat/, fix/, just like conventional commit pre-fixes)
 - Reconcile the spec and log the progress in progress.md after each phase of development
 - Commit after each meaningful phase
