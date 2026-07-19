@@ -47,6 +47,9 @@
 					>
 						Auto-advance {{ autoAdvance ? "on" : "off" }}
 					</Button>
+					<Button variant="outline" @click="toggleMute">
+						{{ muted ? "🔇 Sound off" : "🔊 Sound on" }}
+					</Button>
 					<Button
 						variant="solid"
 						theme="green"
@@ -256,12 +259,13 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import { Button, ErrorMessage } from "frappe-ui";
 import QRCode from "qrcode";
 import { call } from "@/api";
 import { SHAPES, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
+import { initSound, muted, playCue, toggleMute } from "@/sound";
 
 const PODIUM_STYLE = { 1: "bg-amber-400", 2: "bg-gray-400", 3: "bg-orange-400" };
 // remembered so a reload on the podium restores it: get_host_state only auto-finds live sessions
@@ -298,6 +302,13 @@ const joinUrl = computed(
 
 const timerPercent = computed(() =>
 	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
+);
+
+watch(
+	() => Math.ceil(remaining.value),
+	(secondsLeft) => {
+		if (phase.value === "question" && secondsLeft > 0 && secondsLeft <= 5) playCue("tick");
+	}
 );
 
 // tallest bar fills the chart; the rest scale against it
@@ -341,6 +352,7 @@ function onSessionEvent(message) {
 		stopCountdown();
 		leaderboard.value = message.leaderboard;
 		phase.value = "podium";
+		playCue("podium");
 	}
 }
 
@@ -393,6 +405,7 @@ async function loadHostState() {
 }
 
 onMounted(async () => {
+	initSound("host");
 	try {
 		const state = await loadHostState();
 		if (state.session) {

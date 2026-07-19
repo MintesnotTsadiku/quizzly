@@ -19,6 +19,25 @@
 				maxlength="20"
 				autocomplete="off"
 			/>
+			<div class="-mt-2 flex flex-wrap items-center gap-2">
+				<button
+					v-for="suggestion in suggestions"
+					:key="suggestion"
+					type="button"
+					class="rounded-full bg-surface-gray-2 px-3 py-1 text-sm text-ink-gray-7 hover:bg-surface-gray-3"
+					@click="nickname = suggestion"
+				>
+					{{ suggestion }}
+				</button>
+				<button
+					type="button"
+					class="rounded-full bg-surface-gray-2 px-3 py-1 text-sm text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-8"
+					aria-label="More nickname suggestions"
+					@click="suggestions = suggestNicknames()"
+				>
+					↻ More
+				</button>
+			</div>
 			<div class="flex flex-col gap-2">
 				<span class="text-xs text-ink-gray-5">Pick your avatar</span>
 				<div class="grid grid-cols-6 gap-2">
@@ -29,8 +48,8 @@
 						class="rounded-full outline-none ring-offset-2 transition"
 						:class="
 							avatar === option.id
-								? 'scale-110 ring-2 ring-ink-gray-9'
-								: 'opacity-50 hover:opacity-100'
+								? 'scale-110 ring-2 ring-black'
+								: 'hover:scale-105'
 						"
 						:aria-label="option.id"
 						:aria-pressed="avatar === option.id"
@@ -53,6 +72,7 @@ import { Button, ErrorMessage, FormControl } from "frappe-ui";
 import { call } from "@/api";
 import { savePlayer } from "@/player";
 import { avatars, randomAvatar } from "@/avatars";
+import { suggestNicknames } from "@/nicknames";
 import AvatarPic from "@/components/AvatarPic.vue";
 
 const route = useRoute();
@@ -61,6 +81,7 @@ const router = useRouter();
 const pin = ref(route.query.pin || "");
 const nickname = ref("");
 const avatar = ref(randomAvatar());
+const suggestions = ref(suggestNicknames());
 const joining = ref(false);
 const error = ref("");
 

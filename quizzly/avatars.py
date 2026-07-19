@@ -31,8 +31,7 @@ def load_pack(pack_id: str) -> dict:
 	pack = json.loads(manifest.read_text())
 	extension = pack.get("extension", "svg")
 	pack["urls"] = {
-		avatar: f"/assets/quizzly/avatars/{pack['id']}/{avatar}.{extension}"
-		for avatar in pack["avatars"]
+		avatar: f"/assets/quizzly/avatars/{pack['id']}/{avatar}.{extension}" for avatar in pack["avatars"]
 	}
 	return pack
 

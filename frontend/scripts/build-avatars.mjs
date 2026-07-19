@@ -12,27 +12,33 @@ const packsDir = path.join(app, "quizzly/avatar_packs");
 const outRoot = path.join(app, "quizzly/public/avatars");
 
 for (const file of await readdir(packsDir)) {
-	if (!file.endsWith(".json")) continue;
-	const pack = JSON.parse(await readFile(path.join(packsDir, file), "utf8"));
-	if (pack.kind !== "dicebear") continue;
+  if (!file.endsWith(".json")) continue;
+  const pack = JSON.parse(await readFile(path.join(packsDir, file), "utf8"));
+  if (pack.kind !== "dicebear") continue;
 
-	const style = collection[pack.style];
-	if (!style) throw new Error(`${pack.id}: unknown dicebear style "${pack.style}"`);
+  const style = collection[pack.style];
+  if (!style)
+    throw new Error(`${pack.id}: unknown dicebear style "${pack.style}"`);
 
-	const outDir = path.join(outRoot, pack.id);
-	await rm(outDir, { recursive: true, force: true });
-	await mkdir(outDir, { recursive: true });
+  const outDir = path.join(outRoot, pack.id);
+  await rm(outDir, { recursive: true, force: true });
+  await mkdir(outDir, { recursive: true });
 
-	for (const id of pack.avatars) {
-		// Framing is the pack's business: notionists draws half-body portraits,
-		// which read as a cropped torso until zoomed onto the face.
-		const svg = createAvatar(style, {
-			seed: id,
-			radius: 50,
-			backgroundColor: pack.background_colors ?? [],
-			...(pack.framing ?? {}),
-		}).toString();
-		await writeFile(path.join(outDir, `${id}.svg`), svg);
-	}
-	console.log(`${pack.id}: ${pack.avatars.length} avatars -> ${path.relative(app, outDir)}`);
+  for (const id of pack.avatars) {
+    // Framing is the pack's business: notionists draws half-body portraits,
+    // which read as a cropped torso until zoomed onto the face.
+    const svg = createAvatar(style, {
+      seed: id,
+      radius: 50,
+      backgroundColor: pack.background_colors ?? [],
+      ...(pack.framing ?? {}),
+    }).toString();
+    await writeFile(path.join(outDir, `${id}.svg`), svg);
+  }
+  console.log(
+    `${pack.id}: ${pack.avatars.length} avatars -> ${path.relative(
+      app,
+      outDir
+    )}`
+  );
 }

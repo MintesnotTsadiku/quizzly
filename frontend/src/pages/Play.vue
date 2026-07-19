@@ -10,10 +10,20 @@
 					player.nickname
 				}}</span>
 			</span>
-			<span
-				class="rounded-full bg-surface-gray-3 px-3 py-1 text-sm font-bold text-ink-gray-8"
-			>
-				{{ score }}
+			<span class="flex items-center gap-2">
+				<button
+					type="button"
+					class="text-lg leading-none text-ink-gray-6 hover:text-ink-gray-9"
+					:aria-label="muted ? 'Unmute sound' : 'Mute sound'"
+					@click="toggleMute"
+				>
+					{{ muted ? "🔇" : "🔊" }}
+				</button>
+				<span
+					class="rounded-full bg-surface-gray-3 px-3 py-1 text-sm font-bold text-ink-gray-8"
+				>
+					{{ score }}
+				</span>
 			</span>
 		</header>
 
@@ -169,13 +179,14 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { Button, ErrorMessage } from "frappe-ui";
 import { call } from "@/api";
 import { clearPlayer, loadPlayer } from "@/player";
 import { optionOrder, shapeFor, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
+import { initSound, muted, playCue, toggleMute } from "@/sound";
 
 const router = useRouter();
 const socket = inject("$socket");
@@ -199,6 +210,13 @@ const result = ref({});
 const leaderboard = ref([]);
 const myRank = ref(0);
 const error = ref("");
+
+watch(
+	() => Math.ceil(remaining.value),
+	(secondsLeft) => {
+		if (phase.value === "question" && secondsLeft > 0 && secondsLeft <= 5) playCue("tick");
+	}
+);
 
 const timerPercent = computed(() =>
 	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
@@ -255,6 +273,7 @@ async function showResult(closedMessage) {
 	});
 	score.value = result.value.score;
 	phase.value = "result";
+	playCue(result.value.is_correct ? "correct" : "wrong");
 }
 
 function showPodium(entries) {
@@ -263,12 +282,14 @@ function showPodium(entries) {
 	myRank.value =
 		leaderboard.value.find((entry) => entry.nickname === player.value.nickname)?.rank || 0;
 	phase.value = "podium";
+	playCue("podium");
 }
 
 async function answer(optionId) {
 	selected.value = optionId;
 	phase.value = "locked";
 	stopCountdown();
+	playCue("submit");
 	try {
 		await call("quizzly.api.submit_answer", {
 			pin: player.value.pin,
@@ -318,6 +339,7 @@ async function restore() {
 }
 
 onMounted(() => {
+	initSound("player");
 	if (!player.value) {
 		router.replace("/join");
 		return;
