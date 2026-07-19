@@ -93,8 +93,12 @@
 					<button class="ctl" @click="toggleMute">
 						{{ muted ? "Sound off" : "Sound on" }}
 					</button>
-					<button class="ctl ctl-go" :disabled="!participants.length" @click="start">
-						Start game
+					<button
+						class="ctl ctl-go"
+						:disabled="starting || !participants.length"
+						@click="start"
+					>
+						{{ starting ? "Starting…" : "Start game" }}
 					</button>
 				</div>
 				<p v-if="error" class="text-center text-ember">{{ error }}</p>
@@ -340,6 +344,7 @@ const top5 = ref([]);
 const streaks = ref([]);
 const leaderboard = ref([]);
 const qrDataUrl = ref("");
+const starting = ref(false);
 const error = ref("");
 
 const joinUrl = computed(
@@ -424,6 +429,7 @@ async function applyState(state) {
 	});
 
 	if (state.status === "Lobby") {
+		starting.value = false;
 		phase.value = "lobby";
 	} else if (state.leaderboard) {
 		leaderboard.value = state.leaderboard;
@@ -500,6 +506,8 @@ async function hostCall(method, params = {}) {
 		return await call(method, { session: session.value.name, ...params });
 	} catch (e) {
 		error.value = e.messages?.[0] || e.message;
+		// the screen is out of step with the server (a missed event, a stale tab): repair it
+		await refresh().catch(() => {});
 	}
 }
 
@@ -522,7 +530,12 @@ async function kick(participant) {
 	await hostCall("quizzly.api.kick_participant", { participant: participant.name });
 }
 
-const start = () => hostCall("quizzly.api.start_session");
+// the lobby only clears when the worker's first event lands, so the button has to
+// stay down until then: a second start_session throws "Session has already started"
+async function start() {
+	starting.value = true;
+	if (!(await hostCall("quizzly.api.start_session"))) starting.value = false;
+}
 const next = () => hostCall("quizzly.api.next_question");
 const skip = () => hostCall("quizzly.api.skip_question");
 
