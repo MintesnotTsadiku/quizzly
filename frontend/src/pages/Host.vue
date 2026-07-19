@@ -98,6 +98,7 @@
 					<button class="ctl" @click="toggleMute">
 						{{ muted ? "Sound off" : "Sound on" }}
 					</button>
+					<button class="ctl" @click="end">Exit</button>
 					<button
 						class="ctl ctl-go"
 						:disabled="starting || !participants.length"
@@ -550,11 +551,13 @@ const skip = () => hostCall("quizzly.api.skip_question");
 
 async function end() {
 	const players = participants.value.length;
-	if (
-		!window.confirm(`End the game for all ${players} ${players === 1 ? "player" : "players"}?`)
-	)
-		return;
-	await hostCall("quizzly.api.end_session");
+	const inLobby = phase.value === "lobby";
+	const prompt = inLobby
+		? "Close this lobby and pick another quiz?"
+		: `End the game for all ${players} ${players === 1 ? "player" : "players"}?`;
+	if (!window.confirm(prompt)) return;
+	// a cancelled lobby has no podium to land on, so the host goes back to the quiz list
+	if ((await hostCall("quizzly.api.end_session")) && inLobby) reset();
 }
 
 function reset() {
