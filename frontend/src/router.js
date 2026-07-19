@@ -3,8 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 const routes = [
 	{
 		path: "/",
-		redirect: () =>
-			window.session_user === "Guest" ? "/join" : "/host",
+		redirect: () => (window.session_user === "Guest" ? "/join" : "/host"),
 	},
 	{ path: "/join", name: "Join", component: () => import("@/pages/Join.vue") },
 	{ path: "/play", name: "Play", component: () => import("@/pages/Play.vue") },

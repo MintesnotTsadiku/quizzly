@@ -94,7 +94,9 @@
 				>
 					{{ joining ? "Joining…" : "Join game" }}
 				</button>
-				<p v-if="error" class="text-center text-sm text-ember md:col-span-2">{{ error }}</p>
+				<p v-if="error" class="text-center text-sm text-ember md:col-span-2">
+					{{ error }}
+				</p>
 			</form>
 		</div>
 	</div>
