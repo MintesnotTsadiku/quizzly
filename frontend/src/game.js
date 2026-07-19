@@ -2,43 +2,49 @@ import { onBeforeUnmount, ref } from "vue";
 
 const SILENCE_LIMIT_MS = 20000;
 
-// Kahoot-style answer shapes. Index = canonical option id - 1.
+// Night-sky answer marks. Each option gets a hue and a silhouette, so players can
+// call out an answer across a room without reading it. Index = canonical option id - 1.
+// Colors are spelled out as full class names: Tailwind only generates what it can see.
 export const SHAPES = [
 	{
 		id: "1",
-		name: "triangle",
-		fill: "bg-red-500",
-		// spelled out: Tailwind only generates classes it can see as literals
-		svgFill: "fill-red-500",
-		hover: "hover:bg-red-600",
-		path: "M12 3 L22 20 L2 20 Z",
+		name: "bolt",
+		fill: "bg-ember",
+		svgFill: "fill-ember",
+		hover: "hover:brightness-110",
+		ink: "text-night",
+		hex: "#FF5A36",
+		path: "M13.5 1.5 L4 13.5 H10 L8.5 22.5 L20 9.5 H13 Z",
 	},
 	{
 		id: "2",
-		name: "diamond",
-		fill: "bg-blue-500",
-		// spelled out: Tailwind only generates classes it can see as literals
-		svgFill: "fill-blue-500",
-		hover: "hover:bg-blue-600",
-		path: "M12 2 L22 12 L12 22 L2 12 Z",
+		name: "spark",
+		fill: "bg-lagoon",
+		svgFill: "fill-lagoon",
+		hover: "hover:brightness-110",
+		ink: "text-night",
+		hex: "#17B0BE",
+		path: "M12 1 C13 8.5 15.5 11 23 12 C15.5 13 13 15.5 12 23 C11 15.5 8.5 13 1 12 C8.5 11 11 8.5 12 1 Z",
 	},
 	{
 		id: "3",
-		name: "circle",
-		fill: "bg-amber-500",
-		// spelled out: Tailwind only generates classes it can see as literals
-		svgFill: "fill-amber-500",
-		hover: "hover:bg-amber-600",
-		path: "M12 2 A10 10 0 1 1 11.99 2 Z",
+		name: "moon",
+		fill: "bg-gold",
+		svgFill: "fill-gold",
+		hover: "hover:brightness-110",
+		ink: "text-night",
+		hex: "#FFC43D",
+		path: "M17 2 a10 10 0 1 0 0 20 12 12 0 0 1 0-20 z",
 	},
 	{
 		id: "4",
-		name: "square",
-		fill: "bg-green-600",
-		// spelled out: Tailwind only generates classes it can see as literals
-		svgFill: "fill-green-600",
-		hover: "hover:bg-green-700",
-		path: "M3 3 H21 V21 H3 Z",
+		name: "hex",
+		fill: "bg-orchid",
+		svgFill: "fill-orchid",
+		hover: "hover:brightness-110",
+		ink: "text-night",
+		hex: "#9B6BFF",
+		path: "M12 1.5 L21 6.75 V17.25 L12 22.5 L3 17.25 V6.75 Z",
 	},
 ];
 

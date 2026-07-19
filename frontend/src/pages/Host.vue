@@ -1,106 +1,130 @@
 <template>
-	<div class="flex h-full flex-col overflow-y-auto bg-surface-white">
+	<div class="flex h-full flex-col overflow-y-auto bg-night">
 		<template v-if="!session">
-			<div class="flex flex-1 flex-col items-center gap-6 p-6">
-				<h1 class="text-2xl font-bold text-ink-gray-9">Host a game</h1>
-				<ErrorMessage :message="error" />
-				<div v-if="quizzes.length" class="flex w-full max-w-md flex-col gap-2">
+			<div class="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-8 p-8">
+				<div>
+					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">Host</p>
+					<h1 class="mt-2 font-display text-5xl font-extrabold text-paper">
+						Pick a quiz
+					</h1>
+				</div>
+				<p v-if="error" class="text-ember">{{ error }}</p>
+				<div v-if="quizzes.length" class="flex flex-col gap-2">
 					<button
-						v-for="quiz in quizzes"
+						v-for="(quiz, index) in quizzes"
 						:key="quiz.name"
-						class="rounded-lg border border-outline-gray-2 p-4 text-left text-lg text-ink-gray-8 hover:bg-surface-gray-2"
+						class="group flex items-center gap-4 rounded-2xl border border-haze bg-dusk px-5 py-4 text-left transition hover:border-ember"
 						@click="createSession(quiz.name)"
 					>
-						{{ quiz.title }}
+						<span class="font-mono text-xs tabular-nums text-paper/35">
+							{{ String(index + 1).padStart(2, "0") }}
+						</span>
+						<span class="flex-1 font-display text-xl font-bold text-paper">
+							{{ quiz.title }}
+						</span>
+						<span class="text-paper/25 transition group-hover:text-ember">→</span>
 					</button>
 				</div>
-				<p v-else-if="loaded" class="text-ink-gray-6">
-					No quizzes yet. Create a QZ Quiz in Desk first.
+				<p v-else-if="loaded" class="text-paper/50">
+					No quizzes yet. Create a QZ Quiz in Desk, then come back.
 				</p>
 			</div>
 		</template>
 
 		<!-- Lobby -->
 		<template v-else-if="phase === 'lobby'">
-			<div class="flex flex-1 flex-col items-center justify-center gap-6 p-6">
-				<p class="text-lg text-ink-gray-6">
-					Join at <span class="font-bold text-ink-gray-9">{{ joinUrl }}</span>
-				</p>
-				<div class="flex flex-wrap items-center justify-center gap-8">
-					<p class="text-8xl font-black tracking-widest text-ink-gray-9">
-						{{ session.game_pin }}
-					</p>
+			<div class="flex flex-1 flex-col justify-center gap-12 p-8">
+				<div class="flex flex-wrap items-center justify-center gap-14">
+					<div>
+						<p class="font-mono text-sm tracking-wide text-gold">
+							Join at {{ joinHost }}
+						</p>
+						<p class="mt-3 font-mono text-8xl font-bold tracking-[0.08em] text-paper">
+							{{ session.game_pin }}
+						</p>
+						<p class="mt-3 text-paper/45">or point a phone camera at the code</p>
+					</div>
 					<img
 						v-if="qrDataUrl"
 						:src="qrDataUrl"
 						alt="Join QR code"
-						class="h-44 w-44 rounded-lg"
+						class="h-48 w-48 rounded-2xl bg-paper p-2"
 					/>
 				</div>
-				<div class="flex flex-wrap items-center justify-center gap-3">
-					<Button :variant="lobbyLocked ? 'solid' : 'outline'" @click="toggleLock">
-						{{ lobbyLocked ? "Unlock lobby" : "Lock lobby" }}
-					</Button>
-					<Button
-						:variant="autoAdvance ? 'solid' : 'outline'"
-						@click="toggleAutoAdvance"
+
+				<div class="flex flex-col items-center gap-5">
+					<p
+						v-if="participants.length"
+						class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40"
 					>
-						Auto-advance {{ autoAdvance ? "on" : "off" }}
-					</Button>
-					<Button variant="outline" @click="toggleMute">
-						{{ muted ? "🔇 Sound off" : "🔊 Sound on" }}
-					</Button>
-					<Button
-						variant="solid"
-						theme="green"
-						:disabled="!participants.length"
-						@click="start"
-					>
-						Start game
-					</Button>
-					<span class="text-ink-gray-6">{{ participants.length }} joined</span>
+						{{ participants.length }}
+						{{ participants.length === 1 ? "player" : "players" }} in
+					</p>
+					<div class="flex max-w-5xl flex-wrap justify-center gap-2.5">
+						<button
+							v-for="participant in participants"
+							:key="participant.name"
+							class="group flex items-center gap-3 rounded-full border border-haze bg-dusk py-1 pl-1 pr-5 text-xl font-medium text-paper transition hover:border-ember"
+							title="Remove this player"
+							@click="kick(participant)"
+						>
+							<AvatarPic
+								:id="participant.avatar"
+								:nickname="participant.nickname"
+								:size="44"
+							/>
+							<span class="group-hover:line-through">{{
+								participant.nickname
+							}}</span>
+						</button>
+					</div>
+					<p v-if="!participants.length" class="text-paper/35">
+						Waiting for the first player…
+					</p>
 				</div>
-				<div class="flex max-w-4xl flex-wrap justify-center gap-2">
-					<button
-						v-for="participant in participants"
-						:key="participant.name"
-						class="group flex items-center gap-3 rounded-full bg-surface-gray-2 py-1 pl-1 pr-5 text-2xl font-medium text-ink-gray-8 hover:bg-surface-red-2"
-						title="Click to kick"
-						@click="kick(participant)"
-					>
-						<AvatarPic
-							:id="participant.avatar"
-							:nickname="participant.nickname"
-							:size="48"
-						/>
-						<span class="group-hover:line-through">{{ participant.nickname }}</span>
+
+				<div class="flex flex-wrap items-center justify-center gap-3">
+					<button class="ctl" :data-on="lobbyLocked" @click="toggleLock">
+						{{ lobbyLocked ? "Lobby locked" : "Lock lobby" }}
+					</button>
+					<button class="ctl" :data-on="autoAdvance" @click="toggleAutoAdvance">
+						Auto-advance {{ autoAdvance ? "on" : "off" }}
+					</button>
+					<button class="ctl" @click="toggleMute">
+						{{ muted ? "Sound off" : "Sound on" }}
+					</button>
+					<button class="ctl ctl-go" :disabled="!participants.length" @click="start">
+						Start game
 					</button>
 				</div>
-				<p v-if="!participants.length" class="text-ink-gray-5">Waiting for players…</p>
-				<ErrorMessage :message="error" />
+				<p v-if="error" class="text-center text-ember">{{ error }}</p>
 			</div>
 		</template>
 
 		<!-- Podium -->
 		<template v-else-if="phase === 'podium'">
-			<div class="flex flex-1 flex-col items-center justify-center gap-8 p-6">
-				<h1 class="text-5xl font-black text-ink-gray-9">Final results</h1>
+			<div class="flex flex-1 flex-col items-center justify-center gap-10 p-8">
+				<h1 class="font-display text-6xl font-extrabold text-paper">Final results</h1>
 				<div class="flex items-end justify-center gap-4">
 					<div
 						v-for="entry in podiumOrder"
 						:key="entry.nickname"
-						class="flex w-32 flex-col items-center gap-2"
+						class="flex w-36 flex-col items-center gap-2"
 					>
 						<AvatarPic
 							:id="entry.avatar"
 							:nickname="entry.nickname"
 							:size="entry.rank === 1 ? 88 : 64"
 						/>
-						<span class="text-xl font-bold text-ink-gray-9">{{ entry.nickname }}</span>
-						<span class="text-ink-gray-6">{{ entry.score }}</span>
+						<span class="font-display text-xl font-bold text-paper">
+							{{ entry.nickname }}
+						</span>
+						<span class="font-mono text-sm tabular-nums text-paper/50">
+							{{ entry.score }}
+						</span>
 						<div
-							class="flex w-full animate-[grow_0.6s_ease-out] items-start justify-center rounded-t-lg pt-2 text-3xl font-black text-white"
-							:class="PODIUM_STYLE[entry.rank]"
+							class="podium-rise flex w-full items-start justify-center rounded-t-2xl pt-3 font-mono text-3xl font-bold text-night"
+							:class="PODIUM_FILL[entry.rank]"
 							:style="{ height: `${180 - (entry.rank - 1) * 45}px` }"
 						>
 							{{ entry.rank }}
@@ -111,114 +135,141 @@
 					<li
 						v-for="entry in leaderboard"
 						:key="entry.nickname"
-						class="flex items-center justify-between border-b border-outline-gray-1 py-2 text-lg text-ink-gray-7"
+						class="flex items-center justify-between border-b border-haze py-2.5 text-lg text-paper/70"
 					>
-						<span class="flex items-center gap-2">
+						<span class="flex items-center gap-3">
+							<span class="w-5 font-mono text-xs tabular-nums text-paper/35">
+								{{ entry.rank }}
+							</span>
 							<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="28" />
-							{{ entry.rank }}. {{ entry.nickname }}
+							{{ entry.nickname }}
 						</span>
-						<span class="font-bold">{{ entry.score }}</span>
+						<span class="font-mono tabular-nums">{{ entry.score }}</span>
 					</li>
 				</ol>
-				<Button variant="outline" @click="reset">New game</Button>
+				<button class="ctl" @click="reset">New game</button>
+			</div>
+		</template>
+
+		<!-- Read time: question only, no answers yet -->
+		<template v-else-if="phase === 'get_ready'">
+			<div class="flex flex-1 flex-col items-center justify-center gap-10 p-8 text-center">
+				<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
+					Question {{ (question?.q_index ?? 0) + 1 }} of {{ question?.total }}
+				</p>
+				<h1
+					class="max-w-4xl font-display text-6xl font-extrabold leading-tight text-paper"
+				>
+					{{ question?.question_text }}
+				</h1>
+				<DrainRing
+					:percent="timerPercent"
+					:seconds="Math.ceil(remaining)"
+					:size="140"
+					color="#FFC43D"
+				/>
 			</div>
 		</template>
 
 		<!-- Question / results -->
 		<template v-else>
 			<!-- m-auto, not justify-center: a centered flex column clips its top when it overflows -->
-			<div class="flex flex-1 flex-col p-6">
-				<div class="m-auto flex w-full flex-col gap-6">
-					<div class="flex items-center justify-between text-lg text-ink-gray-6">
-						<span
-							>Question {{ (question?.q_index ?? 0) + 1 }} of
-							{{ question?.total }}</span
-						>
-						<span
+			<div class="flex flex-1 flex-col p-8">
+				<div class="m-auto flex w-full max-w-6xl flex-col gap-7">
+					<div class="flex items-center gap-6">
+						<DrainRing
 							v-if="phase === 'question'"
-							class="text-2xl font-black text-ink-gray-9"
-						>
-							{{ Math.ceil(remaining) }}
-						</span>
-						<span v-if="phase === 'question'">{{ answerCount }} answered</span>
-					</div>
-
-					<div
-						v-if="phase === 'question'"
-						class="h-3 w-full overflow-hidden rounded-full bg-surface-gray-3"
-					>
-						<div
-							class="h-full rounded-full bg-surface-gray-7 transition-[width] duration-100 ease-linear"
-							:style="{ width: `${timerPercent}%` }"
+							:percent="timerPercent"
+							:seconds="Math.ceil(remaining)"
+							:size="96"
+							:color="remaining <= 5 ? '#FF5A36' : '#17B0BE'"
 						/>
+						<div class="min-w-0 flex-1">
+							<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
+								Question {{ (question?.q_index ?? 0) + 1 }} of
+								{{ question?.total }}
+							</p>
+							<h1
+								class="mt-2 font-display text-4xl font-extrabold leading-tight text-paper"
+							>
+								{{ question?.question_text }}
+							</h1>
+						</div>
+						<p
+							v-if="phase === 'question'"
+							class="shrink-0 font-mono text-sm tabular-nums text-paper/40"
+						>
+							{{ answerCount }} answered
+						</p>
 					</div>
-
-					<h1 class="text-center text-4xl font-bold text-ink-gray-9">
-						{{ question?.question_text }}
-					</h1>
 
 					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
 						<div
-							v-for="shape in SHAPES.filter(
-								(s) => question?.options[Number(s.id) - 1]
-							)"
+							v-for="shape in visibleShapes"
 							:key="shape.id"
-							class="flex items-center gap-3 rounded-xl p-5 text-xl font-bold text-white transition"
-							:class="[shape.fill, dimmed(shape.id) ? 'opacity-30' : '']"
+							class="flex items-center gap-5 rounded-2xl px-6 py-7 transition"
+							:class="[shape.fill, dimmed(shape.id) ? 'opacity-25' : '']"
 						>
-							<svg class="h-8 w-8 shrink-0 fill-white" viewBox="0 0 24 24">
+							<svg class="h-9 w-9 shrink-0 fill-night/55" viewBox="0 0 24 24">
 								<path :d="shape.path" />
 							</svg>
-							<span class="flex-1">{{
-								question.options[Number(shape.id) - 1]
-							}}</span>
+							<span class="flex-1 font-display text-2xl font-extrabold text-night">
+								{{ question.options[Number(shape.id) - 1] }}
+							</span>
 							<span
 								v-if="phase === 'closed' && shape.id === String(correctOption)"
-								class="text-2xl"
+								class="text-3xl text-night"
 								>✓</span
 							>
 						</div>
 					</div>
 
 					<template v-if="phase === 'closed'">
-						<div class="mx-auto flex h-32 w-full max-w-3xl items-stretch gap-4">
+						<div class="flex h-32 w-full items-stretch gap-3">
 							<div
-								v-for="shape in SHAPES.filter(
-									(s) => question?.options[Number(s.id) - 1]
-								)"
+								v-for="shape in visibleShapes"
 								:key="shape.id"
-								class="flex flex-1 flex-col justify-end gap-1"
+								class="flex flex-1 flex-col gap-1.5"
 							>
-								<span class="text-center text-lg font-bold text-ink-gray-7">
+								<span
+									class="text-center font-mono text-sm tabular-nums text-paper/60"
+								>
 									{{ distribution[shape.id] || 0 }}
 								</span>
-								<div
-									class="rounded-t transition-[height] duration-500"
-									:class="shape.fill"
-									:style="{ height: `${barHeight(shape.id)}%` }"
-								/>
+								<div class="flex flex-1 flex-col justify-end rounded-t-lg bg-dusk">
+									<div
+										class="rounded-t-lg transition-[height] duration-500"
+										:class="shape.fill"
+										:style="{ height: `${barHeight(shape.id)}%` }"
+									/>
+								</div>
 							</div>
 						</div>
 
-						<div class="flex flex-wrap items-start justify-between gap-6">
+						<div class="flex flex-wrap items-start justify-between gap-8">
 							<ol class="min-w-64 flex-1">
 								<li
 									v-for="(entry, index) in top5"
 									:key="entry.nickname"
-									class="flex items-center justify-between border-b border-outline-gray-1 py-2 text-lg text-ink-gray-7"
+									class="flex items-center justify-between border-b border-haze py-2 text-lg text-paper/70"
 								>
-									<span class="flex items-center gap-2">
+									<span class="flex items-center gap-3">
+										<span
+											class="w-5 font-mono text-xs tabular-nums text-paper/35"
+										>
+											{{ index + 1 }}
+										</span>
 										<AvatarPic
 											:id="entry.avatar"
 											:nickname="entry.nickname"
 											:size="28"
 										/>
-										{{ index + 1 }}. {{ entry.nickname }}
+										{{ entry.nickname }}
 									</span>
-									<span class="font-bold">{{ entry.score }}</span>
+									<span class="font-mono tabular-nums">{{ entry.score }}</span>
 								</li>
 							</ol>
-							<ul class="flex-1 space-y-1 text-lg text-ink-gray-7">
+							<ul class="flex-1 space-y-2 text-lg text-paper/70">
 								<li
 									v-for="entry in streaks"
 									:key="entry.nickname"
@@ -237,20 +288,15 @@
 					</template>
 
 					<div class="flex flex-wrap items-center gap-3">
-						<Button v-if="phase === 'question'" variant="outline" @click="skip"
-							>Skip</Button
-						>
-						<Button v-if="phase === 'closed'" variant="solid" @click="next"
-							>Next</Button
-						>
-						<Button
-							:variant="autoAdvance ? 'solid' : 'outline'"
-							@click="toggleAutoAdvance"
-						>
+						<button v-if="phase === 'question'" class="ctl" @click="skip">Skip</button>
+						<button v-if="phase === 'closed'" class="ctl ctl-go" @click="next">
+							Next question
+						</button>
+						<button class="ctl" :data-on="autoAdvance" @click="toggleAutoAdvance">
 							Auto-advance {{ autoAdvance ? "on" : "off" }}
-						</Button>
-						<Button variant="outline" theme="red" @click="end">End game</Button>
-						<ErrorMessage :message="error" />
+						</button>
+						<button class="ctl" @click="end">End game</button>
+						<p v-if="error" class="text-ember">{{ error }}</p>
 					</div>
 				</div>
 			</div>
@@ -260,14 +306,14 @@
 
 <script setup>
 import { computed, inject, onMounted, ref, watch } from "vue";
-import { Button, ErrorMessage } from "frappe-ui";
 import QRCode from "qrcode";
 import { call } from "@/api";
 import { SHAPES, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
+import DrainRing from "@/components/DrainRing.vue";
 import { initSound, muted, playCue, toggleMute } from "@/sound";
 
-const PODIUM_STYLE = { 1: "bg-amber-400", 2: "bg-gray-400", 3: "bg-orange-400" };
+const PODIUM_FILL = { 1: "bg-gold", 2: "bg-lagoon", 3: "bg-orchid" };
 // remembered so a reload on the podium restores it: get_host_state only auto-finds live sessions
 const HOSTED_SESSION_KEY = "qz_hosted_session";
 
@@ -300,8 +346,15 @@ const joinUrl = computed(
 	() => `${window.location.origin}/quizzly/join?pin=${session.value.game_pin}`
 );
 
+// The projector shows where to go, not the whole query string.
+const joinHost = computed(() => `${window.location.host}/quizzly/join`);
+
 const timerPercent = computed(() =>
 	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
+);
+
+const visibleShapes = computed(() =>
+	SHAPES.filter((shape) => question.value?.options[Number(shape.id) - 1])
 );
 
 watch(
@@ -333,6 +386,7 @@ function onSessionEvent(message) {
 	} else if (message.type === "get_ready") {
 		phase.value = "get_ready";
 		question.value = { ...message, options: [] };
+		startCountdown(message.seconds);
 	} else if (message.type === "question") {
 		question.value = message;
 		answerCount.value = 0;
@@ -363,7 +417,11 @@ async function applyState(state) {
 	lobbyLocked.value = Boolean(state.lobby_locked);
 	autoAdvance.value = Boolean(state.auto_advance);
 	top5.value = state.top_5 || [];
-	qrDataUrl.value = await QRCode.toDataURL(joinUrl.value, { margin: 1, width: 400 });
+	qrDataUrl.value = await QRCode.toDataURL(joinUrl.value, {
+		margin: 1,
+		width: 400,
+		color: { dark: "#16111F", light: "#F4F0FA" },
+	});
 
 	if (state.status === "Lobby") {
 		phase.value = "lobby";
@@ -385,6 +443,7 @@ async function applyState(state) {
 		phase.value = "get_ready";
 		// options stay hidden during read time, same as the live get_ready event
 		question.value = { ...state.question, options: [] };
+		startCountdown(state.remaining_seconds);
 	}
 }
 
@@ -459,7 +518,7 @@ async function toggleAutoAdvance() {
 }
 
 async function kick(participant) {
-	if (!window.confirm(`Kick ${participant.nickname}?`)) return;
+	if (!window.confirm(`Remove ${participant.nickname} from the game?`)) return;
 	await hostCall("quizzly.api.kick_participant", { participant: participant.name });
 }
 
@@ -477,11 +536,3 @@ function reset() {
 	window.location.reload();
 }
 </script>
-
-<style>
-@keyframes grow {
-	from {
-		height: 0;
-	}
-}
-</style>

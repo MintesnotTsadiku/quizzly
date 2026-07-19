@@ -1,78 +1,110 @@
 <template>
-	<div class="flex h-full flex-col items-center justify-center gap-8 p-4">
-		<h1 class="text-4xl font-black tracking-tight text-ink-gray-9">Quizzly</h1>
-		<form class="flex w-full max-w-xs flex-col gap-4" @submit.prevent="join">
-			<FormControl
-				v-model="pin"
-				label="Game PIN"
-				placeholder="123456"
-				size="lg"
-				inputmode="numeric"
-				maxlength="6"
-				autocomplete="off"
-			/>
-			<FormControl
-				v-model="nickname"
-				label="Nickname"
-				placeholder="Your name"
-				size="lg"
-				maxlength="20"
-				autocomplete="off"
-			/>
-			<div class="-mt-2 flex flex-wrap items-center gap-2">
-				<button
-					v-for="suggestion in suggestions"
-					:key="suggestion"
-					type="button"
-					class="rounded-full bg-surface-gray-2 px-3 py-1 text-sm text-ink-gray-7 hover:bg-surface-gray-3"
-					@click="nickname = suggestion"
-				>
-					{{ suggestion }}
-				</button>
-				<button
-					type="button"
-					class="rounded-full bg-surface-gray-2 px-3 py-1 text-sm text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-8"
-					aria-label="More nickname suggestions"
-					@click="suggestions = suggestNicknames()"
-				>
-					↻ More
-				</button>
-			</div>
-			<div class="flex flex-col gap-2">
-				<span class="text-xs text-ink-gray-5">Pick your avatar</span>
-				<div class="grid grid-cols-6 gap-2">
-					<button
-						v-for="option in avatars"
-						:key="option.id"
-						type="button"
-						class="rounded-full outline-none ring-offset-2 transition"
-						:class="
-							avatar === option.id
-								? 'scale-110 ring-2 ring-black'
-								: 'hover:scale-105'
-						"
-						:aria-label="option.id"
-						:aria-pressed="avatar === option.id"
-						@click="avatar = option.id"
-					>
-						<AvatarPic :id="option.id" :size="40" />
-					</button>
+	<div class="flex min-h-full flex-col justify-center bg-night px-5 py-10">
+		<div class="mx-auto w-full max-w-sm">
+			<p
+				class="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-gold"
+			>
+				<svg class="h-3 w-3 fill-gold" viewBox="0 0 24 24">
+					<path :d="SHAPES[1].path" />
+				</svg>
+				Live quiz
+			</p>
+			<h1 class="font-display text-6xl font-extrabold leading-none text-paper">Quizzly</h1>
+			<p class="mt-3 text-paper/50">
+				Type the PIN on the big screen, pick a face, and you're in.
+			</p>
+
+			<form class="mt-9 flex flex-col gap-6" @submit.prevent="join">
+				<label class="flex flex-col gap-2">
+					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
+						Game PIN
+					</span>
+					<input
+						v-model="pin"
+						class="w-full rounded-2xl border border-haze bg-dusk py-4 text-center font-mono text-4xl font-bold tracking-[0.18em] text-paper placeholder:text-paper/20 focus:border-ember"
+						placeholder="000000"
+						inputmode="numeric"
+						maxlength="6"
+						autocomplete="off"
+					/>
+				</label>
+
+				<label class="flex flex-col gap-2">
+					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
+						Nickname
+					</span>
+					<input
+						v-model="nickname"
+						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember"
+						placeholder="Your name"
+						maxlength="20"
+						autocomplete="off"
+					/>
+					<span class="flex flex-wrap items-center gap-2 pt-1">
+						<button
+							v-for="suggestion in suggestions"
+							:key="suggestion"
+							type="button"
+							class="rounded-full border border-haze px-3 py-1 text-sm text-paper/70 transition hover:border-lagoon hover:text-lagoon"
+							@click="nickname = suggestion"
+						>
+							{{ suggestion }}
+						</button>
+						<button
+							type="button"
+							class="rounded-full border border-haze px-3 py-1 text-sm text-paper/45 transition hover:border-paper hover:text-paper"
+							@click="suggestions = suggestNicknames()"
+						>
+							↻ More
+						</button>
+					</span>
+				</label>
+
+				<div class="flex flex-col gap-3">
+					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
+						Your face
+					</span>
+					<div class="grid grid-cols-6 gap-2">
+						<button
+							v-for="option in avatars"
+							:key="option.id"
+							type="button"
+							class="rounded-full p-0.5 transition"
+							:class="
+								avatar === option.id
+									? 'bg-gold ring-2 ring-gold'
+									: 'opacity-55 hover:opacity-100'
+							"
+							:aria-label="option.id"
+							:aria-pressed="avatar === option.id"
+							@click="avatar = option.id"
+						>
+							<AvatarPic :id="option.id" :size="40" />
+						</button>
+					</div>
 				</div>
-			</div>
-			<Button variant="solid" size="lg" type="submit" :loading="joining">Join game</Button>
-			<ErrorMessage :message="error" />
-		</form>
+
+				<button
+					type="submit"
+					class="rounded-2xl bg-ember py-4 font-display text-xl font-extrabold text-night transition hover:brightness-110 disabled:opacity-50"
+					:disabled="joining"
+				>
+					{{ joining ? "Joining…" : "Join game" }}
+				</button>
+				<p v-if="error" class="text-center text-sm text-ember">{{ error }}</p>
+			</form>
+		</div>
 	</div>
 </template>
 
 <script setup>
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Button, ErrorMessage, FormControl } from "frappe-ui";
 import { call } from "@/api";
 import { savePlayer } from "@/player";
 import { avatars, randomAvatar } from "@/avatars";
 import { suggestNicknames } from "@/nicknames";
+import { SHAPES } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 
 const route = useRoute();
