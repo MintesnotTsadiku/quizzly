@@ -9,5 +9,10 @@ export function readError(e) {
 }
 
 export function call(method, params = {}) {
-	return frappeRequest({ url: `/api/method/${method}`, method: "POST", params });
+	return frappeRequest({
+		url: `/api/method/${method}`,
+		method: "POST",
+		params,
+		headers: { "X-Frappe-Site-Name": window.site_name },
+	});
 }
