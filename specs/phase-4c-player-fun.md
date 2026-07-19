@@ -20,7 +20,7 @@ Picked from a pack, never uploaded. No file storage from users, no moderation pr
 
 The pack is the unit of configuration: swapping art style, editing the roster, or adding avatars must never require a code change.
 
-A pack is one JSON manifest in `quizzly/avatars/packs/<pack>.json`:
+A pack is one JSON manifest in `quizzly/avatar_packs/<pack>.json`:
 
 ```json
 {

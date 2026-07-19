@@ -174,10 +174,11 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 		)
 
 	top_5 = [
-		{"nickname": p.nickname, "score": p.score} for p in sorted(participants, key=lambda p: -p.score)[:5]
+		{"nickname": p.nickname, "avatar": p.avatar, "score": p.score}
+		for p in sorted(participants, key=lambda p: -p.score)[:5]
 	]
 	streaks = [
-		{"nickname": p.nickname, "streak": p.streak}
+		{"nickname": p.nickname, "avatar": p.avatar, "streak": p.streak}
 		for p in sorted(participants, key=lambda p: -p.streak)
 		if p.streak >= STREAK_CALLOUT_MIN
 	][:3]
@@ -220,7 +221,14 @@ def finish_session(session_doc) -> None:
 	leaderboard = []
 	for rank, participant in enumerate(participants, start=1):
 		frappe.db.set_value("QZ Participant", participant.name, "rank", rank)
-		leaderboard.append({"nickname": participant.nickname, "score": participant.score, "rank": rank})
+		leaderboard.append(
+			{
+				"nickname": participant.nickname,
+				"avatar": participant.avatar,
+				"score": participant.score,
+				"rank": rank,
+			}
+		)
 	frappe.db.set_value(
 		"QZ Session",
 		session_doc.name,
@@ -343,7 +351,7 @@ def get_live_participants(session: str) -> list:
 	return frappe.get_all(
 		"QZ Participant",
 		filters={"session": session, "kicked": 0},
-		fields=["name", "nickname", "score", "streak", "joined_at"],
+		fields=["name", "nickname", "avatar", "score", "streak", "joined_at"],
 	)
 
 

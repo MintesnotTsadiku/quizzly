@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build --base=/assets/quizzly/frontend/",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "build:avatars": "node scripts/build-avatars.mjs"
   },
   "dependencies": {
     "frappe-ui": "^0.1.261",
@@ -16,6 +17,8 @@
     "vue-router": "^4.2.2"
   },
   "devDependencies": {
+    "@dicebear/collection": "^9.4.2",
+    "@dicebear/core": "^9.4.2",
     "@vitejs/plugin-vue": "^4.2.3",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.5",

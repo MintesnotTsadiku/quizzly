@@ -7,6 +7,7 @@ export function savePlayer(joinResult) {
 			token: joinResult.participant_token,
 			participant: joinResult.participant,
 			nickname: joinResult.nickname,
+			avatar: joinResult.avatar,
 			pin: joinResult.game_pin,
 			participants: joinResult.participants,
 		})

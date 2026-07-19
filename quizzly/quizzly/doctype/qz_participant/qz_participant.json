@@ -7,6 +7,7 @@
  "field_order": [
   "session",
   "nickname",
+  "avatar",
   "token_hash",
   "score",
   "streak",
@@ -29,6 +30,12 @@
    "in_list_view": 1,
    "label": "Nickname",
    "reqd": 1
+  },
+  {
+   "description": "avatar id from the active pack in avatar_packs/",
+   "fieldname": "avatar",
+   "fieldtype": "Data",
+   "label": "Avatar"
   },
   {
    "description": "sha256 of the participant token; the raw token is never stored",

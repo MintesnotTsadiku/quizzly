@@ -19,6 +19,27 @@
 				maxlength="20"
 				autocomplete="off"
 			/>
+			<div class="flex flex-col gap-2">
+				<span class="text-xs text-ink-gray-5">Pick your avatar</span>
+				<div class="grid grid-cols-6 gap-2">
+					<button
+						v-for="option in avatars"
+						:key="option.id"
+						type="button"
+						class="rounded-full outline-none ring-offset-2 transition"
+						:class="
+							avatar === option.id
+								? 'scale-110 ring-2 ring-ink-gray-9'
+								: 'opacity-50 hover:opacity-100'
+						"
+						:aria-label="option.id"
+						:aria-pressed="avatar === option.id"
+						@click="avatar = option.id"
+					>
+						<AvatarPic :id="option.id" :size="40" />
+					</button>
+				</div>
+			</div>
 			<Button variant="solid" size="lg" type="submit" :loading="joining">Join game</Button>
 			<ErrorMessage :message="error" />
 		</form>
@@ -31,12 +52,15 @@ import { useRoute, useRouter } from "vue-router";
 import { Button, ErrorMessage, FormControl } from "frappe-ui";
 import { call } from "@/api";
 import { savePlayer } from "@/player";
+import { avatars, randomAvatar } from "@/avatars";
+import AvatarPic from "@/components/AvatarPic.vue";
 
 const route = useRoute();
 const router = useRouter();
 
 const pin = ref(route.query.pin || "");
 const nickname = ref("");
+const avatar = ref(randomAvatar());
 const joining = ref(false);
 const error = ref("");
 
@@ -47,6 +71,7 @@ async function join() {
 		const result = await call("quizzly.api.join_session", {
 			pin: pin.value.trim(),
 			nickname: nickname.value.trim(),
+			avatar: avatar.value,
 		});
 		savePlayer(result);
 		router.push("/play");
