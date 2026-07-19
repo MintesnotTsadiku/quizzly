@@ -43,6 +43,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { call, readError } from "@/api";
+import { confirm } from "@/confirm";
 import HostBar from "@/components/HostBar.vue";
 
 const quizzes = ref([]);
@@ -61,7 +62,7 @@ async function load() {
 }
 
 async function remove(quiz) {
-	if (!window.confirm(`Delete "${quiz.title}"?`)) return;
+	if (!(await confirm(`Delete "${quiz.title}"?`, { action: "Delete", danger: true }))) return;
 	error.value = "";
 	try {
 		// a played quiz is refused by the QZ Session link, which is the rule we want anyway

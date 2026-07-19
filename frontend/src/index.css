@@ -90,6 +90,38 @@ body {
 	opacity: 0.35;
 }
 
+.ctl-danger {
+	background: #ff5a36;
+	border-color: #ff5a36;
+	color: #16111f;
+	font-weight: 800;
+}
+
+.ctl-danger:hover:not(:disabled) {
+	filter: brightness(1.1);
+}
+
+/* Dialogs: the default <dialog> lands white and unanimated on a dark app. */
+.qz-dialog {
+	margin: auto;
+}
+
+.qz-dialog::backdrop {
+	background: rgba(22, 17, 31, 0.82);
+	backdrop-filter: blur(3px);
+}
+
+.qz-dialog[open] {
+	animation: dialog-in 0.14s ease-out;
+}
+
+@keyframes dialog-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px) scale(0.97);
+	}
+}
+
 /* Authoring inputs: frappe-ui form controls only ship a light theme. */
 .field {
 	width: 100%;
