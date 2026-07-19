@@ -10,7 +10,7 @@ import time
 
 import frappe
 from frappe import _
-from frappe.utils import now_datetime
+from frappe.utils import now_datetime, time_diff_in_seconds
 
 GRACE_SECONDS = 1.0
 STATS_SECONDS = 5
@@ -213,6 +213,30 @@ def wait_before_next(session_doc) -> str | None:
 		time.sleep(POLL_SECONDS)
 		waited += POLL_SECONDS
 	return None
+
+
+def is_loop_alive(session: str) -> bool:
+	"""Every loop phase re-sets state with a TTL that outlives that phase, so no state = no loop."""
+	return get_state(session) is not None
+
+
+def is_abandoned(session_doc) -> bool:
+	"""Active but nothing is driving it: the worker died or was restarted mid-game.
+
+	The age check covers the gap between start_session and the loop's first state write.
+	"""
+	if session_doc.status != "Active" or is_loop_alive(session_doc.name):
+		return False
+	last_touched = session_doc.started_at or session_doc.modified
+	return time_diff_in_seconds(now_datetime(), last_touched) > STATE_TTL_MARGIN
+
+
+def end_active_session(session_doc) -> None:
+	"""Ask the loop to stop. With no loop left to read the flag, end it here instead."""
+	if is_loop_alive(session_doc.name):
+		set_control(session_doc.name, "end")
+	else:
+		finish_session(session_doc)
 
 
 def finish_session(session_doc) -> None:

@@ -70,7 +70,7 @@
 					</div>
 					<div class="h-2 w-full overflow-hidden rounded-full bg-surface-gray-3">
 						<div
-							class="h-full rounded-full bg-ink-gray-9 transition-[width] duration-100 ease-linear"
+							class="h-full rounded-full bg-surface-gray-7 transition-[width] duration-100 ease-linear"
 							:style="{ width: `${timerPercent}%` }"
 						/>
 					</div>
@@ -99,7 +99,7 @@
 				<svg
 					v-if="selected"
 					class="h-24 w-24"
-					:class="shapeFor(selected).fill.replace('bg-', 'fill-')"
+					:class="shapeFor(selected).svgFill"
 					viewBox="0 0 24 24"
 				>
 					<path :d="shapeFor(selected).path" />
@@ -110,8 +110,8 @@
 
 			<template v-else-if="phase === 'result'">
 				<div
-					class="flex h-24 w-24 items-center justify-center rounded-full text-5xl"
-					:class="result.is_correct ? 'bg-surface-green-3' : 'bg-surface-red-3'"
+					class="flex h-24 w-24 items-center justify-center rounded-full text-5xl text-white"
+					:class="result.is_correct ? 'bg-green-600' : 'bg-red-500'"
 				>
 					{{ result.is_correct ? "✓" : "✕" }}
 				</div>

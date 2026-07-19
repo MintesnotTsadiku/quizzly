@@ -1,5 +1,20 @@
 # Progress
 
+## Fixes found in end-to-end testing (2026-07-19)
+
+A full host + two-player run in a real browser turned up three defects, all now fixed.
+
+- **Host stuck on a dead game.** A session whose loop worker died stayed `Active` forever, and `get_live_host_session` kept handing it back, so the quiz picker never returned and "New game" was a no-op. `end_session` was no better: it only set a Redis control flag that no loop was left to read. `engine.is_abandoned` now names the condition (Active, no loop state, older than the state TTL), `get_live_host_session` reaps every abandoned session it walks past, `get_host_state` settles a remembered one into its podium, and `end_active_session` ends a loopless game directly instead of flagging it. Five tests in `test_game_ux.py`, including one that a Lobby waiting for players is never reaped.
+- **Countdown bar was invisible.** Both the host and player timer bars used `bg-ink-gray-9`, which frappe-ui defines as an ink (text) token only, so the fill computed to `rgba(0,0,0,0)` and the bar always read as empty. Now `bg-surface-gray-7`.
+- **Locked-in shape rendered black.** The confirmation shape built its SVG class at runtime with `fill.replace("bg-", "fill-")`, so Tailwind never saw those class names and only generated the ones that happened to appear elsewhere: red worked, blue, amber and green came out black. `SHAPES` now carries an `svgFill` literal per shape.
+- **A quiet socket froze a screen for good.** Two player tabs stopped receiving events mid-game and never recovered: the design has no polling fallback, and `useSessionRoom` only re-joined the room on a `connect` event that never came. It now tracks the time of the last event and re-joins (plus resyncs) after 20 seconds of silence, so a lost room membership or a reconnect that never lands costs one `get_state` instead of the rest of the game. Long pauses between questions are normal, hence the generous threshold; verified in the browser that a silent stats pause triggers exactly one resync per interval and an active game triggers none.
+- **Result badge was unreadable.** The correct/wrong circle used `bg-surface-green-3` and `bg-surface-red-3`, two tokens with opposite lightness, so no single glyph colour worked: a black ✓ on dark green, then a white ✕ on pale red. Both now use the strong game palette (`bg-green-600` / `bg-red-500`) with white glyphs.
+- **Tests leaked their fixtures onto the site.** Engine steps commit mid-test, so the framework rollback left every test quiz and session behind; the host's quiz picker had grown to 26 stray "Engine Quiz" entries and 6 sessions stuck `Active`. `GameTestCase.tearDown` now deletes what it created, and the existing junk was purged.
+
+### Verified
+
+Full 4-question game, host plus two guests, played through get-ready, live answer counts, reveal with distribution, streak callout and podium. Scores matched the engine (Ada 2043, Grace 2041).
+
 ## Phase 4c: Player fun (2026-07-19)
 
 Phase 4 was split into four independently shippable slices (`specs/phase-4a..4d`); this is the third.

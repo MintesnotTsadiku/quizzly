@@ -81,6 +81,15 @@ class GameTestCase(IntegrationTestCase):
 		for question in self.questions:
 			frappe.cache.delete_value(engine.answered_key(self.session, question.name))
 		frappe.set_user("Administrator")
+		# engine steps commit mid-test, so the framework rollback alone would leave this
+		# quiz and session behind on the site and pollute the host's quiz picker
+		frappe.db.rollback()
+		for doctype in ("QZ Answer", "QZ Participant"):
+			for name in frappe.get_all(doctype, filters={"session": self.session}, pluck="name"):
+				frappe.delete_doc(doctype, name, force=True)
+		frappe.delete_doc("QZ Session", self.session, force=True)
+		frappe.delete_doc("QZ Quiz", self.quiz.name, force=True)
+		frappe.db.commit()
 		super().tearDown()
 
 	def activate(self):

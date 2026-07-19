@@ -1,11 +1,15 @@
 import { onBeforeUnmount, ref } from "vue";
 
+const SILENCE_LIMIT_MS = 20000;
+
 // Kahoot-style answer shapes. Index = canonical option id - 1.
 export const SHAPES = [
 	{
 		id: "1",
 		name: "triangle",
 		fill: "bg-red-500",
+		// spelled out: Tailwind only generates classes it can see as literals
+		svgFill: "fill-red-500",
 		hover: "hover:bg-red-600",
 		path: "M12 3 L22 20 L2 20 Z",
 	},
@@ -13,6 +17,8 @@ export const SHAPES = [
 		id: "2",
 		name: "diamond",
 		fill: "bg-blue-500",
+		// spelled out: Tailwind only generates classes it can see as literals
+		svgFill: "fill-blue-500",
 		hover: "hover:bg-blue-600",
 		path: "M12 2 L22 12 L12 22 L2 12 Z",
 	},
@@ -20,6 +26,8 @@ export const SHAPES = [
 		id: "3",
 		name: "circle",
 		fill: "bg-amber-500",
+		// spelled out: Tailwind only generates classes it can see as literals
+		svgFill: "fill-amber-500",
 		hover: "hover:bg-amber-600",
 		path: "M12 2 A10 10 0 1 1 11.99 2 Z",
 	},
@@ -27,6 +35,8 @@ export const SHAPES = [
 		id: "4",
 		name: "square",
 		fill: "bg-green-600",
+		// spelled out: Tailwind only generates classes it can see as literals
+		svgFill: "fill-green-600",
 		hover: "hover:bg-green-700",
 		path: "M3 3 H21 V21 H3 Z",
 	},
@@ -74,18 +84,34 @@ function mulberry32(seed) {
  */
 export function useSessionRoom(socket, pin, onEvent, resync) {
 	const eventName = `qz_session_${pin}`;
+	let lastEventAt = Date.now();
+
+	function handle(message) {
+		lastEventAt = Date.now();
+		onEvent(message);
+	}
 
 	function join() {
 		socket.emit("qz_join", pin);
+		lastEventAt = Date.now();
 		resync();
 	}
 
-	socket.on(eventName, onEvent);
+	socket.on(eventName, handle);
 	socket.on("connect", join);
 	join();
 
+	// A socket can go quiet without ever firing `connect` again: the room membership
+	// is lost or a reconnect never lands, and the screen then freezes for good. Long
+	// silences are normal between questions, so this only rejoins after a very quiet
+	// stretch, and rejoining costs one get_state.
+	const watchdog = setInterval(() => {
+		if (Date.now() - lastEventAt > SILENCE_LIMIT_MS) join();
+	}, 5000);
+
 	onBeforeUnmount(() => {
-		socket.off(eventName, onEvent);
+		clearInterval(watchdog);
+		socket.off(eventName, handle);
 		socket.off("connect", join);
 		socket.emit("qz_leave", pin);
 	});

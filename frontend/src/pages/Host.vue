@@ -148,7 +148,7 @@
 						class="h-3 w-full overflow-hidden rounded-full bg-surface-gray-3"
 					>
 						<div
-							class="h-full rounded-full bg-ink-gray-9 transition-[width] duration-100 ease-linear"
+							class="h-full rounded-full bg-surface-gray-7 transition-[width] duration-100 ease-linear"
 							:style="{ width: `${timerPercent}%` }"
 						/>
 					</div>
