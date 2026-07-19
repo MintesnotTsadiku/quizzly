@@ -1,5 +1,33 @@
 # Progress
 
+## Phase 5: Visual identity (2026-07-19)
+
+Spec: `specs/phase-5-visual-identity.md`. Engine untouched; CSS, markup, and one new component.
+
+### Done
+
+- Night-sky direction replaces the Kahoot lookalike. Eight tokens in `tailwind.config.js` (`night`, `dusk`, `haze`, `paper`, `ember`, `lagoon`, `gold`, `orchid`); the four answer inks differ in hue and lightness so they survive a washed-out projector and colourblind players.
+- Answer marks are now bolt, spark, moon, hex. `svgFill` stays a spelled-out literal per shape, same reason as before: Tailwind only generates class names it can see.
+- Type: Bricolage Grotesque display, Instrument Sans body, Martian Mono for PIN, timers, scores, ranks. Loaded in `frontend/index.html` with system fallbacks.
+- Signature: `components/DrainRing.vue`, one conic-gradient arc behind a radial mask. Time drains out of a ring instead of sliding along a bar, at three sizes across the phone and the projector, pulsing under 5 seconds.
+- Player question screen is full-bleed 2x2 tiles below a slim question strip, so a thumb reaches any corner.
+- Host read time got its own centred screen with a gold countdown; it was a bare left-aligned line with no timer, because the host never started a countdown on `get_ready`. Now it does, on both the live event and `applyState`.
+- Answer distribution bars sit in `dusk` tracks aligned to the answer grid. Before, a 0-vote bar was a hairline floating in a void.
+- Host controls use `.ctl` / `.ctl-go` in `index.css` rather than frappe-ui `Button`, which only ships a light theme.
+- Quality floor: one gold `:focus-visible` outline for every control, `prefers-reduced-motion` collapsing the ring pulse, podium rise, and bar growth, responsive to 390px.
+- Fixed a pre-existing ruff UP033 in passing: `avatars.load_pack` now uses `functools.cache`.
+
+### Verified
+
+Full 4-question game in a real browser, host at 1440x900 plus two guest phones at 390x844: quiz picker, lobby with QR and player chips, read time, question, locked-in, reveal with distribution and leaderboard, podium, both host and player views. `pre-commit run --all-files` clean.
+
+### Deferred
+
+Both are written up in the spec with the trigger condition, not just the idea.
+
+- **Light theme.** App is dark-only. Build it when someone hosts in a bright room and reports it washing out; the answer inks would need their own light-ground values, not an inversion.
+- **Avatar picker as a scroll strip.** The 6-column grid fits at 24 avatars. Build it when a pack ships more than ~30 and the join button drops below the fold.
+
 ## Fixes found in end-to-end testing (2026-07-19)
 
 A full host + two-player run in a real browser turned up three defects, all now fixed.

@@ -1,0 +1,106 @@
+# Phase 5: Visual identity
+
+Everything up to Phase 4 shipped on borrowed shapes: red/blue/yellow/green
+triangle, diamond, circle, square, on frappe-ui's default light chrome. It
+worked, and it was Kahoot's design. This phase gives Quizzly a look of its own
+without touching the engine: no scoring, timing, or payload contract changes.
+
+## Goal
+
+A host can put the projector screen in front of a room and nobody thinks they
+are looking at a clone.
+
+## Direction: night sky
+
+The room is dark, the screen is the light source, and the game is about the
+seconds running out.
+
+### Tokens
+
+Defined in `frontend/tailwind.config.js`, used as Tailwind classes everywhere.
+
+| Token    | Hex       | Role                                    |
+| -------- | --------- | --------------------------------------- |
+| `night`  | `#16111F` | Page ground                             |
+| `dusk`   | `#241C31` | Raised surfaces, inputs, chart tracks   |
+| `haze`   | `#3A2F4D` | Hairlines, pill borders                 |
+| `paper`  | `#F4F0FA` | Text on the ground                      |
+| `ember`  | `#FF5A36` | Answer 1, primary action, urgency       |
+| `lagoon` | `#17B0BE` | Answer 2, correct                       |
+| `gold`   | `#FFC43D` | Answer 3, scores, read-time countdown   |
+| `orchid` | `#9B6BFF` | Answer 4                                |
+
+The four answer inks differ in hue *and* lightness, so they stay separable for
+colourblind players and on a washed-out projector. Answer tiles always carry
+`night` text: every ink is bright enough that dark text is the higher-contrast
+choice.
+
+### Answer marks
+
+Bolt, spark, moon, hex, in `SHAPES` (`frontend/src/game.js`). Same job as the
+shapes they replace: let a player call out an answer across a room without
+reading it. `svgFill` stays a spelled-out literal because Tailwind only
+generates class names it can see.
+
+### Type
+
+- **Bricolage Grotesque** (600/800) — display: headings, answer labels, nicknames.
+- **Instrument Sans** (400/500/600) — body and UI.
+- **Martian Mono** (500/700) — anything numeric or machine-ish: game PIN, timers, scores, ranks, eyebrows.
+
+Loaded from Google Fonts in `frontend/index.html`, with system fallbacks.
+
+### Signature: the drain
+
+Time drains out of a ring, not along a bar. `components/DrainRing.vue` is one
+conic-gradient arc with a radial mask and the seconds parked in the middle; it
+pulses under 5 seconds. The same component runs at 56px in the player header,
+96px on the host question screen, and 140px during read time, so the shape of
+"time left" is identical on the phone in your hand and the screen on the wall.
+
+## Layout
+
+- **Join** — one column on `night`: display lockup, mono PIN field, nickname with suggestion pills, avatar grid, ember submit.
+- **Player question** — full-bleed 2x2 tiles filling the viewport below a slim question strip. Glyph top-left, label bottom-left, thumb reaches any corner.
+- **Host lobby** — PIN in Martian Mono at `8xl` beside a `paper` QR card, player chips below, controls as quiet pills so the game owns the screen.
+- **Host read time** — its own centred screen: question at `6xl` with a gold ring. Previously a bare left-aligned line with no countdown.
+- **Host reveal** — answer tiles dim except the correct one; distribution bars sit in `dusk` tracks aligned to the answer grid, so an empty bar still reads as a bar.
+
+Host controls share `.ctl` / `.ctl-go` in `frontend/src/index.css` rather than
+frappe-ui `Button`, which only ships a light theme.
+
+## Quality floor
+
+- Visible keyboard focus: one gold `:focus-visible` outline for every control, since everything sits on the same dark ground.
+- `prefers-reduced-motion` collapses the ring pulse, podium rise, and bar growth.
+- Responsive down to 390px.
+
+## Deferred
+
+Neither is worth building until the condition holds.
+
+### Light theme
+
+The whole app is dark-only (`color-scheme: dark`, tokens hardcoded, `.ctl`
+written in raw hex). A bright room with a weak projector would wash it out.
+
+**Build it when** someone actually hosts in daylight and reports the screen is
+unreadable. The work: promote the eight tokens to CSS custom properties on
+`:root`, add a `prefers-color-scheme: light` block, and re-derive the answer
+inks for dark-text-on-light (the four are tuned for a dark ground and would need
+their own values, not an inversion).
+
+### Avatar picker as a scroll strip
+
+`Join.vue` renders the whole roster as a 6-column grid. At the shipped 24
+avatars it fits above the fold on a 390x844 phone.
+
+**Build it when** a pack ships more than ~30 avatars, which pushes the join
+button below the fold. The work: swap the grid for a horizontal
+`overflow-x: auto` strip with scroll-snap, keeping the current selected-state
+ring. Also worth a search field past ~60.
+
+## Non-goals
+
+- No engine, API, or realtime changes. This phase is CSS, markup, and one new component.
+- No illustration or motion beyond the drain ring. One signature, kept alone.
