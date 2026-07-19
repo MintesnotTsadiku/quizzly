@@ -1,6 +1,6 @@
 <template>
-	<div class="flex min-h-full flex-col justify-center bg-night px-5 py-10">
-		<div class="mx-auto w-full max-w-sm">
+	<div class="flex h-full flex-col overflow-y-auto bg-night px-5 py-10">
+		<div class="m-auto w-full max-w-sm">
 			<p
 				class="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-gold"
 			>
