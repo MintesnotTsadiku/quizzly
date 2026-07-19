@@ -62,9 +62,6 @@ def run_game_loop(session: str) -> None:
 	finish_session(session_doc)
 
 
-# Loop steps
-
-
 def get_ready(session_doc, question, index: int, total: int) -> str | None:
 	"""Read-the-question pause before the clock starts, Kahoot style."""
 	deadline_ts = time.time() + GETREADY_SECONDS
@@ -266,18 +263,12 @@ def finish_session(session_doc) -> None:
 	frappe.db.commit()
 
 
-# Scoring
-
-
 def compute_points(response_ms: int, window_ms: int, streak: int, multiplier: int) -> int:
 	"""Kahoot formula. `streak` is the participant's streak including this answer."""
 	response_ms = min(max(response_ms or 0, 0), window_ms)
 	base = round((1 - (response_ms / window_ms) / 2) * 1000)
 	bonus = min(streak - 1, 5) * 50
 	return (base + bonus) * multiplier
-
-
-# Redis state
 
 
 def state_key(session: str) -> str:
@@ -337,9 +328,6 @@ def has_answered(session: str, question_row: str, participant: str) -> bool:
 
 def answered_count(session: str, question_row: str) -> int:
 	return len(frappe.cache.smembers(answered_key(session, question_row)))
-
-
-# Helpers
 
 
 def question_payload(session_doc, question, index: int, total: int, deadline_ts: float) -> dict:

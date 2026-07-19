@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "hash",
- "creation": "2026-07-19 12:00:00.000000",
+ "creation": "2026-07-19 12:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -87,9 +87,8 @@
    "read_only": 1
   }
  ],
- "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-07-19 12:00:00.000000",
+ "modified": "2026-07-19 22:20:48.711216",
  "modified_by": "Administrator",
  "module": "Quizzly",
  "name": "QZ Session",
@@ -117,6 +116,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

@@ -1,5 +1,3 @@
-// Synthesised rather than shipped as audio files: every cue here is a short
-// tone, so an oscillator covers them with nothing to license or preload.
 import { ref } from "vue";
 
 const KEY = "qz_muted";

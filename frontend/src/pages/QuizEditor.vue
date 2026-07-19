@@ -250,10 +250,6 @@ async function save() {
 	error.value = "";
 	saving.value = true;
 	try {
-		// The loaded doc goes back as it came: frappe refuses a save that drops creation or
-		// owner, and rejects a stale timestamp, which is what stops a second tab from
-		// clobbering this one. The child table is replaced by whatever it is given, so
-		// sending the whole list in display order makes reorder and delete a plain save.
 		const doc = {
 			...loadedDoc.value,
 			doctype: "QZ Quiz",

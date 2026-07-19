@@ -4,6 +4,7 @@ import time
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.rate_limiter import rate_limit
 from frappe.utils import now_datetime, strip_html_tags
 
@@ -12,8 +13,6 @@ from quizzly.engine import publish_session_event
 from quizzly.profanity import is_profane
 
 NICKNAME_MAX_LENGTH = 20
-
-# Host APIs
 
 
 @frappe.whitelist()
@@ -162,14 +161,6 @@ def end_session(session: str) -> dict:
 	return {"ok": True}
 
 
-# Quiz authoring APIs
-
-
-# The editor reads, saves and deletes a quiz through frappe.client.*: `if_owner` on
-# QZ Quiz enforces ownership, the controller enforces content, and the QZ Session link
-# refuses the delete of a played quiz. Only the question count needs a query of its own.
-
-
 @frappe.whitelist()
 def list_quizzes() -> list[dict]:
 	quizzes = frappe.get_list("QZ Quiz", fields=["name", "title"], order_by="modified desc")
@@ -177,9 +168,6 @@ def list_quizzes() -> list[dict]:
 		# ponytail: one count per quiz; group them if a host ever owns hundreds
 		quiz["question_count"] = frappe.db.count("QZ Question", {"parent": quiz.name})
 	return quizzes
-
-
-# Guest APIs
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -336,17 +324,14 @@ def leave_session(pin: str, token: str) -> None:
 		publish_lobby_update(session)
 
 
-# Helpers
-
-
-def get_host_session(session: str) -> "frappe.model.document.Document":
+def get_host_session(session: str) -> Document:
 	doc = frappe.get_doc("QZ Session", session)
 	if doc.host != frappe.session.user:
 		frappe.throw(_("You are not the host of this session"), frappe.PermissionError)
 	return doc
 
 
-def get_live_host_session() -> "frappe.model.document.Document | None":
+def get_live_host_session() -> Document | None:
 	names = frappe.get_all(
 		"QZ Session",
 		filters={"host": frappe.session.user, "status": ("in", ("Lobby", "Active"))},
@@ -363,7 +348,7 @@ def get_live_host_session() -> "frappe.model.document.Document | None":
 	return None
 
 
-def get_session_by_pin(pin: str) -> "frappe.model.document.Document":
+def get_session_by_pin(pin: str) -> Document:
 	pin = (pin or "").strip()
 	# Ended is allowed so a player who reloads on the podium still gets it back
 	name = pin and frappe.db.get_value(
@@ -374,9 +359,7 @@ def get_session_by_pin(pin: str) -> "frappe.model.document.Document":
 	return frappe.get_doc("QZ Session", name)
 
 
-def get_participant_by_token(
-	session: "frappe.model.document.Document", token: str
-) -> "frappe.model.document.Document":
+def get_participant_by_token(session: Document, token: str) -> Document:
 	name = frappe.db.get_value(
 		"QZ Participant",
 		{"session": session.name, "token_hash": hash_token(token or ""), "kicked": 0},
@@ -395,14 +378,14 @@ def get_leaderboard(session: str) -> list[dict]:
 	]
 
 
-def get_rank(session: str, participant: "frappe.model.document.Document") -> int:
+def get_rank(session: str, participant: Document) -> int:
 	ahead = frappe.db.count(
 		"QZ Participant", {"session": session, "kicked": 0, "score": (">", participant.score)}
 	)
 	return ahead + 1
 
 
-def get_lobby_state(session: "frappe.model.document.Document") -> dict:
+def get_lobby_state(session: Document) -> dict:
 	participants = frappe.get_all(
 		"QZ Participant",
 		filters={"session": session.name, "kicked": 0},
@@ -424,13 +407,11 @@ def set_lobby_locked(session: str, locked: bool) -> dict:
 	return get_lobby_state(doc)
 
 
-def publish_lobby_update(session: "frappe.model.document.Document") -> None:
+def publish_lobby_update(session: Document) -> None:
 	publish_session_event(session, {"type": "lobby_update", **get_lobby_state(session)})
 
 
-def get_question_row(
-	session: "frappe.model.document.Document", question_row: str
-) -> "frappe.model.document.Document":
+def get_question_row(session: Document, question_row: str) -> Document:
 	for question in engine.get_quiz_questions(session):
 		if question.name == question_row:
 			return question

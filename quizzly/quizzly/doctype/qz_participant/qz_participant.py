@@ -6,6 +6,25 @@ from quizzly.avatars import default_avatar, is_valid_avatar
 
 
 class QZParticipant(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		avatar: DF.Data | None
+		joined_at: DF.Datetime | None
+		kicked: DF.Check
+		nickname: DF.Data
+		rank: DF.Int
+		score: DF.Int
+		session: DF.Link
+		streak: DF.Int
+		token_hash: DF.Data | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.nickname = self.nickname.strip()
 		if not self.nickname:

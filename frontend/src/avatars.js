@@ -1,5 +1,3 @@
-// Roster comes from the active pack manifest via the portal boot context,
-// so swapping packs never touches the SPA.
 const pack = window.avatar_pack || { avatars: [], attribution: null };
 const urls = Object.fromEntries(pack.avatars.map((avatar) => [avatar.id, avatar.url]));
 

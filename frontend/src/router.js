@@ -17,7 +17,19 @@ const routes = [
 	},
 ];
 
-export default createRouter({
+const router = createRouter({
 	history: createWebHistory("/quizzly"),
 	routes,
 });
+
+// Hosting needs a real user; guests would otherwise land on an empty quiz picker.
+router.beforeEach((to) => {
+	if (to.path.startsWith("/host") && window.session_user === "Guest") {
+		window.location.href = `/login?redirect-to=${encodeURIComponent(
+			"/quizzly" + to.fullPath
+		)}`;
+		return false;
+	}
+});
+
+export default router;
