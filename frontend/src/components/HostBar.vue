@@ -2,7 +2,11 @@
 	<header
 		class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-haze px-4 py-3 sm:gap-x-5 sm:px-6"
 	>
-		<RouterLink class="font-display text-lg font-extrabold text-paper" to="/host">
+		<RouterLink
+			class="flex items-center gap-2 font-display text-lg font-extrabold text-paper"
+			to="/host"
+		>
+			<img alt="" class="size-7 rounded-md" :src="logoUrl" />
 			Quizzly
 		</RouterLink>
 		<nav class="flex items-center gap-2">
@@ -10,7 +14,9 @@
 			<RouterLink class="ctl" :data-on="isAuthoring" to="/host/quizzes">Quizzes</RouterLink>
 		</nav>
 		<span class="ml-auto flex items-center gap-4">
-			<span class="hidden truncate font-mono text-xs text-paper/40 sm:inline">{{ user }}</span>
+			<span class="hidden truncate font-mono text-xs text-paper/40 sm:inline">{{
+				user
+			}}</span>
 			<button class="font-mono text-xs text-paper/40 hover:text-paper" @click="logout">
 				Logout
 			</button>
@@ -22,6 +28,8 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { call } from "@/api";
+
+const logoUrl = "/assets/quizzly/images/quizzly-logo.svg";
 
 const route = useRoute();
 const user = window.session_user;
