@@ -26,8 +26,11 @@
 					</button>
 				</div>
 				<p v-else-if="loaded" class="text-paper/50">
-					No quizzes yet. Create a QZ Quiz in Desk, then come back.
+					No quizzes yet. Write your first one.
 				</p>
+				<RouterLink class="ctl self-start" to="/host/quizzes">
+					{{ quizzes.length ? "Edit quizzes" : "New quiz" }}
+				</RouterLink>
 			</div>
 		</template>
 
@@ -206,6 +209,13 @@
 							{{ answerCount }} answered
 						</p>
 					</div>
+
+					<img
+						v-if="question?.image_url"
+						:src="question.image_url"
+						alt=""
+						class="max-h-[40vh] w-full object-contain"
+					/>
 
 					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
 						<div
@@ -478,11 +488,7 @@ onMounted(async () => {
 			useSessionRoom(socket, state.game_pin, onSessionEvent, refresh);
 			return;
 		}
-		quizzes.value = await call("frappe.client.get_list", {
-			doctype: "QZ Quiz",
-			fields: ["name", "title"],
-			order_by: "modified desc",
-		});
+		quizzes.value = await call("quizzly.api.list_quizzes");
 		loaded.value = true;
 	} catch (e) {
 		error.value = "Could not load quizzes. Log into Desk with a Quiz Host account first.";

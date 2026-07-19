@@ -1,0 +1,73 @@
+<template>
+	<div class="flex h-full flex-col overflow-y-auto bg-night">
+		<div class="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 p-8">
+			<div class="flex items-end justify-between gap-4">
+				<div>
+					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">Host</p>
+					<h1 class="mt-2 font-display text-5xl font-extrabold text-paper">Your quizzes</h1>
+				</div>
+				<RouterLink class="ctl ctl-go" to="/host/quizzes/new">New quiz</RouterLink>
+			</div>
+
+			<p v-if="error" class="text-ember">{{ error }}</p>
+
+			<div v-if="quizzes.length" class="flex flex-col gap-2">
+				<div
+					v-for="quiz in quizzes"
+					:key="quiz.name"
+					class="flex items-center gap-4 rounded-2xl border border-haze bg-dusk px-5 py-4"
+				>
+					<div class="min-w-0 flex-1">
+						<p class="truncate font-display text-xl font-bold text-paper">
+							{{ quiz.title }}
+						</p>
+						<p class="font-mono text-xs text-paper/40">
+							{{ quiz.question_count }}
+							{{ quiz.question_count === 1 ? "question" : "questions" }}
+						</p>
+					</div>
+					<RouterLink class="ctl" :to="`/host/quizzes/${quiz.name}`">Edit</RouterLink>
+					<button class="ctl" @click="remove(quiz)">Delete</button>
+				</div>
+			</div>
+			<p v-else-if="loaded" class="text-paper/50">
+				No quizzes yet. Make your first one.
+			</p>
+
+			<RouterLink class="font-mono text-xs text-paper/40 hover:text-paper" to="/host">
+				← Back to hosting
+			</RouterLink>
+		</div>
+	</div>
+</template>
+
+<script setup>
+import { onMounted, ref } from "vue";
+import { call } from "@/api";
+
+const quizzes = ref([]);
+const loaded = ref(false);
+const error = ref("");
+
+onMounted(load);
+
+async function load() {
+	try {
+		quizzes.value = await call("quizzly.api.list_quizzes");
+		loaded.value = true;
+	} catch (e) {
+		error.value = "Could not load quizzes. Log in with a Quiz Host account first.";
+	}
+}
+
+async function remove(quiz) {
+	if (!window.confirm(`Delete "${quiz.title}"?`)) return;
+	error.value = "";
+	try {
+		await call("quizzly.api.delete_quiz", { quiz: quiz.name });
+		await load();
+	} catch (e) {
+		error.value = e.messages?.[0] || e.message;
+	}
+}
+</script>

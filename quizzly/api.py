@@ -5,13 +5,27 @@ import time
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
-from frappe.utils import now_datetime, strip_html_tags
+from frappe.utils import cint, now_datetime, strip_html_tags
 
 from quizzly import engine
 from quizzly.engine import publish_session_event
 from quizzly.profanity import is_profane
 
 NICKNAME_MAX_LENGTH = 20
+DEFAULT_TIME_LIMIT = 20
+MIN_TIME_LIMIT = 5
+MAX_TIME_LIMIT = 120
+QUESTION_FIELDS = (
+	"question_text",
+	"image",
+	"option_1",
+	"option_2",
+	"option_3",
+	"option_4",
+	"correct_option",
+	"time_limit",
+	"points_multiplier",
+)
 
 # Host APIs
 
@@ -159,6 +173,68 @@ def end_session(session: str) -> dict:
 		publish_session_event(session_doc, {"type": "session_ended"})
 	elif session_doc.status == "Active":
 		engine.end_active_session(session_doc)
+	return {"ok": True}
+
+
+# Quiz authoring APIs
+
+
+@frappe.whitelist()
+def list_quizzes() -> list[dict]:
+	quizzes = frappe.get_all(
+		"QZ Quiz",
+		filters={"owner": frappe.session.user},
+		fields=["name", "title", "description"],
+		order_by="modified desc",
+	)
+	for quiz in quizzes:
+		# ponytail: one count per quiz; group them if a host ever owns hundreds
+		quiz["question_count"] = frappe.db.count("QZ Question", {"parent": quiz.name})
+	return quizzes
+
+
+@frappe.whitelist()
+def get_quiz(quiz: str) -> dict:
+	quiz_doc = get_own_quiz(quiz)
+	return {
+		"name": quiz_doc.name,
+		"title": quiz_doc.title,
+		"description": quiz_doc.description,
+		"default_time_limit": quiz_doc.default_time_limit,
+		"questions": [
+			{field: question.get(field) for field in QUESTION_FIELDS} for question in quiz_doc.questions
+		],
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_quiz(
+	title: str,
+	questions: str,
+	quiz: str | None = None,
+	description: str | None = None,
+	default_time_limit: int | None = None,
+) -> dict:
+	quiz_doc = get_own_quiz(quiz) if quiz else frappe.new_doc("QZ Quiz")
+	quiz_doc.title = title
+	quiz_doc.description = description
+	quiz_doc.default_time_limit = validate_time_limit(cint(default_time_limit) or DEFAULT_TIME_LIMIT)
+	# the client always sends the whole list in display order, so reorder and delete are this call
+	quiz_doc.questions = []
+	for row in frappe.parse_json(questions):
+		validate_time_limit(cint(row.get("time_limit")))
+		quiz_doc.append("questions", {field: row.get(field) for field in QUESTION_FIELDS})
+	quiz_doc.save()
+	return {"quiz": quiz_doc.name}
+
+
+@frappe.whitelist(methods=["POST"])
+def delete_quiz(quiz: str) -> dict:
+	quiz_doc = get_own_quiz(quiz)
+	# any session, not only a live one: the link would block the delete regardless
+	if frappe.db.exists("QZ Session", {"quiz": quiz_doc.name}):
+		frappe.throw(_("This quiz has been used in a game, so it cannot be deleted"))
+	quiz_doc.delete()
 	return {"ok": True}
 
 
@@ -344,6 +420,22 @@ def get_live_host_session() -> "frappe.model.document.Document | None":
 			continue
 		return doc
 	return None
+
+
+def validate_time_limit(seconds: int) -> int:
+	# authoring rule only: the engine copes with any window, but tests and Desk use short ones
+	if seconds and not MIN_TIME_LIMIT <= seconds <= MAX_TIME_LIMIT:
+		frappe.throw(
+			_("A time limit must be between {0} and {1} seconds").format(MIN_TIME_LIMIT, MAX_TIME_LIMIT)
+		)
+	return seconds
+
+
+def get_own_quiz(quiz: str) -> "frappe.model.document.Document":
+	doc = frappe.get_doc("QZ Quiz", quiz)
+	if doc.owner != frappe.session.user:
+		doc.check_permission("write")
+	return doc
 
 
 def get_session_by_pin(pin: str) -> "frappe.model.document.Document":
