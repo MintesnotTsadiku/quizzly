@@ -22,29 +22,36 @@ Ship the thinnest end-to-end path first, then widen:
 
 No other schema change. Images ride on the standard `File` doctype and are served from `/files/...`.
 
-## APIs (`quizzly/api.py`, host-only, logged in)
+## APIs
 
-- `list_quizzes()` — quizzes owned by the host: name, title, question count.
-- `get_quiz(quiz)` — full quiz with questions for the editor.
-- `save_quiz(quiz, title, description, default_time_limit, questions)` — create when `quiz` is empty, else update. `questions` is a JSON list of rows in display order. Server replaces the child table wholesale, so reorder and delete are the same call.
-- `delete_quiz(quiz)` — refuses when any `QZ Session` references it. Built as "any", not "non-Cancelled": the Link field blocks the delete either way, so a narrower rule would only produce a worse error message.
+Authoring is CRUD on one doctype, which the framework already exposes, so the editor uses `frappe.client.*` and Quizzly adds one endpoint:
+
+- `list_quizzes()` (`quizzly/api.py`) — `name`, `title` and a question count per quiz. The count is the only part `frappe.client.get_list` cannot return without an aggregate whose result key is the raw SQL expression.
+- Read: `frappe.client.get("QZ Quiz", name)`, which returns the child rows in `idx` order, image included.
+- Save: `frappe.client.insert` for a new quiz, `frappe.client.save` for an existing one. `get_doc(dict).save()` replaces the child table with whatever it is given, so sending the whole list in display order makes reorder and delete a plain save.
+- Delete: `frappe.client.delete`.
+
+An app-level wrapper around each of those was written first and then deleted. It re-implemented what the framework does, and it enforced ownership by hand when `if_owner` on `QZ Quiz` already does exactly that. It was not even a smaller attack surface: `frappe.client.save` is whitelisted for every logged-in user whether or not this app calls it.
+
+Two rules the client has to respect on the standard path, both verified in the browser and pinned by a test:
+
+- Send the loaded doc back as it came. Frappe refuses a save that drops `creation` or `owner`, and rejects a stale `modified`, which is the concurrent-edit protection the hand-written `save_quiz` silently lacked.
+- Rebuild the question rows without `name` or `idx`. Frappe keeps an `idx` it is given, so rows carrying their old one would ignore the reorder.
 
 Image upload reuses the framework's `/api/method/upload_file` through frappe-ui's `FileUploader`, and the returned `file_url` is stored on the question row. No custom upload endpoint. The file is not attached to the parent quiz, because a brand new quiz has no name yet when the host picks the picture.
 
-Ownership is enforced the same way as existing host APIs (`if_owner` on `QZ Quiz` plus an explicit owner check in the API), never trusting a client-supplied quiz name.
+## Validation
 
-## Validation (server-side)
-
-In the `QZ Quiz` controller, so nothing can write a quiz the engine cannot play:
+In the `QZ Quiz` controller, so nothing on any path can write a quiz the engine cannot play:
 
 - At least one question.
 - Each question: non-empty text, all four options non-empty, `correct_option` in 1..4.
 
-In `save_quiz`, because it is an authoring rule rather than an integrity one:
+In the editor, because a time limit is an authoring taste rather than an integrity rule:
 
-- `time_limit` within 5..120 seconds, falling back to the quiz default when unset.
+- `time_limit` clamped to 5..120 seconds, native `min`/`max` on the input, falling back to the quiz default when unset.
 
-The range sits in the API and not the controller on purpose. The engine plays any window correctly, and both the test suite and a Desk-authored fixture use 1 to 2 second questions to keep runs fast; a controller-level range would have broken 26 existing tests to buy nothing. `save_quiz` is the only client path, so a rogue client still cannot save a 3600 second question.
+The range is deliberately not in the controller. The engine plays any window correctly, and the test suite uses 1 to 2 second questions to keep runs fast; a controller-level range broke 26 existing tests to buy nothing. The worst a hand-crafted request achieves is a host boring their own players.
 
 ## Question payload change
 
@@ -60,9 +67,12 @@ Image display rules: contained, max 40% of the question area's height on the hos
 
 ## Tests
 
-- `save_quiz` round-trips: create, reload, reorder, delete a row, all reflected in `tabQZ Question` `idx` order.
-- Validation rejects: zero questions, blank option, `correct_option` out of range.
-- `delete_quiz` refuses while a live session references the quiz.
+Only what this app adds to the standard path is worth a test:
+
+- A reorder sent through `frappe.client.save` lands in `tabQZ Question` `idx` order.
+- The controller rejects zero questions, a blank option, and `correct_option` out of range.
+- `list_quizzes` returns the question count.
+- Deleting a quiz a session references raises `LinkExistsError`.
 - A question with an image produces `image_url` in the published payload; one without produces `null`.
 
 ## Exit criteria

@@ -21,9 +21,17 @@
 			</div>
 
 			<div class="flex flex-wrap items-center gap-4">
-				<label class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50">
+				<label
+					class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
+				>
 					Seconds per question
-					<input v-model.number="defaultTimeLimit" type="number" class="field w-20" />
+					<input
+						v-model.number="defaultTimeLimit"
+						type="number"
+						:min="MIN_SECONDS"
+						:max="MAX_SECONDS"
+						class="field w-20"
+					/>
 				</label>
 				<input
 					v-model="description"
@@ -80,8 +88,8 @@
 									uploading
 										? `Uploading ${progress}%`
 										: question.image
-											? "Replace image"
-											: "Add image"
+										? "Replace image"
+										: "Add image"
 								}}
 							</button>
 						</template>
@@ -115,16 +123,22 @@
 				</div>
 
 				<div class="flex flex-wrap gap-4">
-					<label class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50">
+					<label
+						class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
+					>
 						Time limit
 						<input
 							v-model.number="question.time_limit"
 							type="number"
+							:min="MIN_SECONDS"
+							:max="MAX_SECONDS"
 							class="field w-20"
 							:placeholder="String(defaultTimeLimit)"
 						/>
 					</label>
-					<label class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50">
+					<label
+						class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
+					>
 						Points
 						<select v-model="question.points_multiplier" class="field w-32">
 							<option value="0">No points</option>
@@ -137,7 +151,10 @@
 
 			<div class="flex items-center gap-3">
 				<button class="ctl" @click="questions.push(blankQuestion())">Add question</button>
-				<RouterLink class="font-mono text-xs text-paper/40 hover:text-paper" to="/host/quizzes">
+				<RouterLink
+					class="font-mono text-xs text-paper/40 hover:text-paper"
+					to="/host/quizzes"
+				>
 					← All quizzes
 				</RouterLink>
 			</div>
@@ -152,14 +169,30 @@ import { FileUploader } from "frappe-ui";
 import { call } from "@/api";
 import { SHAPES } from "@/game";
 
+const QUESTION_FIELDS = [
+	"question_text",
+	"image",
+	"option_1",
+	"option_2",
+	"option_3",
+	"option_4",
+	"correct_option",
+	"time_limit",
+	"points_multiplier",
+];
+const DEFAULT_TIME_LIMIT = 20;
+const MIN_SECONDS = 5;
+const MAX_SECONDS = 120;
+
 const route = useRoute();
 const router = useRouter();
 
 const isNew = computed(() => route.params.name === "new");
 const quizName = ref(isNew.value ? null : route.params.name);
+const loadedDoc = ref(null);
 const title = ref("");
 const description = ref("");
-const defaultTimeLimit = ref(20);
+const defaultTimeLimit = ref(DEFAULT_TIME_LIMIT);
 const questions = ref([]);
 const saving = ref(false);
 const saved = ref(false);
@@ -175,10 +208,14 @@ onMounted(async () => {
 		return;
 	}
 	try {
-		const quiz = await call("quizzly.api.get_quiz", { quiz: quizName.value });
+		const quiz = await call("frappe.client.get", {
+			doctype: "QZ Quiz",
+			name: quizName.value,
+		});
 		title.value = quiz.title;
 		description.value = quiz.description || "";
-		defaultTimeLimit.value = quiz.default_time_limit || 20;
+		defaultTimeLimit.value = quiz.default_time_limit || DEFAULT_TIME_LIMIT;
+		loadedDoc.value = quiz;
 		// an unset Int comes back as 0; the field should read as empty, not as zero seconds
 		questions.value = quiz.questions.map((question) => ({
 			...question,
@@ -213,20 +250,40 @@ async function save() {
 	error.value = "";
 	saving.value = true;
 	try {
-		const result = await call("quizzly.api.save_quiz", {
-			quiz: quizName.value,
+		// The loaded doc goes back as it came: frappe refuses a save that drops creation or
+		// owner, and rejects a stale timestamp, which is what stops a second tab from
+		// clobbering this one. The child table is replaced by whatever it is given, so
+		// sending the whole list in display order makes reorder and delete a plain save.
+		const doc = {
+			...loadedDoc.value,
+			doctype: "QZ Quiz",
 			title: title.value,
 			description: description.value,
-			default_time_limit: defaultTimeLimit.value,
-			questions: JSON.stringify(questions.value),
-		});
+			default_time_limit: clampSeconds(defaultTimeLimit.value) || DEFAULT_TIME_LIMIT,
+			// rebuilt without name or idx: frappe keeps an idx it is given, so a row that
+			// carried its old one would ignore the reorder
+			questions: questions.value.map((question) => ({
+				doctype: "QZ Question",
+				...Object.fromEntries(QUESTION_FIELDS.map((field) => [field, question[field]])),
+				time_limit: clampSeconds(question.time_limit),
+			})),
+		};
+		const method = loadedDoc.value ? "frappe.client.save" : "frappe.client.insert";
+		const savedDoc = await call(method, { doc });
 		saved.value = true;
-		if (isNew.value) router.replace(`/host/quizzes/${result.quiz}`);
-		quizName.value = result.quiz;
+		loadedDoc.value = savedDoc;
+		if (!quizName.value) router.replace(`/host/quizzes/${savedDoc.name}`);
+		quizName.value = savedDoc.name;
 	} catch (e) {
 		error.value = e.messages?.[0] || e.message;
 	} finally {
 		saving.value = false;
 	}
+}
+
+// The engine plays any window; this is an authoring rule, so the client is the right place.
+function clampSeconds(seconds) {
+	if (!seconds) return null;
+	return Math.min(Math.max(seconds, MIN_SECONDS), MAX_SECONDS);
 }
 </script>

@@ -4,7 +4,9 @@
 			<div class="flex items-end justify-between gap-4">
 				<div>
 					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">Host</p>
-					<h1 class="mt-2 font-display text-5xl font-extrabold text-paper">Your quizzes</h1>
+					<h1 class="mt-2 font-display text-5xl font-extrabold text-paper">
+						Your quizzes
+					</h1>
 				</div>
 				<RouterLink class="ctl ctl-go" to="/host/quizzes/new">New quiz</RouterLink>
 			</div>
@@ -30,9 +32,7 @@
 					<button class="ctl" @click="remove(quiz)">Delete</button>
 				</div>
 			</div>
-			<p v-else-if="loaded" class="text-paper/50">
-				No quizzes yet. Make your first one.
-			</p>
+			<p v-else-if="loaded" class="text-paper/50">No quizzes yet. Make your first one.</p>
 
 			<RouterLink class="font-mono text-xs text-paper/40 hover:text-paper" to="/host">
 				← Back to hosting
@@ -64,10 +64,16 @@ async function remove(quiz) {
 	if (!window.confirm(`Delete "${quiz.title}"?`)) return;
 	error.value = "";
 	try {
-		await call("quizzly.api.delete_quiz", { quiz: quiz.name });
+		// a played quiz is refused by the QZ Session link, which is the rule we want anyway
+		await call("frappe.client.delete", { doctype: "QZ Quiz", name: quiz.name });
 		await load();
 	} catch (e) {
-		error.value = e.messages?.[0] || e.message;
+		// the framework's own link error names doctypes and links into Desk, which means
+		// nothing to a host who never opens it
+		error.value =
+			e.exc_type === "LinkExistsError"
+				? `"${quiz.title}" has been played, so it cannot be deleted.`
+				: e.messages?.[0] || e.message;
 	}
 }
 </script>
