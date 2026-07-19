@@ -9,6 +9,7 @@ def get_context(context):
 	context.boot = {
 		"csrf_token": frappe.sessions.get_csrf_token(),
 		"site_name": frappe.local.site,
+		"session_user": frappe.session.user,
 		"avatar_pack": get_boot_pack(),
 		"nickname_words": get_boot_words(),
 	}

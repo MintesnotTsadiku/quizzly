@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "hash",
- "creation": "2026-07-19 12:00:00.000000",
+ "creation": "2026-07-19 12:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -41,7 +41,8 @@
    "description": "sha256 of the participant token; the raw token is never stored",
    "fieldname": "token_hash",
    "fieldtype": "Data",
-   "label": "Token Hash"
+   "label": "Token Hash",
+   "search_index": 1
   },
   {
    "default": "0",
@@ -73,9 +74,8 @@
    "label": "Joined At"
   }
  ],
- "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-07-19 12:00:00.000000",
+ "modified": "2026-07-19 22:20:48.904164",
  "modified_by": "Administrator",
  "module": "Quizzly",
  "name": "QZ Participant",
@@ -95,6 +95,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
