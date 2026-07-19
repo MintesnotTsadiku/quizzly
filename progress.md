@@ -1,5 +1,32 @@
 # Progress
 
+## Phase 4c: Player fun (2026-07-19)
+
+Phase 4 was split into four independently shippable slices (`specs/phase-4a..4d`); this is the third.
+
+### Done
+
+- Avatar packs. A pack is a JSON manifest in `quizzly/avatar_packs/` holding the roster, the background palette, and the framing; `site_config.quizzly_avatar_pack` picks the active one. `quizzly/avatars.py` loads it and hands it to the SPA through the existing portal boot context, so the roster has one source of truth and the join path costs no extra request. Shipped pack is DiceBear `notionists` (CC0, 24 avatars).
+- `yarn build:avatars` pre-renders `kind: "dicebear"` packs to static SVG under `quizzly/public/avatars/<pack>/`, output committed. The DiceBear libraries are devDependencies only and never reach the runtime bundle; at runtime an avatar id is just an `<img>` URL, which is also how a bought `kind: "static"` pack drops in with no code change.
+- `QZ Participant.avatar`, validated in the controller against the active roster. `join_session` takes an optional `avatar` and falls back to a crc32-of-nickname pick. `avatar` now rides along on lobby updates, leaderboards, top-5, streak callouts, podium, and `get_state`.
+- Nickname generator: three suggestions with a reroll on the join screen. Word lists live in `quizzly/nicknames.py` and reach the SPA through the boot context.
+- Sound synthesised with Web Audio (`frontend/src/sound.js`): countdown tick, submit blip, correct/wrong stings, podium arpeggio, plus a persisted mute toggle on both screens.
+- Tests: 9 new (`test_avatars.py`, `test_nicknames.py`). 45 green across the app.
+
+### Exit criteria verified
+
+Full 4-question game in headless Chrome (host + two players) against the live site: both players picked distinct avatars and generated nicknames, and those avatars showed on the host lobby chips, the live leaderboard, the player header, and both podiums. No console errors from the audio path. Contact sheet of all 24 avatars reviewed at render size.
+
+### Notes
+
+- No free avatar library matches the 3D-rendered reference look (Inner Teens); that style is a commercial category. The pack system exists so that decision stays reversible: swapping to a bought 3D pack is a manifest plus a folder.
+- `notionists` draws half-body portraits that read as a cropped torso in a circle. Framing (`scale: 140`, `translateY: 25`) is per-pack manifest data, chosen by rendering a comparison sheet.
+- An unknown avatar id is rejected rather than defaulted, so a stale client or a manifest entry that was never rendered fails loudly instead of showing a blank circle. A test asserts every manifest id has a file on disk.
+- `quizzly/avatars.py` (module) and `quizzly/avatar_packs/` (data) are deliberately not the same name; a module and a package directory sharing a name in one directory breaks imports.
+- Players default to muted and the host defaults to audible: a classroom of phones all unmuting at once is a bad time.
+- Lobby background music is dropped from scope. A listenable loop is a composition, not a synth line.
+- Cleared three stale `Active` sessions from earlier phase testing; `get_live_host_session` picks the newest live session, so an abandoned one hides the quiz picker forever. Worth a real fix (auto-expire) if it recurs outside tests.
+
 ## Phase 3: Game UX (2026-07-19)
 
 ### Done
