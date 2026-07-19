@@ -1,8 +1,16 @@
 import frappe
 from frappe.tests import IntegrationTestCase
+from frappe.utils import add_to_date, now_datetime
 
 from quizzly import engine
-from quizzly.api import get_host_state, get_result, get_state, join_session, submit_answer
+from quizzly.api import (
+	end_session,
+	get_host_state,
+	get_result,
+	get_state,
+	join_session,
+	submit_answer,
+)
 from quizzly.profanity import is_profane
 from quizzly.tests.test_engine import GameTestCase
 
@@ -72,5 +80,53 @@ class TestPlayerResult(GameTestCase):
 	def test_podium_survives_reload_after_the_game_ends(self):
 		frappe.db.set_value("QZ Session", self.session, "status", "Ended")
 		state = get_state(self.pin, self.alice["participant_token"])
+		self.assertEqual(state["status"], "Ended")
+		self.assertEqual(len(state["leaderboard"]), 2)
+
+
+class TestAbandonedSession(GameTestCase):
+	"""A worker restart mid-game leaves an Active session nobody is driving."""
+
+	def abandon(self, seconds_ago=120):
+		self.activate()
+		engine.clear_state(self.session)
+		frappe.db.set_value(
+			"QZ Session", self.session, "started_at", add_to_date(now_datetime(), seconds=-seconds_ago)
+		)
+		self.session_doc.reload()
+
+	def test_host_state_reaps_it_and_offers_a_fresh_game(self):
+		self.abandon()
+		self.assertEqual(get_host_state(), {})
+		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
+
+	def test_running_game_is_left_alone(self):
+		self.activate()
+		frappe.db.set_value("QZ Session", self.session, "started_at", now_datetime())
+		self.open_question()
+		self.assertEqual(get_host_state()["session"], self.session)
+		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Active")
+
+	def test_just_started_game_is_not_reaped_before_the_loop_writes_state(self):
+		self.activate()
+		engine.clear_state(self.session)
+		frappe.db.set_value("QZ Session", self.session, "started_at", now_datetime())
+		self.session_doc.reload()
+		self.assertEqual(get_host_state()["session"], self.session)
+
+	def test_lobby_waiting_for_players_is_never_reaped(self):
+		frappe.db.set_value("QZ Session", self.session, "modified", add_to_date(now_datetime(), seconds=-600))
+		self.session_doc.reload()
+		self.assertEqual(get_host_state()["session"], self.session)
+		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Lobby")
+
+	def test_end_session_ends_it_instead_of_flagging_a_dead_loop(self):
+		self.abandon()
+		end_session(self.session)
+		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
+
+	def test_remembered_session_settles_to_a_podium(self):
+		self.abandon()
+		state = get_host_state(self.session)
 		self.assertEqual(state["status"], "Ended")
 		self.assertEqual(len(state["leaderboard"]), 2)

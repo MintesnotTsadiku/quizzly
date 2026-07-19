@@ -66,6 +66,10 @@ def get_host_state(session: str | None = None) -> dict:
 	session_doc = get_host_session(session) if session else get_live_host_session()
 	if not session_doc or session_doc.status == "Cancelled":
 		return {}
+	if engine.is_abandoned(session_doc):
+		# the host reloaded into a game whose worker is gone: settle it and show the podium
+		engine.finish_session(session_doc)
+		session_doc.reload()
 	result = {
 		"session": session_doc.name,
 		"game_pin": session_doc.game_pin,
@@ -154,7 +158,7 @@ def end_session(session: str) -> dict:
 		session_doc.save()
 		publish_session_event(session_doc, {"type": "session_ended"})
 	elif session_doc.status == "Active":
-		engine.set_control(session_doc.name, "end")
+		engine.end_active_session(session_doc)
 	return {"ok": True}
 
 
@@ -326,12 +330,20 @@ def get_host_session(session: str) -> "frappe.model.document.Document":
 
 
 def get_live_host_session() -> "frappe.model.document.Document | None":
-	name = frappe.db.get_value(
+	names = frappe.get_all(
 		"QZ Session",
-		{"host": frappe.session.user, "status": ("in", ("Lobby", "Active"))},
+		filters={"host": frappe.session.user, "status": ("in", ("Lobby", "Active"))},
+		pluck="name",
 		order_by="creation desc",
 	)
-	return frappe.get_doc("QZ Session", name) if name else None
+	for name in names:
+		doc = frappe.get_doc("QZ Session", name)
+		# games left Active by a dead worker would otherwise hide the quiz picker forever
+		if engine.is_abandoned(doc):
+			engine.finish_session(doc)
+			continue
+		return doc
+	return None
 
 
 def get_session_by_pin(pin: str) -> "frappe.model.document.Document":
