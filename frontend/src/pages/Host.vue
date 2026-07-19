@@ -43,20 +43,52 @@
 			<div class="flex flex-1 flex-col justify-center gap-12 p-8">
 				<div class="flex flex-wrap items-center justify-center gap-14">
 					<div>
-						<p class="font-mono text-sm tracking-wide text-gold">
-							Join at {{ joinHost }}
-						</p>
+						<div class="flex items-center gap-2">
+							<p class="font-mono text-sm tracking-wide text-gold">
+								Join at {{ joinHost }}
+							</p>
+							<button
+								class="rounded-md p-1 text-paper/30 transition hover:bg-dusk hover:text-paper"
+								:title="copied ? 'Copied' : `Copy ${joinUrl}`"
+								:aria-label="`Copy ${joinUrl}`"
+								@click="copyJoinUrl"
+							>
+								<svg
+									class="size-4"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								>
+									<polyline v-if="copied" points="20 6 9 17 4 12" />
+									<template v-else>
+										<rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+										<path
+											d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+										/>
+									</template>
+								</svg>
+							</button>
+						</div>
 						<p class="mt-3 font-mono text-8xl font-bold tracking-[0.08em] text-paper">
 							{{ session.game_pin }}
 						</p>
 						<p class="mt-3 text-paper/45">or point a phone camera at the code</p>
 					</div>
-					<img
-						v-if="qrDataUrl"
-						:src="qrDataUrl"
-						alt="Join QR code"
-						class="h-48 w-48 rounded-2xl bg-paper p-2"
-					/>
+					<button v-if="qrDataUrl" class="group" @click="qrFullscreen = true">
+						<img
+							:src="qrDataUrl"
+							alt="Join QR code"
+							class="h-48 w-48 rounded-2xl bg-paper p-2 transition group-hover:scale-105"
+						/>
+						<span
+							class="mt-2 block font-mono text-[11px] uppercase tracking-wider text-paper/35 transition group-hover:text-paper/70"
+						>
+							Click to enlarge
+						</span>
+					</button>
 				</div>
 
 				<div class="flex flex-col items-center gap-5">
@@ -68,22 +100,27 @@
 						{{ participants.length === 1 ? "player" : "players" }} in
 					</p>
 					<div class="flex max-w-5xl flex-wrap justify-center gap-2.5">
-						<button
+						<!-- The chip itself is not the kick target: a full-name-sized button is
+						     too easy to hit by accident on a projector. -->
+						<div
 							v-for="participant in participants"
 							:key="participant.name"
-							class="group flex items-center gap-3 rounded-full border border-haze bg-dusk py-1 pl-1 pr-5 text-xl font-medium text-paper transition hover:border-ember"
-							title="Remove this player"
-							@click="kick(participant)"
+							class="group relative flex items-center gap-3 rounded-full border border-haze bg-dusk py-1 pl-1 pr-5 text-xl font-medium text-paper"
 						>
 							<AvatarPic
 								:id="participant.avatar"
 								:nickname="participant.nickname"
 								:size="44"
 							/>
-							<span class="group-hover:line-through">{{
-								participant.nickname
-							}}</span>
-						</button>
+							<span>{{ participant.nickname }}</span>
+							<button
+								class="absolute -right-1 -top-1 grid size-6 place-items-center rounded-full bg-haze text-sm leading-none text-paper opacity-0 transition hover:bg-ember hover:text-night focus-visible:opacity-100 group-hover:opacity-100"
+								:aria-label="`Remove ${participant.nickname}`"
+								@click="kick(participant)"
+							>
+								×
+							</button>
+						</div>
 					</div>
 					<p v-if="!participants.length" class="text-paper/35">
 						Waiting for the first player…
@@ -111,6 +148,22 @@
 				</div>
 				<p v-if="error" class="text-center text-ember">{{ error }}</p>
 			</div>
+
+			<dialog
+				ref="qrDialog"
+				class="qz-dialog max-h-none overflow-hidden border-0 bg-transparent p-0"
+				@cancel.prevent="qrFullscreen = false"
+				@click="qrFullscreen = false"
+			>
+				<img
+					:src="qrDataUrl"
+					alt="Join QR code"
+					class="size-[min(78vh,88vw)] rounded-3xl bg-paper p-4"
+				/>
+				<p class="mt-4 text-center font-mono text-2xl tracking-[0.08em] text-paper">
+					{{ session.game_pin }}
+				</p>
+			</dialog>
 		</template>
 
 		<!-- Podium -->
@@ -327,6 +380,7 @@
 import { computed, inject, onMounted, ref, watch } from "vue";
 import QRCode from "qrcode";
 import { call, readError } from "@/api";
+import { confirm } from "@/confirm";
 import { SHAPES, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 import DrainRing from "@/components/DrainRing.vue";
@@ -360,8 +414,13 @@ const top5 = ref([]);
 const streaks = ref([]);
 const leaderboard = ref([]);
 const qrDataUrl = ref("");
+const qrFullscreen = ref(false);
+const qrDialog = ref(null);
+const copied = ref(false);
 const starting = ref(false);
 const error = ref("");
+
+watch(qrFullscreen, (open) => (open ? qrDialog.value.showModal() : qrDialog.value.close()));
 
 const joinUrl = computed(
 	() => `${window.location.origin}/quizzly/join?pin=${session.value.game_pin}`
@@ -431,6 +490,42 @@ function onSessionEvent(message) {
 	}
 }
 
+// Level H redundancy is what buys the room to punch the logo over the middle.
+async function renderQr(url) {
+	const canvas = document.createElement("canvas");
+	await QRCode.toCanvas(canvas, url, {
+		margin: 1,
+		width: 800,
+		errorCorrectionLevel: "H",
+		color: { dark: "#16111F", light: "#F4F0FA" },
+	});
+	const logo = new Image();
+	logo.src = "/assets/quizzly/images/quizzly-logo.svg";
+	try {
+		await logo.decode();
+	} catch {
+		return canvas.toDataURL(); // a missing logo is not worth losing the code over
+	}
+	const badge = Math.round(canvas.width * 0.2);
+	const at = Math.round((canvas.width - badge) / 2);
+	const pad = Math.round(badge * 0.12);
+	const context = canvas.getContext("2d");
+	context.fillStyle = "#F4F0FA";
+	context.fillRect(at - pad, at - pad, badge + pad * 2, badge + pad * 2);
+	context.drawImage(logo, at, at, badge, badge);
+	return canvas.toDataURL();
+}
+
+async function copyJoinUrl() {
+	try {
+		await navigator.clipboard.writeText(joinUrl.value);
+		copied.value = true;
+		setTimeout(() => (copied.value = false), 1500);
+	} catch {
+		error.value = `Copy failed. The link is ${joinUrl.value}`;
+	}
+}
+
 async function applyState(state) {
 	session.value = { name: state.session, game_pin: state.game_pin };
 	localStorage.setItem(HOSTED_SESSION_KEY, state.session);
@@ -438,11 +533,7 @@ async function applyState(state) {
 	lobbyLocked.value = Boolean(state.lobby_locked);
 	autoAdvance.value = Boolean(state.auto_advance);
 	top5.value = state.top_5 || [];
-	qrDataUrl.value = await QRCode.toDataURL(joinUrl.value, {
-		margin: 1,
-		width: 400,
-		color: { dark: "#16111F", light: "#F4F0FA" },
-	});
+	qrDataUrl.value = await renderQr(joinUrl.value);
 
 	if (state.status === "Lobby") {
 		starting.value = false;
@@ -538,7 +629,11 @@ async function toggleAutoAdvance() {
 }
 
 async function kick(participant) {
-	if (!window.confirm(`Remove ${participant.nickname} from the game?`)) return;
+	const ok = await confirm(`Remove ${participant.nickname} from the game?`, {
+		action: "Remove",
+		danger: true,
+	});
+	if (!ok) return;
 	await hostCall("quizzly.api.kick_participant", { participant: participant.name });
 }
 
@@ -557,7 +652,8 @@ async function end() {
 	const prompt = inLobby
 		? "Close this lobby and pick another quiz?"
 		: `End the game for all ${players} ${players === 1 ? "player" : "players"}?`;
-	if (!window.confirm(prompt)) return;
+	if (!(await confirm(prompt, { action: inLobby ? "Close lobby" : "End game", danger: true })))
+		return;
 	// a cancelled lobby has no podium to land on, so the host goes back to the quiz list
 	if ((await hostCall("quizzly.api.end_session")) && inLobby) reset();
 }
