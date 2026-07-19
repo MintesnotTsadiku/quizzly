@@ -27,19 +27,24 @@ No other schema change. Images ride on the standard `File` doctype and are serve
 - `list_quizzes()` — quizzes owned by the host: name, title, question count.
 - `get_quiz(quiz)` — full quiz with questions for the editor.
 - `save_quiz(quiz, title, description, default_time_limit, questions)` — create when `quiz` is empty, else update. `questions` is a JSON list of rows in display order. Server replaces the child table wholesale, so reorder and delete are the same call.
-- `delete_quiz(quiz)` — refuses when a non-Cancelled `QZ Session` references it.
+- `delete_quiz(quiz)` — refuses when any `QZ Session` references it. Built as "any", not "non-Cancelled": the Link field blocks the delete either way, so a narrower rule would only produce a worse error message.
 
-Image upload reuses the framework's `/api/method/upload_file`, attached to the parent `QZ Quiz`, and the returned `file_url` is stored on the question row. No custom upload endpoint.
+Image upload reuses the framework's `/api/method/upload_file` through frappe-ui's `FileUploader`, and the returned `file_url` is stored on the question row. No custom upload endpoint. The file is not attached to the parent quiz, because a brand new quiz has no name yet when the host picks the picture.
 
 Ownership is enforced the same way as existing host APIs (`if_owner` on `QZ Quiz` plus an explicit owner check in the API), never trusting a client-supplied quiz name.
 
-## Validation (server-side, in the `QZ Quiz` controller)
+## Validation (server-side)
+
+In the `QZ Quiz` controller, so nothing can write a quiz the engine cannot play:
 
 - At least one question.
 - Each question: non-empty text, all four options non-empty, `correct_option` in 1..4.
+
+In `save_quiz`, because it is an authoring rule rather than an integrity one:
+
 - `time_limit` within 5..120 seconds, falling back to the quiz default when unset.
 
-Client mirrors these for fast feedback but the controller is the authority, so a rogue client cannot save a broken quiz.
+The range sits in the API and not the controller on purpose. The engine plays any window correctly, and both the test suite and a Desk-authored fixture use 1 to 2 second questions to keep runs fast; a controller-level range would have broken 26 existing tests to buy nothing. `save_quiz` is the only client path, so a rogue client still cannot save a 3600 second question.
 
 ## Question payload change
 
@@ -48,7 +53,7 @@ Client mirrors these for fast feedback but the controller is the authority, so a
 ## Screens
 
 - `/host/quizzes` — list, create button, edit and delete per row.
-- `/host/quizzes/:name` — question-by-question editor: text, image drop zone with preview and remove, four option inputs, correct-option radio, time limit, multiplier. Add, delete, and drag-reorder questions.
+- `/host/quizzes/:name` — question-by-question editor: text, image picker with preview and remove, four option inputs, correct-option radio, time limit, multiplier. Add, delete, and reorder questions. Reorder is a pair of up/down buttons, not drag: a drag library is a dependency, and a quiz is a handful of rows. Revisit when a host writes 30-question quizzes and starts moving a row across a screenful.
 - Existing `/host` quiz picker links out to the editor when the host has no quizzes yet.
 
 Image display rules: contained, max 40% of the question area's height on the host screen, above the options on the player screen. Never letterboxed or cropped, never pushing options below the fold on a phone.
