@@ -167,7 +167,7 @@ class TestSubmitGauntlet(GameTestCase):
 
 	def test_question_payload_never_contains_correct_answer(self):
 		question = self.questions[0]
-		payload = engine.question_payload(question, 0, 2, time.time() + 20)
+		payload = engine.question_payload(self.session_doc, question, 0, 2, time.time() + 20)
 		self.assertNotIn("correct", json.dumps(payload))
 
 	def test_get_state_mid_question_gives_remaining_time(self):
@@ -199,6 +199,7 @@ class TestGameLoop(GameTestCase):
 			patch("frappe.publish_realtime", side_effect=record),
 			patch("frappe.db.commit"),
 			patch.object(engine, "STATS_SECONDS", 0.25),
+			patch.object(engine, "GETREADY_SECONDS", 0.25),
 			patch.object(engine, "GRACE_SECONDS", 0.25),
 			patch.object(engine, "POLL_SECONDS", 0.05),
 		):
@@ -218,7 +219,18 @@ class TestGameLoop(GameTestCase):
 		events = self.run_loop(on_question=self.submit_scripted_answers)
 
 		types = [e["type"] for e in events if e["type"] != "answer_count"]
-		self.assertEqual(types, ["question", "question_closed", "question", "question_closed", "podium"])
+		self.assertEqual(
+			types,
+			[
+				"get_ready",
+				"question",
+				"question_closed",
+				"get_ready",
+				"question",
+				"question_closed",
+				"podium",
+			],
+		)
 		for event in events:
 			if event["type"] == "question":
 				self.assertNotIn("correct", json.dumps(event))

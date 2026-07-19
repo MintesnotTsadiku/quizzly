@@ -14,6 +14,7 @@ from frappe.utils import now_datetime
 
 GRACE_SECONDS = 1.0
 STATS_SECONDS = 5
+GETREADY_SECONDS = 3
 # ponytail: host gets 5 minutes to hit Next, then the game moves on by itself
 ADVANCE_WAIT_CAP = 300
 POLL_SECONDS = 0.25
@@ -24,7 +25,9 @@ STREAK_CALLOUT_MIN = 3
 def enqueue_game_loop(session_doc) -> None:
 	total_seconds = sum(question_window(q, session_doc) for q in get_quiz_questions(session_doc))
 	question_count = len(get_quiz_questions(session_doc))
-	per_question_overhead = STATS_SECONDS + (0 if session_doc.auto_advance else ADVANCE_WAIT_CAP)
+	per_question_overhead = (
+		GETREADY_SECONDS + STATS_SECONDS + (0 if session_doc.auto_advance else ADVANCE_WAIT_CAP)
+	)
 	timeout = int(total_seconds + question_count * (per_question_overhead + GRACE_SECONDS) + 60)
 	frappe.enqueue(
 		"quizzly.engine.run_game_loop",
@@ -46,6 +49,8 @@ def run_game_loop(session: str) -> None:
 	clear_control(session)
 
 	for index, question in enumerate(questions):
+		if get_ready(session_doc, question, index, total) == "end":
+			break
 		deadline_ts = open_question(session_doc, question, index, total)
 		control = wait_question_window(session, deadline_ts)
 		close_question(session_doc, question, index, total)
@@ -58,6 +63,40 @@ def run_game_loop(session: str) -> None:
 
 
 # Loop steps
+
+
+def get_ready(session_doc, question, index: int, total: int) -> str | None:
+	"""Read-the-question pause before the clock starts, Kahoot style."""
+	deadline_ts = time.time() + GETREADY_SECONDS
+	set_state(
+		session_doc.name,
+		{
+			"status": "get_ready",
+			"q_index": index,
+			"question_row": question.name,
+			"opened_at": time.time(),
+			"deadline_ts": deadline_ts,
+			"window_ms": question_window(question, session_doc) * 1000,
+			"total": total,
+		},
+		ttl=GETREADY_SECONDS + STATE_TTL_MARGIN,
+	)
+	publish_session_event(
+		session_doc,
+		{
+			"type": "get_ready",
+			"q_index": index,
+			"total": total,
+			"question_text": question.question_text,
+			"seconds": GETREADY_SECONDS,
+		},
+	)
+	frappe.db.commit()
+	while time.time() < deadline_ts:
+		if pop_control(session_doc.name, ("end",)):
+			return "end"
+		time.sleep(POLL_SECONDS)
+	return None
 
 
 def open_question(session_doc, question, index: int, total: int) -> float:
@@ -78,7 +117,7 @@ def open_question(session_doc, question, index: int, total: int) -> float:
 		ttl=window + STATE_TTL_MARGIN,
 	)
 	frappe.db.set_value("QZ Session", session_doc.name, "current_question", index)
-	publish_session_event(session_doc, question_payload(question, index, total, deadline_ts))
+	publish_session_event(session_doc, question_payload(session_doc, question, index, total, deadline_ts))
 	frappe.db.commit()
 	return deadline_ts
 
@@ -163,7 +202,9 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 def wait_before_next(session_doc) -> str | None:
 	"""Stats pause; then auto-advance, or wait (capped) for host next_question."""
 	waited = 0.0
-	cap = STATS_SECONDS if session_doc.auto_advance else STATS_SECONDS + ADVANCE_WAIT_CAP
+	# read fresh: the host can flip auto-advance mid-game
+	auto_advance = frappe.db.get_value("QZ Session", session_doc.name, "auto_advance")
+	cap = STATS_SECONDS if auto_advance else STATS_SECONDS + ADVANCE_WAIT_CAP
 	while waited < cap:
 		control = pop_control(session_doc.name, ("advance", "end"))
 		if control:
@@ -269,7 +310,7 @@ def answered_count(session: str, question_row: str) -> int:
 # Helpers
 
 
-def question_payload(question, index: int, total: int, deadline_ts: float) -> dict:
+def question_payload(session_doc, question, index: int, total: int, deadline_ts: float) -> dict:
 	"""Hand-built payload: correct_option must never ride along."""
 	return {
 		"type": "question",
@@ -279,6 +320,9 @@ def question_payload(question, index: int, total: int, deadline_ts: float) -> di
 		"question_text": question.question_text,
 		"options": [question.option_1, question.option_2, question.option_3, question.option_4],
 		"deadline_ts": deadline_ts,
+		# clients count down from this instead of deadline_ts, so client clock skew cannot matter
+		"window_ms": question_window(question, session_doc) * 1000,
+		"randomize_answer_order": int(session_doc.randomize_answer_order or 0),
 		"points_multiplier": int(question.points_multiplier or 1),
 	}
 
