@@ -24,6 +24,7 @@ Quizzly is a live multiplayer quiz application built on Frappe. Guests join a ga
 
 - use site is quizzly.localhost
 - use Administrator/admin as credentials.
+- Send me a Telegram Message using `tg_bot -h`, attach relevant screenshots related to the fix/feature.
 
 ## Planning / Spec-ing
 
