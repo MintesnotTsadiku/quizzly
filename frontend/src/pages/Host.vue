@@ -48,11 +48,28 @@
 								Join at {{ joinHost }}
 							</p>
 							<button
-								class="rounded-full border border-haze px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wider text-paper/45 transition hover:border-paper hover:text-paper"
-								:title="`Copy ${joinUrl}`"
+								class="rounded-md p-1 text-paper/30 transition hover:bg-dusk hover:text-paper"
+								:title="copied ? 'Copied' : `Copy ${joinUrl}`"
+								:aria-label="`Copy ${joinUrl}`"
 								@click="copyJoinUrl"
 							>
-								{{ copied ? "Copied" : "Copy link" }}
+								<svg
+									class="size-4"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								>
+									<polyline v-if="copied" points="20 6 9 17 4 12" />
+									<template v-else>
+										<rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+										<path
+											d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+										/>
+									</template>
+								</svg>
 							</button>
 						</div>
 						<p class="mt-3 font-mono text-8xl font-bold tracking-[0.08em] text-paper">
