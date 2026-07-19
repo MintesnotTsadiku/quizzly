@@ -3,7 +3,9 @@
 		<!-- A live game owns the projector; nav on it is something the room looks at instead of the PIN. -->
 		<template v-if="!session">
 			<HostBar />
-			<div class="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-8 p-5 sm:p-8">
+			<div
+				class="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-8 p-5 sm:p-8"
+			>
 				<div>
 					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">Host</p>
 					<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">
