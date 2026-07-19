@@ -1,5 +1,6 @@
 <template>
 	<div class="flex h-full flex-col overflow-y-auto bg-night">
+		<HostBar />
 		<div class="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 p-8">
 			<div class="flex items-end justify-between gap-4">
 				<div>
@@ -33,17 +34,14 @@
 				</div>
 			</div>
 			<p v-else-if="loaded" class="text-paper/50">No quizzes yet. Make your first one.</p>
-
-			<RouterLink class="font-mono text-xs text-paper/40 hover:text-paper" to="/host">
-				← Back to hosting
-			</RouterLink>
 		</div>
 	</div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue";
-import { call } from "@/api";
+import { call, readError } from "@/api";
+import HostBar from "@/components/HostBar.vue";
 
 const quizzes = ref([]);
 const loaded = ref(false);
@@ -56,7 +54,7 @@ async function load() {
 		quizzes.value = await call("quizzly.api.list_quizzes");
 		loaded.value = true;
 	} catch (e) {
-		error.value = "Could not load quizzes. Log in with a Quiz Host account first.";
+		error.value = readError(e);
 	}
 }
 
@@ -73,7 +71,7 @@ async function remove(quiz) {
 		error.value =
 			e.exc_type === "LinkExistsError"
 				? `"${quiz.title}" has been played, so it cannot be deleted.`
-				: e.messages?.[0] || e.message;
+				: readError(e);
 	}
 }
 </script>

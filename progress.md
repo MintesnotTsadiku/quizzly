@@ -1,5 +1,27 @@
 # Progress
 
+## Phase 6: Navigation (2026-07-19)
+
+Spec: `specs/phase-6-navigation.md`. Frontend only, no API and no doctype change.
+
+### Done
+
+- `components/HostBar.vue` on `/host`, `/host/quizzes`, `/host/quizzes/:name`: wordmark, Host/Quizzes links with the existing `data-on` active treatment, the logged-in user, and logout through the framework's own `logout` method. Rendered by the three screens rather than by a layout route, because `App.vue` is a bare `<router-view />` and turning it into a layout host would cost more than the three lines of markup it saves.
+- The bar is hidden the moment `/host` holds a live session. A lobby, question, or podium is what 40 people in a room look at, and nav on it competes with the PIN.
+- The per-screen back links it replaces are gone (`← Back to hosting`, `← All quizzes`), as is the picker's `Edit quizzes` link; the picker keeps a `New quiz` CTA only while the host has no quizzes.
+- `readError(e)` in `api.js` now backs every host screen's catch. A non-host used to get whatever the framework said, which names doctypes and permissions; the editor did not translate it at all.
+- `End game` names the cost: "End the game for all N players". A mid-game leave keeps the participant row on purpose (scores), so the count stays truthful after someone walks out.
+- Player `Leave` moved from the lobby and podium screens into the persistent header, so it exists during a question too. Hidden on the podium, where `Back to join` is already the primary action, and on `kicked`, where the header does not render.
+
+### Verified
+
+End to end on `quizzly.localhost`: host nav across all three screens with the active pill correct, bar gone the instant a game started and back after `New game`, a player leaving mid-question and landing on `/join`, logout landing on `/join`, and a logged-out `/host` bouncing to login with the redirect intact. 56 tests green, `pre-commit run --all-files` clean.
+
+### Deferred
+
+- **Session history nav.** `/host/history` is specced in phase 4b and unbuilt. It becomes one more link in the bar and nothing else, which is the point of having the bar in one component now.
+- **Mobile host bar.** Plain text links fit at 390px. Collapse it when a fourth or fifth link makes it wrap.
+
 ## Phase 4a: Content authoring (2026-07-19)
 
 Spec: `specs/phase-4a-content-authoring.md`. The last slice of phase 4, shipped after 4b/4c and phase 5. Removes the Desk-only authoring constraint: a host now writes and plays a quiz without leaving the SPA.

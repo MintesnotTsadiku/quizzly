@@ -1,0 +1,36 @@
+<template>
+	<header
+		class="flex shrink-0 flex-wrap items-center gap-x-5 gap-y-2 border-b border-haze px-6 py-3"
+	>
+		<RouterLink class="font-display text-lg font-extrabold text-paper" to="/host">
+			Quizzly
+		</RouterLink>
+		<nav class="flex items-center gap-2">
+			<RouterLink class="ctl" :data-on="isHosting" to="/host">Host</RouterLink>
+			<RouterLink class="ctl" :data-on="isAuthoring" to="/host/quizzes">Quizzes</RouterLink>
+		</nav>
+		<span class="ml-auto flex items-center gap-4">
+			<span class="truncate font-mono text-xs text-paper/40">{{ user }}</span>
+			<button class="font-mono text-xs text-paper/40 hover:text-paper" @click="logout">
+				Log out
+			</button>
+		</span>
+	</header>
+</template>
+
+<script setup>
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+import { call } from "@/api";
+
+const route = useRoute();
+const user = window.session_user;
+
+const isHosting = computed(() => route.path === "/host");
+const isAuthoring = computed(() => route.path.startsWith("/host/quizzes"));
+
+async function logout() {
+	await call("logout");
+	window.location.href = "/quizzly/join";
+}
+</script>

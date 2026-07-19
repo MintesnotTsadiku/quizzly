@@ -1,6 +1,8 @@
 <template>
 	<div class="flex h-full flex-col overflow-y-auto bg-night">
+		<!-- A live game owns the projector; nav on it is something the room looks at instead of the PIN. -->
 		<template v-if="!session">
+			<HostBar />
 			<div class="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-8 p-8">
 				<div>
 					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">Host</p>
@@ -28,8 +30,8 @@
 				<p v-else-if="loaded" class="text-paper/50">
 					No quizzes yet. Write your first one.
 				</p>
-				<RouterLink class="ctl self-start" to="/host/quizzes">
-					{{ quizzes.length ? "Edit quizzes" : "New quiz" }}
+				<RouterLink v-if="!quizzes.length" class="ctl self-start" to="/host/quizzes/new">
+					New quiz
 				</RouterLink>
 			</div>
 		</template>
@@ -321,10 +323,11 @@
 <script setup>
 import { computed, inject, onMounted, ref, watch } from "vue";
 import QRCode from "qrcode";
-import { call } from "@/api";
+import { call, readError } from "@/api";
 import { SHAPES, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 import DrainRing from "@/components/DrainRing.vue";
+import HostBar from "@/components/HostBar.vue";
 import { initSound, muted, playCue, toggleMute } from "@/sound";
 
 const PODIUM_FILL = { 1: "bg-gold", 2: "bg-lagoon", 3: "bg-orchid" };
@@ -491,7 +494,7 @@ onMounted(async () => {
 		quizzes.value = await call("quizzly.api.list_quizzes");
 		loaded.value = true;
 	} catch (e) {
-		error.value = "Could not load quizzes. Log into Desk with a Quiz Host account first.";
+		error.value = readError(e);
 	}
 });
 
@@ -502,7 +505,7 @@ async function createSession(quiz) {
 		await applyState(await call("quizzly.api.get_host_state", { session: created.session }));
 		useSessionRoom(socket, session.value.game_pin, onSessionEvent, refresh);
 	} catch (e) {
-		error.value = e.messages?.[0] || e.message;
+		error.value = readError(e);
 	}
 }
 
@@ -511,7 +514,7 @@ async function hostCall(method, params = {}) {
 	try {
 		return await call(method, { session: session.value.name, ...params });
 	} catch (e) {
-		error.value = e.messages?.[0] || e.message;
+		error.value = readError(e);
 		// the screen is out of step with the server (a missed event, a stale tab): repair it
 		await refresh().catch(() => {});
 	}
@@ -546,7 +549,11 @@ const next = () => hostCall("quizzly.api.next_question");
 const skip = () => hostCall("quizzly.api.skip_question");
 
 async function end() {
-	if (!window.confirm("End the game for everyone?")) return;
+	const players = participants.value.length;
+	if (
+		!window.confirm(`End the game for all ${players} ${players === 1 ? "player" : "players"}?`)
+	)
+		return;
 	await hostCall("quizzly.api.end_session");
 }
 
