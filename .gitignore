@@ -53,3 +53,8 @@ jspm_packages/
 
 # Aider AI Chat
 .aider*
+
+# SPA build output
+node_modules
+quizzly/public/frontend
+quizzly/www/quizzly.html
