@@ -1,1 +1,107 @@
 @import 'frappe-ui/style.css';
+
+:root {
+	color-scheme: dark;
+}
+
+html,
+body {
+	background-color: #16111f;
+	color: #f4f0fa;
+	font-family: 'Instrument Sans', system-ui, sans-serif;
+}
+
+/* Every focusable thing sits on a dark ground, so one bright ring works everywhere. */
+:where(button, a, input, [tabindex]):focus-visible {
+	outline: 3px solid #ffc43d;
+	outline-offset: 3px;
+}
+
+/* The signature: time drains out of a ring instead of sliding along a bar.
+   --p is percent remaining; the arc shrinks back to 12 o'clock as it runs out. */
+.drain-ring {
+	background: conic-gradient(
+		from -90deg,
+		var(--drain-color, #ff5a36) calc(var(--p) * 1%),
+		rgba(244, 240, 250, 0.08) 0
+	);
+	-webkit-mask: radial-gradient(
+		closest-side,
+		transparent calc(100% - var(--ring-w, 10px)),
+		#000 calc(100% - var(--ring-w, 10px))
+	);
+	mask: radial-gradient(
+		closest-side,
+		transparent calc(100% - var(--ring-w, 10px)),
+		#000 calc(100% - var(--ring-w, 10px))
+	);
+}
+
+.drain-ring[data-urgent='true'] {
+	animation: drain-pulse 1s ease-in-out infinite;
+}
+
+@keyframes drain-pulse {
+	50% {
+		opacity: 0.45;
+	}
+}
+
+/* Host controls: pill toggles that stay quiet so the game owns the screen. */
+.ctl {
+	border: 1px solid #3a2f4d;
+	border-radius: 999px;
+	padding: 0.5rem 1.1rem;
+	font-size: 0.875rem;
+	color: rgba(244, 240, 250, 0.7);
+	transition: 0.15s ease;
+}
+
+.ctl:hover:not(:disabled) {
+	border-color: #f4f0fa;
+	color: #f4f0fa;
+}
+
+.ctl[data-on='true'] {
+	background: #f4f0fa;
+	border-color: #f4f0fa;
+	color: #16111f;
+	font-weight: 600;
+}
+
+.ctl-go {
+	background: #ff5a36;
+	border-color: #ff5a36;
+	color: #16111f;
+	font-weight: 800;
+}
+
+.ctl-go:hover:not(:disabled) {
+	border-color: #ff5a36;
+	color: #16111f;
+	filter: brightness(1.1);
+}
+
+.ctl:disabled {
+	opacity: 0.35;
+}
+
+.podium-rise {
+	animation: podium-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes podium-rise {
+	from {
+		height: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}

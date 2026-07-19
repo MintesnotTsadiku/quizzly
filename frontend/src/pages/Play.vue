@@ -1,178 +1,209 @@
 <template>
-	<div class="flex h-full flex-col bg-surface-white">
+	<div class="flex h-full flex-col bg-night">
 		<header
 			v-if="player && phase !== 'kicked'"
-			class="flex items-center justify-between border-b border-outline-gray-1 px-4 py-2"
+			class="flex shrink-0 items-center justify-between gap-3 border-b border-haze px-4 py-2.5"
 		>
-			<span class="flex min-w-0 items-center gap-2">
-				<AvatarPic :id="player.avatar" :nickname="player.nickname" :size="32" />
-				<span class="truncate text-base font-semibold text-ink-gray-8">{{
-					player.nickname
-				}}</span>
+			<span class="flex min-w-0 items-center gap-2.5">
+				<AvatarPic :id="player.avatar" :nickname="player.nickname" :size="30" />
+				<span class="truncate font-display text-base font-bold text-paper">
+					{{ player.nickname }}
+				</span>
 			</span>
-			<span class="flex items-center gap-2">
+			<span class="flex items-center gap-3">
 				<button
 					type="button"
-					class="text-lg leading-none text-ink-gray-6 hover:text-ink-gray-9"
-					:aria-label="muted ? 'Unmute sound' : 'Mute sound'"
+					class="text-lg leading-none opacity-60 transition hover:opacity-100"
+					:aria-label="muted ? 'Turn sound on' : 'Turn sound off'"
 					@click="toggleMute"
 				>
 					{{ muted ? "🔇" : "🔊" }}
 				</button>
-				<span
-					class="rounded-full bg-surface-gray-3 px-3 py-1 text-sm font-bold text-ink-gray-8"
-				>
-					{{ score }}
-				</span>
+				<span class="font-mono text-sm font-bold tabular-nums text-gold">{{ score }}</span>
 			</span>
 		</header>
 
-		<main class="flex flex-1 flex-col items-center justify-center gap-6 p-4 text-center">
-			<template v-if="phase === 'kicked'">
-				<p class="text-2xl font-bold text-ink-gray-8">
-					The host removed you from the game.
-				</p>
-				<Button variant="solid" size="lg" @click="router.replace('/join')"
-					>Back to join</Button
+		<template v-if="phase === 'question'">
+			<div class="flex shrink-0 items-center gap-4 px-4 py-4">
+				<DrainRing
+					:percent="timerPercent"
+					:seconds="Math.ceil(remaining)"
+					:size="56"
+					:color="urgentColor"
+				/>
+				<div class="min-w-0">
+					<p class="font-mono text-[10px] uppercase tracking-[0.22em] text-paper/40">
+						Question {{ qIndex + 1 }} of {{ total }}
+					</p>
+					<h1 class="mt-1 font-display text-lg font-bold leading-snug text-paper">
+						{{ question.question_text }}
+					</h1>
+				</div>
+			</div>
+			<div class="grid flex-1 grid-cols-2 grid-rows-2 gap-2 p-2">
+				<button
+					v-for="optionId in orderedOptions"
+					:key="optionId"
+					class="flex flex-col items-start justify-between rounded-2xl p-4 text-left transition active:scale-[0.97]"
+					:class="[shapeFor(optionId).fill, shapeFor(optionId).hover]"
+					@click="answer(optionId)"
 				>
+					<svg class="h-9 w-9 fill-night/55" viewBox="0 0 24 24">
+						<path :d="shapeFor(optionId).path" />
+					</svg>
+					<span class="font-display text-xl font-extrabold leading-tight text-night">
+						{{ question.options[Number(optionId) - 1] }}
+					</span>
+				</button>
+			</div>
+			<p v-if="error" class="px-4 pb-3 text-center text-sm text-ember">{{ error }}</p>
+		</template>
+
+		<main
+			v-else
+			class="flex flex-1 flex-col items-center justify-center gap-5 p-6 text-center"
+		>
+			<template v-if="phase === 'kicked'">
+				<h1 class="font-display text-3xl font-extrabold text-paper">
+					The host removed you
+				</h1>
+				<p class="text-paper/50">You can join again with the PIN.</p>
+				<button
+					class="rounded-2xl bg-ember px-7 py-3 font-display text-lg font-extrabold text-night"
+					@click="router.replace('/join')"
+				>
+					Back to join
+				</button>
 			</template>
 
 			<template v-else-if="phase === 'lobby'">
-				<p class="text-sm uppercase tracking-widest text-ink-gray-5">
+				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">
 					PIN {{ player.pin }}
 				</p>
-				<h1 class="text-4xl font-black text-ink-gray-9">You're in!</h1>
-				<p class="text-ink-gray-6">
-					See your name on the big screen. Waiting for the host…
+				<h1 class="font-display text-5xl font-extrabold text-paper">You're in</h1>
+				<p class="max-w-xs text-paper/50">
+					Find your name on the big screen. The host starts when everyone's here.
 				</p>
-				<p class="text-sm text-ink-gray-5">{{ participants.length }} in the lobby</p>
-				<Button variant="outline" @click="leave">Leave game</Button>
+				<p class="font-mono text-sm tabular-nums text-paper/40">
+					{{ participants.length }} in the lobby
+				</p>
+				<button
+					class="mt-2 rounded-full border border-haze px-5 py-2 text-sm text-paper/60 transition hover:border-ember hover:text-ember"
+					@click="leave"
+				>
+					Leave game
+				</button>
 			</template>
 
 			<template v-else-if="phase === 'get_ready'">
-				<p class="text-sm uppercase tracking-widest text-ink-gray-5">
+				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-paper/40">
 					Question {{ (qIndex ?? 0) + 1 }} of {{ total }}
 				</p>
-				<h1 class="max-w-xl text-2xl font-bold text-ink-gray-9">{{ questionText }}</h1>
-				<div
-					class="flex h-24 w-24 items-center justify-center rounded-full bg-surface-gray-3 text-5xl font-black text-ink-gray-9"
-				>
-					{{ Math.ceil(remaining) }}
-				</div>
-				<p class="text-ink-gray-6">Get ready…</p>
-			</template>
-
-			<template v-else-if="phase === 'question'">
-				<div class="w-full max-w-2xl">
-					<div class="mb-2 flex items-baseline justify-between text-sm text-ink-gray-5">
-						<span>Question {{ qIndex + 1 }} of {{ total }}</span>
-						<span class="font-bold text-ink-gray-8">{{ Math.ceil(remaining) }}s</span>
-					</div>
-					<div class="h-2 w-full overflow-hidden rounded-full bg-surface-gray-3">
-						<div
-							class="h-full rounded-full bg-surface-gray-7 transition-[width] duration-100 ease-linear"
-							:style="{ width: `${timerPercent}%` }"
-						/>
-					</div>
-				</div>
-				<h1 class="max-w-2xl text-2xl font-bold text-ink-gray-9">
-					{{ question.question_text }}
+				<h1 class="max-w-md font-display text-2xl font-bold leading-snug text-paper">
+					{{ questionText }}
 				</h1>
-				<div class="grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
-					<button
-						v-for="optionId in orderedOptions"
-						:key="optionId"
-						class="flex items-center gap-3 rounded-xl p-4 text-left text-lg font-bold text-white shadow-sm transition active:scale-95"
-						:class="[shapeFor(optionId).fill, shapeFor(optionId).hover]"
-						@click="answer(optionId)"
-					>
-						<svg class="h-7 w-7 shrink-0 fill-white" viewBox="0 0 24 24">
-							<path :d="shapeFor(optionId).path" />
-						</svg>
-						<span>{{ question.options[Number(optionId) - 1] }}</span>
-					</button>
-				</div>
-				<ErrorMessage :message="error" />
+				<DrainRing
+					:percent="timerPercent"
+					:seconds="Math.ceil(remaining)"
+					:size="132"
+					color="#FFC43D"
+				/>
+				<p class="text-paper/50">Read it. Answers land in a second.</p>
 			</template>
 
 			<template v-else-if="phase === 'locked'">
 				<svg
 					v-if="selected"
-					class="h-24 w-24"
+					class="h-28 w-28"
 					:class="shapeFor(selected).svgFill"
 					viewBox="0 0 24 24"
 				>
 					<path :d="shapeFor(selected).path" />
 				</svg>
-				<h1 class="text-3xl font-black text-ink-gray-9">Locked in!</h1>
-				<p class="text-ink-gray-6">Look up at the big screen.</p>
+				<h1 class="font-display text-4xl font-extrabold text-paper">Locked in</h1>
+				<p class="text-paper/50">Look up at the big screen.</p>
 			</template>
 
 			<template v-else-if="phase === 'result'">
 				<div
-					class="flex h-24 w-24 items-center justify-center rounded-full text-5xl text-white"
-					:class="result.is_correct ? 'bg-green-600' : 'bg-red-500'"
+					class="grid h-24 w-24 place-items-center rounded-full text-5xl text-night"
+					:class="result.is_correct ? 'bg-lagoon' : 'bg-ember'"
 				>
 					{{ result.is_correct ? "✓" : "✕" }}
 				</div>
-				<h1 class="text-3xl font-black text-ink-gray-9">
-					{{ result.is_correct ? "Correct!" : result.answered ? "Wrong" : "No answer" }}
+				<h1 class="font-display text-4xl font-extrabold text-paper">
+					{{ result.is_correct ? "Correct" : result.answered ? "Wrong" : "No answer" }}
 				</h1>
-				<p v-if="result.points" class="text-2xl font-bold text-ink-green-3">
+				<p v-if="result.points" class="font-mono text-2xl font-bold text-gold">
 					+{{ result.points }}
 				</p>
-				<p v-if="result.streak > 1" class="text-ink-gray-6">
-					{{ result.streak }} answer streak 🔥
+				<p v-if="result.streak > 1" class="text-paper/60">
+					{{ result.streak }} in a row 🔥
 				</p>
-				<p class="text-ink-gray-6">Rank {{ result.rank }} · {{ result.score }} points</p>
-				<ul class="w-full max-w-xs text-left">
+				<p class="font-mono text-xs uppercase tracking-[0.2em] text-paper/40">
+					Rank {{ result.rank }} · {{ result.score }} pts
+				</p>
+				<ul class="mt-2 w-full max-w-xs text-left">
 					<li
 						v-for="(entry, index) in result.top_5"
 						:key="entry.nickname"
-						class="flex items-center justify-between border-b border-outline-gray-1 py-1 text-sm"
+						class="flex items-center justify-between border-b border-haze py-2 text-sm"
 						:class="
 							entry.nickname === player.nickname
-								? 'font-bold text-ink-gray-9'
-								: 'text-ink-gray-6'
+								? 'font-bold text-gold'
+								: 'text-paper/60'
 						"
 					>
 						<span class="flex items-center gap-2">
-							<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="24" />
-							{{ index + 1 }}. {{ entry.nickname }}
+							<span class="w-4 font-mono text-xs tabular-nums opacity-60">{{
+								index + 1
+							}}</span>
+							<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="22" />
+							{{ entry.nickname }}
 						</span>
-						<span>{{ entry.score }}</span>
+						<span class="font-mono tabular-nums">{{ entry.score }}</span>
 					</li>
 				</ul>
 			</template>
 
 			<template v-else-if="phase === 'podium'">
-				<h1 class="text-4xl font-black text-ink-gray-9">
-					{{ myRank === 1 ? "You won! 🏆" : `You finished #${myRank}` }}
+				<h1 class="font-display text-5xl font-extrabold text-paper">
+					{{ myRank === 1 ? "You won" : `You finished #${myRank}` }}
 				</h1>
-				<p class="text-2xl font-bold text-ink-gray-8">{{ score }} points</p>
-				<ul class="w-full max-w-xs text-left">
+				<p class="font-mono text-2xl font-bold text-gold">{{ score }} pts</p>
+				<ul class="mt-2 w-full max-w-xs text-left">
 					<li
 						v-for="entry in leaderboard.slice(0, 5)"
 						:key="entry.nickname"
-						class="flex items-center justify-between border-b border-outline-gray-1 py-1"
+						class="flex items-center justify-between border-b border-haze py-2"
 						:class="
 							entry.nickname === player.nickname
-								? 'font-bold text-ink-gray-9'
-								: 'text-ink-gray-6'
+								? 'font-bold text-gold'
+								: 'text-paper/60'
 						"
 					>
 						<span class="flex items-center gap-2">
-							<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="24" />
-							{{ entry.rank }}. {{ entry.nickname }}
+							<span class="w-4 font-mono text-xs tabular-nums opacity-60">{{
+								entry.rank
+							}}</span>
+							<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="22" />
+							{{ entry.nickname }}
 						</span>
-						<span>{{ entry.score }}</span>
+						<span class="font-mono tabular-nums">{{ entry.score }}</span>
 					</li>
 				</ul>
-				<Button variant="outline" @click="playAgain">Back to join</Button>
+				<button
+					class="mt-3 rounded-full border border-haze px-5 py-2 text-sm text-paper/60 transition hover:border-ember hover:text-ember"
+					@click="playAgain"
+				>
+					Back to join
+				</button>
 			</template>
 
 			<template v-else>
-				<p class="text-lg text-ink-gray-6">Hang tight…</p>
+				<p class="font-mono text-sm uppercase tracking-[0.22em] text-paper/40">
+					Hang tight
+				</p>
 			</template>
 		</main>
 	</div>
@@ -181,11 +212,11 @@
 <script setup>
 import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { Button, ErrorMessage } from "frappe-ui";
 import { call } from "@/api";
 import { clearPlayer, loadPlayer } from "@/player";
 import { optionOrder, shapeFor, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
+import DrainRing from "@/components/DrainRing.vue";
 import { initSound, muted, playCue, toggleMute } from "@/sound";
 
 const router = useRouter();
@@ -221,6 +252,8 @@ watch(
 const timerPercent = computed(() =>
 	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
 );
+
+const urgentColor = computed(() => (remaining.value <= 5 ? "#FF5A36" : "#17B0BE"));
 
 const orderedOptions = computed(() =>
 	question.value ? optionOrder(question.value, player.value.token) : []

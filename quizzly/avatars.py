@@ -8,7 +8,7 @@ avatars is a manifest change, never a code change.
 
 import json
 import zlib
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 
 import frappe
@@ -22,7 +22,7 @@ def get_active_pack() -> dict:
 	return load_pack(frappe.conf.get("quizzly_avatar_pack") or DEFAULT_PACK)
 
 
-@lru_cache(maxsize=None)
+@cache
 def load_pack(pack_id: str) -> dict:
 	manifest = PACKS_DIR / f"{pack_id}.json"
 	if not manifest.is_file():
