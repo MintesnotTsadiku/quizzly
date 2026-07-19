@@ -1,14 +1,14 @@
-import json
-
 import frappe
+from frappe.client import delete, save
 from frappe.tests import IntegrationTestCase
 
 from quizzly import engine
-from quizzly.api import create_session, delete_quiz, get_quiz, list_quizzes, save_quiz
+from quizzly.api import create_session, list_quizzes
 
 
 def question(text="2 + 2?", **overrides) -> dict:
 	row = {
+		"doctype": "QZ Question",
 		"question_text": text,
 		"option_1": "3",
 		"option_2": "4",
@@ -20,54 +20,56 @@ def question(text="2 + 2?", **overrides) -> dict:
 	return row
 
 
+def quiz_doc(questions, base=None) -> dict:
+	"""The editor sends back the doc it loaded, with the questions rebuilt in display order."""
+	return {**(base or {}), "doctype": "QZ Quiz", "title": "Authored Quiz", "questions": questions}
+
+
 class TestQuizAuthoring(IntegrationTestCase):
+	"""The editor saves through frappe.client.*, so these cover what Quizzly adds to that path:
+	the controller's content rules, the question count, and the image on the payload."""
+
 	def setUp(self):
 		frappe.set_user("Administrator")
 
-	def save(self, questions, quiz=None, title="Authored Quiz"):
-		return save_quiz(title=title, questions=json.dumps(questions), quiz=quiz)["quiz"]
+	def test_reorder_survives_a_client_save(self):
+		saved = save(quiz_doc([question("First"), question("Second"), question("Third")]))
 
-	def test_create_reorder_and_delete_rows(self):
-		name = self.save([question("First"), question("Second"), question("Third")])
-
-		loaded = get_quiz(name)
-		self.assertEqual([row["question_text"] for row in loaded["questions"]], ["First", "Second", "Third"])
-		self.assertIn(name, [quiz["name"] for quiz in list_quizzes()])
-		self.assertEqual(next(q for q in list_quizzes() if q["name"] == name)["question_count"], 3)
-
-		self.save([question("Third"), question("First")], quiz=name)
+		reordered = save(quiz_doc([question("Third"), question("First")], base=saved))
 
 		rows = frappe.get_all(
-			"QZ Question", filters={"parent": name}, fields=["question_text"], order_by="idx asc"
+			"QZ Question",
+			filters={"parent": reordered["name"]},
+			fields=["question_text"],
+			order_by="idx asc",
 		)
 		self.assertEqual([row.question_text for row in rows], ["Third", "First"])
 
-	def test_validation_rejects_broken_quizzes(self):
+	def test_controller_rejects_broken_quizzes(self):
 		with self.assertRaises(frappe.ValidationError):
-			self.save([])
+			save(quiz_doc([]))
 		with self.assertRaises(frappe.ValidationError):
-			self.save([question(option_2="  ")])
+			save(quiz_doc([question(option_2="  ")]))
 		with self.assertRaises(frappe.ValidationError):
-			self.save([question(correct_option="7")])
-		with self.assertRaises(frappe.ValidationError):
-			self.save([question(time_limit=300)])
+			save(quiz_doc([question(correct_option="7")]))
+
+	def test_list_quizzes_counts_questions(self):
+		saved = save(quiz_doc([question("First"), question("Second")]))
+
+		listed = next(quiz for quiz in list_quizzes() if quiz["name"] == saved["name"])
+
+		self.assertEqual(listed["question_count"], 2)
 
 	def test_delete_refuses_while_a_session_references_the_quiz(self):
-		name = self.save([question()])
-		create_session(name)
+		saved = save(quiz_doc([question()]))
+		create_session(saved["name"])
 
-		with self.assertRaises(frappe.ValidationError):
-			delete_quiz(name)
-
-	def test_delete_removes_an_unplayed_quiz(self):
-		name = self.save([question()])
-		delete_quiz(name)
-
-		self.assertFalse(frappe.db.exists("QZ Quiz", name))
+		with self.assertRaises(frappe.LinkExistsError):
+			delete("QZ Quiz", saved["name"])
 
 	def test_image_rides_along_on_the_question_payload(self):
-		name = self.save([question(image="/files/cat.png"), question("No picture")])
-		session = frappe.get_doc("QZ Session", create_session(name)["session"])
+		saved = save(quiz_doc([question(image="/files/cat.png"), question("No picture")]))
+		session = frappe.get_doc("QZ Session", create_session(saved["name"])["session"])
 		questions = engine.get_quiz_questions(session)
 
 		payloads = [engine.question_payload(session, q, 0, 2, 0.0) for q in questions]
