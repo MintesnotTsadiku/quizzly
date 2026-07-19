@@ -20,6 +20,14 @@
 					{{ muted ? "🔇" : "🔊" }}
 				</button>
 				<span class="font-mono text-sm font-bold tabular-nums text-gold">{{ score }}</span>
+				<button
+					v-if="phase !== 'podium'"
+					type="button"
+					class="rounded-full border border-haze px-3 py-1 text-xs text-paper/50 transition hover:border-ember hover:text-ember"
+					@click="leave"
+				>
+					Leave
+				</button>
 			</span>
 		</header>
 
@@ -93,12 +101,6 @@
 				<p class="font-mono text-sm tabular-nums text-paper/40">
 					{{ participants.length }} in the lobby
 				</p>
-				<button
-					class="mt-2 rounded-full border border-haze px-5 py-2 text-sm text-paper/60 transition hover:border-ember hover:text-ember"
-					@click="leave"
-				>
-					Leave game
-				</button>
 			</template>
 
 			<template v-else-if="phase === 'get_ready'">

@@ -1,5 +1,6 @@
 <template>
 	<div class="flex h-full flex-col overflow-y-auto bg-night">
+		<HostBar />
 		<div class="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
 			<div class="flex items-end justify-between gap-4">
 				<div class="min-w-0 flex-1">
@@ -151,12 +152,6 @@
 
 			<div class="flex items-center gap-3">
 				<button class="ctl" @click="questions.push(blankQuestion())">Add question</button>
-				<RouterLink
-					class="font-mono text-xs text-paper/40 hover:text-paper"
-					to="/host/quizzes"
-				>
-					← All quizzes
-				</RouterLink>
 			</div>
 		</div>
 	</div>
@@ -166,8 +161,9 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { FileUploader } from "frappe-ui";
-import { call } from "@/api";
+import { call, readError } from "@/api";
 import { SHAPES } from "@/game";
+import HostBar from "@/components/HostBar.vue";
 
 const QUESTION_FIELDS = [
 	"question_text",
@@ -223,7 +219,7 @@ onMounted(async () => {
 		}));
 		saved.value = true;
 	} catch (e) {
-		error.value = e.messages?.[0] || e.message;
+		error.value = readError(e);
 	}
 });
 
@@ -271,7 +267,7 @@ async function save() {
 		if (!quizName.value) router.replace(`/host/quizzes/${savedDoc.name}`);
 		quizName.value = savedDoc.name;
 	} catch (e) {
-		error.value = e.messages?.[0] || e.message;
+		error.value = readError(e);
 	} finally {
 		saving.value = false;
 	}
