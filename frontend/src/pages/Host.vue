@@ -98,7 +98,7 @@
 					<button class="ctl" @click="toggleMute">
 						{{ muted ? "Sound off" : "Sound on" }}
 					</button>
-					<button class="ctl" @click="end">End game</button>
+					<button class="ctl" @click="end">Exit</button>
 					<button
 						class="ctl ctl-go"
 						:disabled="starting || !participants.length"

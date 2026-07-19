@@ -12,7 +12,7 @@
 		<span class="ml-auto flex items-center gap-4">
 			<span class="hidden truncate font-mono text-xs text-paper/40 sm:inline">{{ user }}</span>
 			<button class="font-mono text-xs text-paper/40 hover:text-paper" @click="logout">
-				Log out
+				Logout
 			</button>
 		</span>
 	</header>
