@@ -1,5 +1,25 @@
 # Progress
 
+## Phase 2: Game Engine (2026-07-19)
+
+### Done
+
+- `quizzly/engine.py`: RQ game loop (`queue="long"`, `job_id=qz_session_{name}`, `deduplicate`, timeout sized to quiz length). Per question: Redis state write, `question` publish (no correct answer, server `deadline_ts`), sleep-with-poll until deadline + 1s grace, close, score, `question_closed` publish (correct option, distribution, top-5, streak callouts >= 3), then auto-advance after 5s stats or wait for host (capped at 5 min, then advances anyway). After last question: ranks persisted, `podium` published, status Ended, Redis state cleared.
+- Redis keys per spec: `qz:{session}:state` (dict, TTL window+30s), `qz:{session}:answered:{question_row}` (set, duplicate pre-check), plus `qz:{session}:control` for host commands (`skip`/`advance`/`end`) polled by the loop. Host controls never touch the loop process directly; the flag survives web/worker process boundary.
+- Scoring: Kahoot formula, `response_ms` clamped to window so grace submits floor at 500 base. Streak bonus capped at 250, multiplier 0/1/2. Non-answerers get streak reset at close.
+- APIs: host `start_session` (Lobby -> Active, enqueue loop, rejects empty lobby), `next_question`, `skip_question`, `end_session` (Lobby -> Cancelled, Active -> control flag). Guest `submit_answer` (full gauntlet in spec order, returns only `{"ok": true}`, publishes `answer_count`) and `get_state` (reconnect: phase, question sans answer, `remaining_seconds`, own score/answered). Both token-scoped rate-limited.
+- Tests: 19 in `tests/test_engine.py`, all green. Whole spec checklist covered: late/duplicate/wrong-question/kicked rejection, DB unique constraint as final word (Redis pre-check bypassed), scoring boundaries + streak reset + multipliers, no `correct` substring in any pre-close payload, reconnect remaining time, full loop to podium with scripted answers.
+
+### Exit criteria verified
+
+Full game played start to podium over HTTP against the live site with the real RQ worker (2 players, 2 questions): questions arrived with correct remaining time, correct answer absent from payloads, duplicate submits got 417, scores/streaks/ranks persisted exactly per formula (checked in DB: 946 + 1982 = 2928, streak 2, rank 1), session Ended with podium event.
+
+### Notes
+
+- Loop commits after each publish so `after_commit` realtime events flush from the worker; submits land in separate web transactions and are visible at close.
+- `wait_before_next` accepts host `advance` even during the 5s stats pause; auto-advance mode ignores stray flags.
+- Host game-screen state API deliberately deferred to phase 3 (spec lists only guest `get_state`); host reconnect currently rides on the socket events.
+
 ## Phase 1: Content + Session Shell (2026-07-19)
 
 ### Done
