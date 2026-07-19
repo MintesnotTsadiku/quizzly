@@ -1,5 +1,32 @@
 # Progress
 
+## Phase 4a: Content authoring (2026-07-19)
+
+Spec: `specs/phase-4a-content-authoring.md`. The last slice of phase 4, shipped after 4b/4c and phase 5. Removes the Desk-only authoring constraint: a host now writes and plays a quiz without leaving the SPA.
+
+### Done
+
+- `QZ Question.image` (Attach Image). `question_payload` carries `image_url`, null when absent, so an image-free quiz publishes exactly what it published before. Rendered contained above the answer grid on both screens: 40vh on the projector, 26vh on the phone, so options never leave the fold.
+- Four host APIs: `list_quizzes`, `get_quiz`, `save_quiz`, `delete_quiz`. `save_quiz` takes the whole question list in display order and replaces the child table, which makes reorder, edit, and delete one call and one code path. Ownership goes through `get_own_quiz`, never a client-supplied name.
+- Validation split by kind. The `QZ Quiz` controller owns integrity (at least one question, non-blank text and options, `correct_option` in 1..4) so nothing can write a quiz the engine cannot play. `save_quiz` owns the 5..120 second range, because it is an authoring rule: engine tests and Desk fixtures use 1 to 2 second questions on purpose, and putting the range in the controller broke 26 of them for no gain.
+- `/host/quizzes` (list, create, delete) and `/host/quizzes/:name` (editor). Options are edited inside the four game-coloured pills with the correct-option radio in place, so the author sees the player's screen while writing. Image upload is frappe-ui's `FileUploader` against the framework's `upload_file`, no custom endpoint.
+- The `/host` quiz picker now reads `list_quizzes` instead of `frappe.client.get_list` and links to the editor.
+- Tests: 5 in `tests/test_authoring.py` (round-trip and reorder through `idx`, validation rejections, delete refused while a session references the quiz, `image_url` present and null). 56 green across the app.
+
+### Exit criteria verified
+
+Quiz written entirely in the SPA (two questions, a checkerboard PNG uploaded onto the first), then hosted and played to podium with a real guest in a second browser: image on both host and player question screens, answers scored (1379), podium reached. Desk never opened. The image-free question rendered identically to before. `pre-commit run --all-files` clean.
+
+### Fixed while testing
+
+- The editor showed `0` in an unset time-limit field, because an unset Frappe Int reads back as 0. It now loads as empty and shows the quiz default as the placeholder.
+- Native radios inside the coloured answer pills rendered as a white disc with a blue dot: frappe-ui's stylesheet fills inputs, and `accent-color` alone could not fix the ground. They are `appearance-none` circles drawn from the border now.
+
+### Deferred
+
+- **Drag-reorder.** Up/down buttons instead, no dependency. Build drag when a host writes ~30-question quizzes and moving a row means crossing a screenful.
+- **Uploaded images are not attached to the parent quiz**, because a new quiz has no name yet when the picture is picked. They are ordinary public `File` rows, so a removed image leaves a file behind. Attach them (and clean up) when the file list gets noisy.
+
 ## Phase 5: Visual identity (2026-07-19)
 
 Spec: `specs/phase-5-visual-identity.md`. Engine untouched; CSS, markup, and one new component.
