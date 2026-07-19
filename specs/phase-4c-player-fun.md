@@ -14,9 +14,41 @@ Joining and playing feel like a game rather than a form. No engine changes: scor
 
 ## Avatars
 
-Generated, not uploaded. A fixed set of emoji-style avatars rendered client-side from a seed, so there is no file storage, no moderation problem, and no upload endpoint.
+Picked from a pack, never uploaded. No file storage from users, no moderation problem, no upload endpoint.
 
-- `QZ Participant.avatar` — Data, stores the chosen avatar id (e.g. `fox`), validated in the controller against the known set. An unknown id is rejected rather than silently defaulted, because it would otherwise render as a blank on the host screen.
+### Pack system
+
+The pack is the unit of configuration: swapping art style, editing the roster, or adding avatars must never require a code change.
+
+A pack is one JSON manifest in `quizzly/avatars/packs/<pack>.json`:
+
+```json
+{
+  "id": "notionists",
+  "name": "Notionists",
+  "kind": "dicebear",
+  "style": "notionists",
+  "license": "CC0 1.0",
+  "attribution": null,
+  "avatars": ["fox", "otter", "..."]
+}
+```
+
+- Active pack from `site_config.quizzly_avatar_pack`, defaulting to the shipped one. One setting, no DocType, because this changes roughly never.
+- `avatars` is the ordered roster the picker renders and the server validates against. Adding an avatar is one line in the manifest.
+- `kind: "dicebear"` packs are pre-rendered to static SVG by `yarn build:avatars`, output committed under `quizzly/public/avatars/<pack>/<id>.svg`. `kind: "static"` packs skip the script and just ship an image folder, which is how a bought 3D pack drops in later.
+
+Pre-rendering, rather than generating in the browser, keeps the DiceBear libraries out of the runtime bundle entirely and makes both pack kinds identical at runtime: an id resolves to an `<img>` URL.
+
+Python owns the manifest and hands it to the SPA through the existing `www/quizzly.py` boot context, so there is a single source of truth and no extra request on the join path.
+
+### Default pack
+
+DiceBear `notionists`, CC0 1.0, no attribution required. 2D vector rather than the 3D-render reference look, which is a commercial category with no free equivalent. At the sizes avatars actually render here (48px in the host grid, 32px in the play header) the difference is close to invisible, and the pack system makes a later swap a one-setting change.
+
+### Model and payloads
+
+- `QZ Participant.avatar` — Data, stores the chosen avatar id, validated in the controller against the active pack roster. An unknown id is rejected rather than silently defaulted, because it would otherwise render as a blank on the host screen.
 - `join_session` accepts an optional `avatar`, defaulting to one derived from the nickname hash so an old client still gets something reasonable.
 - `lobby_update`, leaderboard, and podium payloads carry `avatar` alongside `nickname`.
 
@@ -28,8 +60,10 @@ Server behaviour is unchanged: `join_session` still validates and still rejects 
 
 ## Sound
 
-- Assets in `frontend/src/assets/sound/`, short and small, preloaded on the join screen.
-- Cues: lobby loop (host screen only), 5-second countdown tick, answer-submitted blip, correct and wrong stings, podium fanfare.
+Synthesised with the Web Audio API, not shipped as audio files. The cues needed here are short tones, so an oscillator covers them in a few lines with no binary assets, no licensing question, and nothing to preload.
+
+- Cues: 5-second countdown tick, answer-submitted blip, correct and wrong stings, podium arpeggio.
+- Lobby background music is out of scope: a listenable loop is a real composition, not a synth line, so it waits for an actual asset.
 - Mute toggle on both host and player, persisted in localStorage, defaulting to **on for host, off for player**. Phones in a classroom all unmuting at once is a bad time.
 - Audio starts only after a user gesture, satisfying browser autoplay policy: the join tap and the host start tap both count.
 
@@ -43,6 +77,7 @@ Server behaviour is unchanged: `join_session` still validates and still rejects 
 
 - `join_session` with a valid avatar stores it; with an unknown avatar id it errors; with none it derives a stable one from the nickname.
 - Lobby and leaderboard payloads carry `avatar`.
+- Every id in the active pack manifest has a rendered file on disk, which is the check that catches a manifest edited without re-running the build script.
 - Nickname generator output passes the profanity filter for the entire word list (a loop over the list, cheap and it catches a bad word slipping into the file later).
 
 ## Exit criteria
