@@ -350,6 +350,7 @@ def question_payload(session_doc, question, index: int, total: int, deadline_ts:
 		"total": total,
 		"question_row": question.name,
 		"question_text": question.question_text,
+		"image_url": question.image or None,
 		"options": [question.option_1, question.option_2, question.option_3, question.option_4],
 		"deadline_ts": deadline_ts,
 		# clients count down from this instead of deadline_ts, so client clock skew cannot matter

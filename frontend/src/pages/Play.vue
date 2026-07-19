@@ -40,6 +40,12 @@
 					</h1>
 				</div>
 			</div>
+			<img
+				v-if="question.image_url"
+				:src="question.image_url"
+				alt=""
+				class="max-h-[26vh] w-full shrink-0 object-contain px-4 pb-2"
+			/>
 			<div class="grid flex-1 grid-cols-2 grid-rows-2 gap-2 p-2">
 				<button
 					v-for="optionId in orderedOptions"
