@@ -57,7 +57,7 @@ body {
 	transition: 0.15s ease;
 }
 
-.ctl:hover:not(:disabled) {
+.ctl:hover:not(:disabled, [data-on='true']) {
 	border-color: #f4f0fa;
 	color: #f4f0fa;
 }
@@ -67,6 +67,10 @@ body {
 	border-color: #f4f0fa;
 	color: #16111f;
 	font-weight: 600;
+}
+
+.ctl[data-on='true']:hover:not(:disabled) {
+	filter: brightness(0.92);
 }
 
 .ctl-go {
