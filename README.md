@@ -1,40 +1,120 @@
-### Quizzly
+<div align="center">
 
-Real-time multiplayer quiz platform
+# Quizzly
 
-### Installation
+**Live multiplayer quiz, no login required**
 
-You can install this app using the [bench](https://github.com/frappe/bench) CLI:
+<img alt="Host lobby with the game PIN, QR code and players joining" src="docs/images/host-lobby.png" />
+
+</div>
+
+## What it is
+
+Quizzly is a live quiz game built on the Frappe Framework. A host puts the game
+PIN on the big screen, players join from their phones with the PIN or by
+scanning the QR code, and nobody needs an account.
+
+Gameplay is server-authoritative. The correct answer never reaches a player's
+device before the question closes, scores are computed from a server-set
+deadline, and every submission is validated against the server's own view of
+the game.
+
+<details>
+<summary>Screenshots</summary>
+
+**Joining from a phone**
+
+<img alt="Join screen with PIN, nickname suggestions and avatar picker" src="docs/images/player-join.png" width="320" />
+
+**A question, live on both screens**
+
+<img alt="Host screen showing a question, countdown and answer count" src="docs/images/host-question.png" />
+
+<img alt="Player screen showing four coloured answer buttons" src="docs/images/player-answer.png" width="320" />
+
+**Between questions**
+
+<img alt="Correct answer revealed with answer distribution and top five leaderboard" src="docs/images/host-leaderboard.png" />
+
+**Final results**
+
+<img alt="Podium with the top three players and the full leaderboard" src="docs/images/host-podium.png" />
+
+**Writing a quiz**
+
+<img alt="Quiz editor with question text, four options and the correct answer marked" src="docs/images/quiz-editor.png" />
+
+**Light and dark**
+
+<img alt="Player question screen in dark theme" src="docs/images/theme.png" width="320" />
+
+</details>
+
+## Features
+
+- Guests join with a PIN or QR code, no account and no app install
+- Live lobby: names appear as players join, host can lock it or kick anyone
+- Questions land on every device at once, with a per-question timer
+- Speed-scaled scoring with streak bonuses, in the style of the games it borrows from
+- Answer distribution, correct answer reveal and top-five leaderboard between questions
+- Top-three podium at the end, plus the full ranking
+- Avatar picker and nickname suggestions for players
+- Light and dark theme, everywhere
+- Quizzes are written in the app, no Desk trip needed
+
+## Under the hood
+
+- [Frappe Framework](https://github.com/frappe/frappe) for the backend, DocTypes and permissions
+- [Vue 3](https://vuejs.org) and [frappe-ui](https://github.com/frappe/frappe-ui) for the single-page app
+- [Socket.IO](https://socket.io) to push every state change to hosts and players
+- Redis for the hot session state each answer is validated against
+- RQ for the background job that drives the game loop
+
+## Development setup
+
+1. Set up a bench by following the
+   [installation steps](https://frappeframework.com/docs/user/en/installation)
+   and start the server with `bench start`.
+
+2. In another terminal, from your bench directory:
 
 ```bash
-cd $PATH_TO_YOUR_BENCH
 bench get-app $URL_OF_THIS_REPO --branch develop
-bench install-app quizzly
+bench --site your-site.localhost install-app quizzly
 ```
 
-### Contributing
+The app is served at `/quizzly` on your site. For frontend work, run the Vite
+dev server against it:
 
-This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
+```bash
+cd apps/quizzly/frontend
+yarn install
+yarn dev
+```
+
+## Testing
+
+```bash
+bench --site your-site.localhost set-config allow_tests true
+bench --site your-site.localhost run-tests --app quizzly
+```
+
+## Contributing
+
+This app uses `pre-commit` for code formatting and linting. Please
+[install pre-commit](https://pre-commit.com/#installation) and enable it for
+this repository:
 
 ```bash
 cd apps/quizzly
 pre-commit install
 ```
 
-Pre-commit is configured to use the following tools for checking and formatting your code:
+Pre-commit is configured to use ruff, eslint, prettier and pyupgrade.
 
-- ruff
-- eslint
-- prettier
-- pyupgrade
-### CI
+`plan.md` holds the build plan and architecture, `specs/` holds the spec for
+each phase, and `progress.md` logs what was actually built.
 
-This app can use GitHub Actions for CI. The following workflows are configured:
+## License
 
-- CI: Installs this app and runs unit tests on every push to `develop` branch.
-- Linters: Runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request.
-
-
-### License
-
-mit
+MIT
