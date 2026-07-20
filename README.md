@@ -79,7 +79,7 @@ the game.
 2. In another terminal, from your bench directory:
 
 ```bash
-bench get-app $URL_OF_THIS_REPO --branch develop
+bench get-app https://github.com/gajjug004/quizzly --branch develop
 bench --site your-site.localhost install-app quizzly
 ```
 
