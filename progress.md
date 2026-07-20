@@ -10,6 +10,8 @@ Spec: `specs/phase-7-avatar-carousel.md`. Shipped as specced, `Join.vue` only, n
 - Strip moved out of the desktop right column (`md:col-span-2`) and dropped its `md:max-w-sm` cap, so desktop reads PIN, nickname, faces, join, the same order a phone already had.
 - Then the desktop layout went away entirely: `Join.vue` has no `md:` classes left. The two-column grid was only ever there to balance the tall 6-column avatar block, and once the faces were a strip the wide form was two stretched inputs next to each other and nothing else. One centred `max-w-sm` column at every width, so what a host sees on a laptop is what the players see on their phones. Same reason the strip keeps its gutter bleed on desktop now: the cut-off faces at the edge are what say it scrolls, at any width.
 
+- Strip trim: `.no-scrollbar` (new utility in `index.css`, `scrollbar-width: none` plus the `-webkit-scrollbar` rule) hides the desktop bar under the row, which was redundant next to the cut-off faces at the gutter. `pb-1` became `py-1.5`, because `overflow-x: auto` also clips vertically and the selected face's ring was losing its top edge. Gap tightened to `gap-1`, since a shrunken 27px face inside a 44px slot already carries most of the spacing.
+
 ### Verified
 
 Headless browser at 390x844 and 1280 wide. Phone: opening random pick lands centred and big, tapping the last face in the roster scrolls the strip to its end (`scrollLeft` 890 of max 890) with the join button unmoved. Desktop: strip is the full-width row between the inputs and the join button. `pre-commit` clean on the changed file.

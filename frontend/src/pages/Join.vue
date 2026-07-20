@@ -67,7 +67,7 @@
 					<!-- Bleeds past the page gutter so the roster is visibly cut off at
 					     the edge, which is what says "this scrolls". -->
 					<div
-						class="-mx-5 flex snap-x gap-2 overflow-x-auto px-5 pb-1 motion-safe:scroll-smooth"
+						class="no-scrollbar -mx-5 flex snap-x gap-1 overflow-x-auto px-5 py-1.5 motion-safe:scroll-smooth"
 					>
 						<!-- Every slot stays the large size and only the face inside scales,
 						     so picking one never reflows the row under the thumb. -->
