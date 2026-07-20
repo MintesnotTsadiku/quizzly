@@ -1,5 +1,17 @@
 # Progress
 
+## Theme toggle on the player side (2026-07-20)
+
+The light theme shipped with a control on the host bar and in the lobby row, so only a logged-in host could switch. Players got whatever `prefers-color-scheme` said and no way out of it, which is backwards: the host is on one laptop they control, the players are on twenty phones in a room whose brightness nobody polled.
+
+- `ThemeButton.vue` wraps the existing `cycleTheme` from `theme.js`. Icon-only (🌗 auto, ☀️ light, 🌙 dark) with the label in `aria-label` and `title`, matching the mute button next to it rather than the host bar's text pill, because the player header is a phone header with no room for words.
+- Placed in the `Play.vue` header beside mute, and absolutely positioned top-right on `Join.vue`, which has no chrome of its own. `HostBar.vue` and `Host.vue` keep their own inline text controls; they read "Theme: auto" in a row that has space for it, and rewriting them to use the component would trade a clearer label for nothing.
+- No state added. `theme.js` already persists to `localStorage` and applies on load, so a player's choice survives join, the whole game, and a reload.
+
+### Verified
+
+Real join at 390x844: toggled on the join screen (auto → light), joined a live session with a PIN from `create_session`, and the choice carried into the play header, where cycling to dark repainted the lobby. Test session deleted afterwards.
+
 ## Phase 7: avatar carousel (2026-07-20)
 
 Spec: `specs/phase-7-avatar-carousel.md`. Shipped as specced, `Join.vue` only, no backend.

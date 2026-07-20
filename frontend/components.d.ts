@@ -14,5 +14,6 @@ declare module 'vue' {
     HostBar: typeof import('./src/components/HostBar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    ThemeButton: typeof import('./src/components/ThemeButton.vue')['default']
   }
 }
