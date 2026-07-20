@@ -19,7 +19,9 @@
 				>
 					{{ muted ? "🔇" : "🔊" }}
 				</button>
-				<ThemeButton />
+				<ThemeButton
+					class="text-lg leading-none opacity-60 transition hover:opacity-100"
+				/>
 				<span class="font-mono text-sm font-bold tabular-nums text-accent">{{
 					score
 				}}</span>

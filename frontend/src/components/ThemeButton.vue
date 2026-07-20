@@ -1,7 +1,8 @@
 <template>
+	<!-- Unstyled on purpose: the host wears this as a `ctl` pill and the players
+	     as a bare header icon. Only the glyph and the cycling are shared. -->
 	<button
 		type="button"
-		class="text-lg leading-none opacity-60 transition hover:opacity-100"
 		:aria-label="`Theme: ${theme}`"
 		:title="`Theme: ${theme}`"
 		@click="cycleTheme"
