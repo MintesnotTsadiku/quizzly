@@ -40,15 +40,15 @@
 
 		<!-- Lobby -->
 		<template v-else-if="phase === 'lobby'">
-			<div class="flex flex-1 flex-col justify-center gap-12 p-8">
-				<div class="flex flex-wrap items-center justify-center gap-14">
-					<div>
-						<div class="flex items-center gap-2">
-							<p class="font-mono text-sm tracking-wide text-gold">
-								Join at {{ joinHost }}
-							</p>
+			<div class="flex flex-1 flex-col justify-center gap-8 p-5 sm:gap-12 sm:p-8">
+				<div class="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
+					<div class="min-w-0 text-center sm:text-left">
+						<!-- inline, not a flex row: the icon has to follow the last line when a
+						     long join host wraps on a phone -->
+						<p class="break-all font-mono text-xs tracking-wide text-gold sm:text-sm">
+							Join at {{ joinHost }}
 							<button
-								class="rounded-md p-1 text-paper/30 transition hover:bg-dusk hover:text-paper"
+								class="ml-1 inline-block translate-y-1 rounded-md p-1 text-paper/30 transition hover:bg-dusk hover:text-paper"
 								:title="copied ? 'Copied' : `Copy ${joinUrl}`"
 								:aria-label="`Copy ${joinUrl}`"
 								@click="copyJoinUrl"
@@ -71,17 +71,21 @@
 									</template>
 								</svg>
 							</button>
-						</div>
-						<p class="mt-3 font-mono text-8xl font-bold tracking-[0.08em] text-paper">
+						</p>
+						<p
+							class="mt-3 font-mono text-6xl font-bold tracking-[0.08em] text-paper sm:text-8xl"
+						>
 							{{ session.game_pin }}
 						</p>
-						<p class="mt-3 text-paper/45">or point a phone camera at the code</p>
+						<p class="mt-3 text-sm text-paper/45 sm:text-base">
+							or point a phone camera at the code
+						</p>
 					</div>
 					<button v-if="qrDataUrl" class="group" @click="qrFullscreen = true">
 						<img
 							:src="qrDataUrl"
 							alt="Join QR code"
-							class="h-48 w-48 rounded-2xl bg-paper p-2 transition group-hover:scale-105"
+							class="size-40 rounded-2xl bg-paper p-2 transition group-hover:scale-105 sm:size-48"
 						/>
 						<span
 							class="mt-2 block font-mono text-[11px] uppercase tracking-wider text-paper/35 transition group-hover:text-paper/70"
@@ -105,12 +109,12 @@
 						<div
 							v-for="participant in participants"
 							:key="participant.name"
-							class="group relative flex items-center gap-3 rounded-full border border-haze bg-dusk py-1 pl-1 pr-5 text-xl font-medium text-paper"
+							class="group relative flex items-center gap-2 rounded-full border border-haze bg-dusk py-1 pl-1 pr-4 text-base font-medium text-paper sm:gap-3 sm:pr-5 sm:text-xl"
 						>
 							<AvatarPic
 								:id="participant.avatar"
 								:nickname="participant.nickname"
-								:size="44"
+								:size="40"
 							/>
 							<span>{{ participant.nickname }}</span>
 							<button
@@ -168,27 +172,33 @@
 
 		<!-- Podium -->
 		<template v-else-if="phase === 'podium'">
-			<div class="flex flex-1 flex-col items-center justify-center gap-10 p-8">
-				<h1 class="font-display text-6xl font-extrabold text-paper">Final results</h1>
-				<div class="flex items-end justify-center gap-4">
+			<div
+				class="flex flex-1 flex-col items-center justify-center gap-8 p-5 sm:gap-10 sm:p-8"
+			>
+				<h1 class="font-display text-4xl font-extrabold text-paper sm:text-6xl">
+					Final results
+				</h1>
+				<div class="flex items-end justify-center gap-2 sm:gap-4">
 					<div
 						v-for="entry in podiumOrder"
 						:key="entry.nickname"
-						class="flex w-36 flex-col items-center gap-2"
+						class="flex w-24 flex-col items-center gap-2 sm:w-36"
 					>
 						<AvatarPic
 							:id="entry.avatar"
 							:nickname="entry.nickname"
 							:size="entry.rank === 1 ? 88 : 64"
 						/>
-						<span class="font-display text-xl font-bold text-paper">
+						<span
+							class="max-w-full truncate font-display text-base font-bold text-paper sm:text-xl"
+						>
 							{{ entry.nickname }}
 						</span>
 						<span class="font-mono text-sm tabular-nums text-paper/50">
 							{{ entry.score }}
 						</span>
 						<div
-							class="podium-rise flex w-full items-start justify-center rounded-t-2xl pt-3 font-mono text-3xl font-bold text-night"
+							class="podium-rise flex w-full items-start justify-center rounded-t-2xl pt-3 font-mono text-2xl font-bold text-night sm:text-3xl"
 							:class="PODIUM_FILL[entry.rank]"
 							:style="{ height: `${180 - (entry.rank - 1) * 45}px` }"
 						>
@@ -200,16 +210,18 @@
 					<li
 						v-for="entry in leaderboard"
 						:key="entry.nickname"
-						class="flex items-center justify-between border-b border-haze py-2.5 text-lg text-paper/70"
+						class="flex items-center justify-between gap-3 border-b border-haze py-2.5 text-base text-paper/70 sm:text-lg"
 					>
-						<span class="flex items-center gap-3">
-							<span class="w-5 font-mono text-xs tabular-nums text-paper/35">
+						<span class="flex min-w-0 items-center gap-3">
+							<span
+								class="w-5 shrink-0 font-mono text-xs tabular-nums text-paper/35"
+							>
 								{{ entry.rank }}
 							</span>
 							<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="28" />
-							{{ entry.nickname }}
+							<span class="truncate">{{ entry.nickname }}</span>
 						</span>
-						<span class="font-mono tabular-nums">{{ entry.score }}</span>
+						<span class="shrink-0 font-mono tabular-nums">{{ entry.score }}</span>
 					</li>
 				</ol>
 				<button class="ctl" @click="reset">New game</button>
@@ -218,12 +230,14 @@
 
 		<!-- Read time: question only, no answers yet -->
 		<template v-else-if="phase === 'get_ready'">
-			<div class="flex flex-1 flex-col items-center justify-center gap-10 p-8 text-center">
+			<div
+				class="flex flex-1 flex-col items-center justify-center gap-8 p-5 text-center sm:gap-10 sm:p-8"
+			>
 				<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
 					Question {{ (question?.q_index ?? 0) + 1 }} of {{ question?.total }}
 				</p>
 				<h1
-					class="max-w-4xl font-display text-6xl font-extrabold leading-tight text-paper"
+					class="max-w-4xl font-display text-3xl font-extrabold leading-tight text-paper sm:text-6xl"
 				>
 					{{ question?.question_text }}
 				</h1>
@@ -239,9 +253,11 @@
 		<!-- Question / results -->
 		<template v-else>
 			<!-- m-auto, not justify-center: a centered flex column clips its top when it overflows -->
-			<div class="flex flex-1 flex-col p-8">
-				<div class="m-auto flex w-full max-w-6xl flex-col gap-7">
-					<div class="flex items-center gap-6">
+			<div class="flex flex-1 flex-col p-4 sm:p-8">
+				<div class="m-auto flex w-full max-w-6xl flex-col gap-5 sm:gap-7">
+					<!-- on a phone the question takes its own row: a timer and a counter beside it
+					     leave the text in a column too narrow to read -->
+					<div class="flex flex-wrap items-center gap-4 sm:gap-6">
 						<DrainRing
 							v-if="phase === 'question'"
 							:percent="timerPercent"
@@ -249,20 +265,20 @@
 							:size="96"
 							:color="remaining <= 5 ? '#FF5A36' : '#17B0BE'"
 						/>
-						<div class="min-w-0 flex-1">
+						<div class="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
 							<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
 								Question {{ (question?.q_index ?? 0) + 1 }} of
 								{{ question?.total }}
 							</p>
 							<h1
-								class="mt-2 font-display text-4xl font-extrabold leading-tight text-paper"
+								class="mt-2 font-display text-2xl font-extrabold leading-tight text-paper sm:text-4xl"
 							>
 								{{ question?.question_text }}
 							</h1>
 						</div>
 						<p
 							v-if="phase === 'question'"
-							class="shrink-0 font-mono text-sm tabular-nums text-paper/40"
+							class="ml-auto shrink-0 font-mono text-sm tabular-nums text-paper/40 sm:ml-0"
 						>
 							{{ answerCount }} answered
 						</p>
@@ -272,20 +288,25 @@
 						v-if="question?.image_url"
 						:src="question.image_url"
 						alt=""
-						class="max-h-[40vh] w-full object-contain"
+						class="max-h-[22vh] w-full object-contain sm:max-h-[40vh]"
 					/>
 
 					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
 						<div
 							v-for="shape in visibleShapes"
 							:key="shape.id"
-							class="flex items-center gap-5 rounded-2xl px-6 py-7 transition"
+							class="flex items-center gap-3 rounded-2xl px-4 py-4 transition sm:gap-5 sm:px-6 sm:py-7"
 							:class="[shape.fill, dimmed(shape.id) ? 'opacity-25' : '']"
 						>
-							<svg class="h-9 w-9 shrink-0 fill-night/55" viewBox="0 0 24 24">
+							<svg
+								class="size-7 shrink-0 fill-night/55 sm:size-9"
+								viewBox="0 0 24 24"
+							>
 								<path :d="shape.path" />
 							</svg>
-							<span class="flex-1 font-display text-2xl font-extrabold text-night">
+							<span
+								class="flex-1 font-display text-lg font-extrabold text-night sm:text-2xl"
+							>
 								{{ question.options[Number(shape.id) - 1] }}
 							</span>
 							<span
@@ -318,16 +339,16 @@
 							</div>
 						</div>
 
-						<div class="flex flex-wrap items-start justify-between gap-8">
-							<ol class="min-w-64 flex-1">
+						<div class="flex flex-wrap items-start justify-between gap-6 sm:gap-8">
+							<ol class="w-full flex-1 sm:min-w-64">
 								<li
 									v-for="(entry, index) in top5"
 									:key="entry.nickname"
-									class="flex items-center justify-between border-b border-haze py-2 text-lg text-paper/70"
+									class="flex items-center justify-between gap-3 border-b border-haze py-2 text-base text-paper/70 sm:text-lg"
 								>
-									<span class="flex items-center gap-3">
+									<span class="flex min-w-0 items-center gap-3">
 										<span
-											class="w-5 font-mono text-xs tabular-nums text-paper/35"
+											class="w-5 shrink-0 font-mono text-xs tabular-nums text-paper/35"
 										>
 											{{ index + 1 }}
 										</span>
@@ -336,12 +357,14 @@
 											:nickname="entry.nickname"
 											:size="28"
 										/>
-										{{ entry.nickname }}
+										<span class="truncate">{{ entry.nickname }}</span>
 									</span>
-									<span class="font-mono tabular-nums">{{ entry.score }}</span>
+									<span class="shrink-0 font-mono tabular-nums">{{
+										entry.score
+									}}</span>
 								</li>
 							</ol>
-							<ul class="flex-1 space-y-2 text-lg text-paper/70">
+							<ul class="w-full flex-1 space-y-2 text-base text-paper/70 sm:text-lg">
 								<li
 									v-for="entry in streaks"
 									:key="entry.nickname"
@@ -423,25 +446,25 @@ const error = ref("");
 watch(qrFullscreen, (open) => (open ? qrDialog.value.showModal() : qrDialog.value.close()));
 
 const joinUrl = computed(
-	() => `${window.location.origin}/quizzly/join?pin=${session.value.game_pin}`
+	() => `${window.location.origin}/quizzly/join?pin=${session.value.game_pin}`,
 );
 
 // The projector shows where to go, not the whole query string.
 const joinHost = computed(() => `${window.location.host}/quizzly/join`);
 
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
 );
 
 const visibleShapes = computed(() =>
-	SHAPES.filter((shape) => question.value?.options[Number(shape.id) - 1])
+	SHAPES.filter((shape) => question.value?.options[Number(shape.id) - 1]),
 );
 
 watch(
 	() => Math.ceil(remaining.value),
 	(secondsLeft) => {
 		if (phase.value === "question" && secondsLeft > 0 && secondsLeft <= 5) playCue("tick");
-	}
+	},
 );
 
 // tallest bar fills the chart; the rest scale against it
@@ -456,7 +479,7 @@ const dimmed = (optionId) => phase.value === "closed" && optionId !== String(cor
 
 // 2nd, 1st, 3rd — the winner stands in the middle
 const podiumOrder = computed(() =>
-	[leaderboard.value[1], leaderboard.value[0], leaderboard.value[2]].filter(Boolean)
+	[leaderboard.value[1], leaderboard.value[0], leaderboard.value[2]].filter(Boolean),
 );
 
 function onSessionEvent(message) {
@@ -616,7 +639,7 @@ async function hostCall(method, params = {}) {
 
 async function toggleLock() {
 	const lobby = await hostCall(
-		lobbyLocked.value ? "quizzly.api.unlock_lobby" : "quizzly.api.lock_lobby"
+		lobbyLocked.value ? "quizzly.api.unlock_lobby" : "quizzly.api.lock_lobby",
 	);
 	if (lobby) lobbyLocked.value = Boolean(lobby.lobby_locked);
 }
