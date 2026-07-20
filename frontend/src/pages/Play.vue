@@ -19,11 +19,13 @@
 				>
 					{{ muted ? "🔇" : "🔊" }}
 				</button>
-				<span class="font-mono text-sm font-bold tabular-nums text-gold">{{ score }}</span>
+				<span class="font-mono text-sm font-bold tabular-nums text-accent">{{
+					score
+				}}</span>
 				<button
 					v-if="phase !== 'podium'"
 					type="button"
-					class="rounded-full border border-haze px-3 py-1 text-xs text-paper/50 transition hover:border-ember hover:text-ember"
+					class="rounded-full border border-haze px-3 py-1 text-xs text-paper/50 transition hover:border-ember hover:text-alert"
 					@click="leave"
 				>
 					Leave
@@ -62,15 +64,15 @@
 					:class="[shapeFor(optionId).fill, shapeFor(optionId).hover]"
 					@click="answer(optionId)"
 				>
-					<svg class="h-9 w-9 fill-night/55" viewBox="0 0 24 24">
+					<svg class="h-9 w-9 fill-sunk/55" viewBox="0 0 24 24">
 						<path :d="shapeFor(optionId).path" />
 					</svg>
-					<span class="font-display text-xl font-extrabold leading-tight text-night">
+					<span class="font-display text-xl font-extrabold leading-tight text-sunk">
 						{{ question.options[Number(optionId) - 1] }}
 					</span>
 				</button>
 			</div>
-			<p v-if="error" class="px-4 pb-3 text-center text-sm text-ember">{{ error }}</p>
+			<p v-if="error" class="px-4 pb-3 text-center text-sm text-alert">{{ error }}</p>
 		</template>
 
 		<main
@@ -83,7 +85,7 @@
 				</h1>
 				<p class="text-paper/50">You can join again with the PIN.</p>
 				<button
-					class="rounded-2xl bg-ember px-7 py-3 font-display text-lg font-extrabold text-night"
+					class="rounded-2xl bg-ember px-7 py-3 font-display text-lg font-extrabold text-sunk"
 					@click="router.replace('/join')"
 				>
 					Back to join
@@ -91,7 +93,7 @@
 			</template>
 
 			<template v-else-if="phase === 'lobby'">
-				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">
+				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
 					PIN {{ player.pin }}
 				</p>
 				<h1 class="font-display text-5xl font-extrabold text-paper">You're in</h1>
@@ -114,7 +116,7 @@
 					:percent="timerPercent"
 					:seconds="Math.ceil(remaining)"
 					:size="132"
-					color="#FFC43D"
+					color="rgb(var(--accent))"
 				/>
 				<p class="text-paper/50">Read it. Answers land in a second.</p>
 			</template>
@@ -134,7 +136,7 @@
 
 			<template v-else-if="phase === 'result'">
 				<div
-					class="grid h-24 w-24 place-items-center rounded-full text-5xl text-night"
+					class="grid h-24 w-24 place-items-center rounded-full text-5xl text-sunk"
 					:class="result.is_correct ? 'bg-lagoon' : 'bg-ember'"
 				>
 					{{ result.is_correct ? "✓" : "✕" }}
@@ -142,7 +144,7 @@
 				<h1 class="font-display text-4xl font-extrabold text-paper">
 					{{ result.is_correct ? "Correct" : result.answered ? "Wrong" : "No answer" }}
 				</h1>
-				<p v-if="result.points" class="font-mono text-2xl font-bold text-gold">
+				<p v-if="result.points" class="font-mono text-2xl font-bold text-accent">
 					+{{ result.points }}
 				</p>
 				<p v-if="result.streak > 1" class="text-paper/60">
@@ -158,7 +160,7 @@
 						class="flex items-center justify-between border-b border-haze py-2 text-sm"
 						:class="
 							entry.nickname === player.nickname
-								? 'font-bold text-gold'
+								? 'font-bold text-accent'
 								: 'text-paper/60'
 						"
 					>
@@ -178,7 +180,7 @@
 				<h1 class="font-display text-5xl font-extrabold text-paper">
 					{{ myRank === 1 ? "You won" : `You finished #${myRank}` }}
 				</h1>
-				<p class="font-mono text-2xl font-bold text-gold">{{ score }} pts</p>
+				<p class="font-mono text-2xl font-bold text-accent">{{ score }} pts</p>
 				<ul class="mt-2 w-full max-w-xs text-left">
 					<li
 						v-for="entry in leaderboard.slice(0, 5)"
@@ -186,7 +188,7 @@
 						class="flex items-center justify-between border-b border-haze py-2"
 						:class="
 							entry.nickname === player.nickname
-								? 'font-bold text-gold'
+								? 'font-bold text-accent'
 								: 'text-paper/60'
 						"
 					>
@@ -201,7 +203,7 @@
 					</li>
 				</ul>
 				<button
-					class="mt-3 rounded-full border border-haze px-5 py-2 text-sm text-paper/60 transition hover:border-ember hover:text-ember"
+					class="mt-3 rounded-full border border-haze px-5 py-2 text-sm text-paper/60 transition hover:border-ember hover:text-alert"
 					@click="playAgain"
 				>
 					Back to join
@@ -261,7 +263,9 @@ const timerPercent = computed(() =>
 	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
 );
 
-const urgentColor = computed(() => (remaining.value <= 5 ? "#FF5A36" : "#17B0BE"));
+const urgentColor = computed(() =>
+	remaining.value <= 5 ? "rgb(var(--alert))" : "rgb(var(--ok))"
+);
 
 const orderedOptions = computed(() =>
 	question.value ? optionOrder(question.value, player.value.token) : []

@@ -25,6 +25,6 @@ defineProps({
 	percent: { type: Number, default: 0 },
 	seconds: { type: Number, default: 0 },
 	size: { type: Number, default: 64 },
-	color: { type: String, default: "#FF5A36" },
+	color: { type: String, default: "rgb(var(--alert))" },
 });
 </script>

@@ -4,7 +4,9 @@
 		<div class="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 p-5 sm:p-8">
 			<div class="flex items-end justify-between gap-4">
 				<div>
-					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">Host</p>
+					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
+						Host
+					</p>
 					<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">
 						Your quizzes
 					</h1>
@@ -14,7 +16,7 @@
 				</RouterLink>
 			</div>
 
-			<p v-if="error" class="text-ember">{{ error }}</p>
+			<p v-if="error" class="text-alert">{{ error }}</p>
 
 			<div v-if="quizzes.length" class="flex flex-col gap-2">
 				<div

@@ -4,7 +4,7 @@
 		<div class="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-5 sm:p-8">
 			<div class="flex items-end justify-between gap-4">
 				<div class="min-w-0 flex-1">
-					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">
+					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
 						{{ isNew ? "New quiz" : "Editing" }}
 					</p>
 					<input
@@ -14,7 +14,7 @@
 					/>
 				</div>
 				<div class="flex shrink-0 items-center gap-2">
-					<span v-if="saved" class="font-mono text-xs text-lagoon">Saved</span>
+					<span v-if="saved" class="font-mono text-xs text-ok">Saved</span>
 					<button class="ctl ctl-go" :disabled="saving" @click="save">
 						{{ saving ? "Saving…" : "Save" }}
 					</button>
@@ -41,7 +41,7 @@
 				/>
 			</div>
 
-			<p v-if="error" class="text-ember">{{ error }}</p>
+			<p v-if="error" class="text-alert">{{ error }}</p>
 
 			<div
 				v-for="(question, index) in questions"
@@ -115,11 +115,11 @@
 							:value="String(option)"
 							:name="`correct-${index}`"
 							:aria-label="`Option ${option} is correct`"
-							class="h-5 w-5 shrink-0 appearance-none rounded-full border-2 border-night/40 bg-transparent checked:border-[6px] checked:border-night"
+							class="h-5 w-5 shrink-0 appearance-none rounded-full border-2 border-sunk/40 bg-transparent checked:border-[6px] checked:border-sunk"
 						/>
 						<input
 							v-model="question[`option_${option}`]"
-							class="w-full border-0 bg-transparent font-display text-lg font-bold text-night placeholder:text-night/40 focus:outline-none"
+							class="w-full border-0 bg-transparent font-display text-lg font-bold text-sunk placeholder:text-sunk/40 focus:outline-none"
 							:placeholder="`Answer ${option}`"
 						/>
 					</label>

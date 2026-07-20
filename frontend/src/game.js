@@ -10,8 +10,7 @@ export const SHAPES = [
 		fill: "bg-ember",
 		svgFill: "fill-ember",
 		hover: "hover:brightness-110",
-		ink: "text-night",
-		hex: "#FF5A36",
+		ink: "text-sunk",
 		path: "M13.5 1.5 L4 13.5 H10 L8.5 22.5 L20 9.5 H13 Z",
 	},
 	{
@@ -20,8 +19,7 @@ export const SHAPES = [
 		fill: "bg-lagoon",
 		svgFill: "fill-lagoon",
 		hover: "hover:brightness-110",
-		ink: "text-night",
-		hex: "#17B0BE",
+		ink: "text-sunk",
 		path: "M12 1 C13 8.5 15.5 11 23 12 C15.5 13 13 15.5 12 23 C11 15.5 8.5 13 1 12 C8.5 11 11 8.5 12 1 Z",
 	},
 	{
@@ -30,8 +28,7 @@ export const SHAPES = [
 		fill: "bg-gold",
 		svgFill: "fill-gold",
 		hover: "hover:brightness-110",
-		ink: "text-night",
-		hex: "#FFC43D",
+		ink: "text-sunk",
 		path: "M17 2 a10 10 0 1 0 0 20 12 12 0 0 1 0-20 z",
 	},
 	{
@@ -40,8 +37,7 @@ export const SHAPES = [
 		fill: "bg-orchid",
 		svgFill: "fill-orchid",
 		hover: "hover:brightness-110",
-		ink: "text-night",
-		hex: "#9B6BFF",
+		ink: "text-sunk",
 		path: "M12 1.5 L21 6.75 V17.25 L12 22.5 L3 17.25 V6.75 Z",
 	},
 ];

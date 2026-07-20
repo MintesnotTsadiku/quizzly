@@ -75,20 +75,30 @@ frappe-ui `Button`, which only ships a light theme.
 - `prefers-reduced-motion` collapses the ring pulse, podium rise, and bar growth.
 - Responsive down to 390px.
 
+## Light theme
+
+Shipped. The plan written here was to promote all eight tokens to custom
+properties and re-derive the answer inks for a light ground. Building it showed
+that was the wrong split: the four inks are the brand. A player learns "red is
+top-left" once, and a tile that changes hue with the room breaks the one thing
+the whole colour scheme exists to do. They do not theme at all.
+
+What themes is the ground and what sits on it:
+
+- `night`, `dusk`, `haze`, `paper` — ground, elevated surface, border, body text.
+- `alert`, `accent`, `ok` — the ember, gold and lagoon hues used as *text* on the
+  ground, which has to hold 4.5:1 and so darkens where the fill below it cannot.
+  This is the split the original plan missed: one token cannot be both a vivid
+  tile and legible small text on white.
+- `ember`, `lagoon`, `gold`, `orchid`, `sunk`, `card` — fixed. The answer inks,
+  the ink they carry, and the QR quiet zone.
+
+`prefers-color-scheme` picks the default; a Theme control on the host bar and in
+the lobby row overrides it in both directions and persists in `localStorage`.
+The OS preference alone was not enough: the case this exists for is a bright
+room, and the laptop driving the projector is usually still set to dark.
+
 ## Deferred
-
-Neither is worth building until the condition holds.
-
-### Light theme
-
-The whole app is dark-only (`color-scheme: dark`, tokens hardcoded, `.ctl`
-written in raw hex). A bright room with a weak projector would wash it out.
-
-**Build it when** someone actually hosts in daylight and reports the screen is
-unreadable. The work: promote the eight tokens to CSS custom properties on
-`:root`, add a `prefers-color-scheme: light` block, and re-derive the answer
-inks for dark-text-on-light (the four are tuned for a dark ground and would need
-their own values, not an inversion).
 
 ### Avatar picker as a scroll strip
 

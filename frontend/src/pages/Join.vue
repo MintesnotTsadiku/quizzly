@@ -2,7 +2,7 @@
 	<div class="flex h-full flex-col overflow-y-auto bg-night px-5 py-10">
 		<div class="m-auto w-full max-w-sm md:max-w-2xl">
 			<p
-				class="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-gold"
+				class="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent"
 			>
 				<svg class="h-3 w-3 fill-gold" viewBox="0 0 24 24">
 					<path :d="SHAPES[1].path" />
@@ -48,7 +48,7 @@
 							v-for="suggestion in suggestions"
 							:key="suggestion"
 							type="button"
-							class="rounded-full border border-haze px-3 py-1 text-sm text-paper/70 transition hover:border-lagoon hover:text-lagoon"
+							class="rounded-full border border-haze px-3 py-1 text-sm text-paper/70 transition hover:border-lagoon hover:text-ok"
 							@click="nickname = suggestion"
 						>
 							{{ suggestion }}
@@ -89,12 +89,12 @@
 
 				<button
 					type="submit"
-					class="rounded-2xl bg-ember py-4 font-display text-xl font-extrabold text-night transition hover:brightness-110 disabled:opacity-50 md:col-span-2"
+					class="rounded-2xl bg-ember py-4 font-display text-xl font-extrabold text-sunk transition hover:brightness-110 disabled:opacity-50 md:col-span-2"
 					:disabled="joining"
 				>
 					{{ joining ? "Joining…" : "Join game" }}
 				</button>
-				<p v-if="error" class="text-center text-sm text-ember md:col-span-2">
+				<p v-if="error" class="text-center text-sm text-alert md:col-span-2">
 					{{ error }}
 				</p>
 			</form>
