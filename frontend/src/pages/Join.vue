@@ -1,5 +1,8 @@
 <template>
-	<div class="flex h-full flex-col overflow-y-auto bg-night px-5 py-10">
+	<div class="relative flex h-full flex-col overflow-y-auto bg-night px-5 py-10">
+		<ThemeButton
+			class="absolute right-4 top-4 text-lg leading-none opacity-60 transition hover:opacity-100"
+		/>
 		<div class="m-auto w-full max-w-sm">
 			<p
 				class="mb-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent"
@@ -119,6 +122,7 @@ import { avatars, randomAvatar } from "@/avatars";
 import { suggestNicknames } from "@/nicknames";
 import { SHAPES } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
+import ThemeButton from "@/components/ThemeButton.vue";
 
 const route = useRoute();
 const router = useRouter();

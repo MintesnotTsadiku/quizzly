@@ -19,6 +19,9 @@
 				>
 					{{ muted ? "🔇" : "🔊" }}
 				</button>
+				<ThemeButton
+					class="text-lg leading-none opacity-60 transition hover:opacity-100"
+				/>
 				<span class="font-mono text-sm font-bold tabular-nums text-accent">{{
 					score
 				}}</span>
@@ -227,6 +230,7 @@ import { clearPlayer, loadPlayer } from "@/player";
 import { optionOrder, shapeFor, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 import DrainRing from "@/components/DrainRing.vue";
+import ThemeButton from "@/components/ThemeButton.vue";
 import { initSound, muted, playCue, toggleMute } from "@/sound";
 
 const router = useRouter();

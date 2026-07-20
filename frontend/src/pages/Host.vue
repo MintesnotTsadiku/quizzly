@@ -145,7 +145,7 @@
 					<button class="ctl" @click="toggleMute">
 						{{ muted ? "Sound off" : "Sound on" }}
 					</button>
-					<button class="ctl" @click="cycleTheme">Theme: {{ theme }}</button>
+					<ThemeButton class="ctl" />
 					<button class="ctl" @click="end">Exit</button>
 					<button
 						class="ctl ctl-go"
@@ -411,10 +411,10 @@ import { call, readError } from "@/api";
 import { confirm } from "@/confirm";
 import { SHAPES, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
+import ThemeButton from "@/components/ThemeButton.vue";
 import DrainRing from "@/components/DrainRing.vue";
 import HostBar from "@/components/HostBar.vue";
 import { initSound, muted, playCue, toggleMute } from "@/sound";
-import { cycleTheme, theme } from "@/theme";
 
 const PODIUM_FILL = { 1: "bg-gold", 2: "bg-lagoon", 3: "bg-orchid" };
 // remembered so a reload on the podium restores it: get_host_state only auto-finds live sessions

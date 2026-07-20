@@ -14,7 +14,7 @@
 			<RouterLink class="ctl" :data-on="isAuthoring" to="/host/quizzes">Quizzes</RouterLink>
 		</nav>
 		<span class="ml-auto flex items-center gap-4">
-			<button class="ctl" title="Theme" @click="cycleTheme">{{ THEME_LABEL[theme] }}</button>
+			<ThemeButton class="ctl" />
 			<span class="hidden truncate font-mono text-xs text-paper/40 sm:inline">{{
 				user
 			}}</span>
@@ -29,9 +29,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { call } from "@/api";
-import { cycleTheme, theme } from "@/theme";
-
-const THEME_LABEL = { auto: "Auto", light: "Light", dark: "Dark" };
+import ThemeButton from "@/components/ThemeButton.vue";
 
 const logoUrl = "/assets/quizzly/images/quizzly-logo.svg";
 
