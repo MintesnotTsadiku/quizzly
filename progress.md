@@ -1,5 +1,23 @@
 # Progress
 
+## Fix: host screen on a phone (2026-07-20)
+
+No spec. `Host.vue` only, no API and no doctype change. Every host screen was sized for a projector and broke at 390px.
+
+### Done
+
+- Lobby: PIN `text-6xl` up to `sm:text-8xl`, QR `size-40` up to `sm:size-48`, padding and gaps scaled, and the PIN block centres under the QR on a phone. The copy button moved inside the join-host `<p>` as an inline element, so it follows the last line when the URL wraps instead of floating beside the first.
+- Question: the question text takes its own full-width row below the timer ring and the answer counter (`flex-wrap` plus `order-last w-full sm:order-none`). Beside a 96px ring and a counter it had a column too narrow to read two words in. The question image caps at 22vh under `sm`, which keeps all four options on screen without scrolling.
+- Results and podium: display sizes scaled, podium columns `w-24` up to `sm:w-36`, and leaderboard rows got `gap-3` with `truncate` on the nickname and `shrink-0` on the score, which used to collide.
+
+### Verified
+
+Live on `quizzly.localhost` at 390x844: lobby with and without a player, get-ready, question, closed stats, podium. Desktop at 1440x900 renders identically to before on the lobby and question screens.
+
+### Notes
+
+- The bench `long` queue is backed up with jobs from other sites behind a single worker, so `run_game_loop` never gets picked up: a started game sits on "Starting…" until `is_abandoned` settles it and the host lands on the podium. Testing ran the loop directly with `bench execute quizzly.engine.run_game_loop`. Bench config, not app code.
+
 ## Phase 6: Navigation (2026-07-19)
 
 Spec: `specs/phase-6-navigation.md`. Frontend only, no API and no doctype change.
