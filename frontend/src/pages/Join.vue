@@ -67,12 +67,17 @@
 					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
 						Your face
 					</span>
-					<div class="grid grid-cols-6 gap-2">
+					<!-- Bleeds past the page gutter on a phone so the roster is visibly cut
+					     off at the edge, which is what says "this scrolls". -->
+					<div
+						class="-mx-5 flex snap-x gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:max-w-sm md:px-0"
+					>
 						<button
 							v-for="option in avatars"
 							:key="option.id"
+							:ref="(el) => option.id === avatar && (selectedButton = el)"
 							type="button"
-							class="rounded-full p-0.5 transition"
+							class="shrink-0 snap-center rounded-full p-0.5 transition"
 							:class="
 								avatar === option.id
 									? 'bg-gold ring-2 ring-gold'
@@ -103,7 +108,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { call } from "@/api";
 import { savePlayer } from "@/player";
@@ -121,6 +126,11 @@ const avatar = ref(randomAvatar());
 const suggestions = ref(suggestNicknames());
 const joining = ref(false);
 const error = ref("");
+const selectedButton = ref(null);
+
+// The opening pick is random, so it lands anywhere in the roster. Without this
+// the strip opens on the first face and nothing looks chosen.
+onMounted(() => selectedButton.value?.scrollIntoView({ inline: "center", block: "nearest" }));
 
 async function join() {
 	error.value = "";

@@ -98,17 +98,22 @@ the lobby row overrides it in both directions and persists in `localStorage`.
 The OS preference alone was not enough: the case this exists for is a bright
 room, and the laptop driving the projector is usually still set to dark.
 
+## Avatar picker as a scroll strip
+
+Shipped. `Join.vue` renders the roster as one horizontal `overflow-x: auto` row
+with `snap-x`, capped at `max-w-sm` on desktop so it stays a strip rather than
+stretching across the column. It bleeds past the page gutter on a phone: the
+faces cut off at both edges are the only thing that says it scrolls.
+
+The opening pick is random, so it lands anywhere in the roster. The selected
+button scrolls itself into view on mount, otherwise the strip opens on the first
+face and nothing looks chosen.
+
+A search field past ~60 avatars is still worth having, but nothing needs it yet.
+
 ## Deferred
 
-### Avatar picker as a scroll strip
-
-`Join.vue` renders the whole roster as a 6-column grid. At the shipped 24
-avatars it fits above the fold on a 390x844 phone.
-
-**Build it when** a pack ships more than ~30 avatars, which pushes the join
-button below the fold. The work: swap the grid for a horizontal
-`overflow-x: auto` strip with scroll-snap, keeping the current selected-state
-ring. Also worth a search field past ~60.
+Nothing.
 
 ## Non-goals
 
