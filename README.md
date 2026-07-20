@@ -1,6 +1,6 @@
 <div align="center">
 
-# Quizzly
+# <img alt="" src="quizzly/public/images/quizzly-logo.svg" width="40" height="40" align="center" /> Quizzly
 
 **Live multiplayer quiz, no login required**
 
