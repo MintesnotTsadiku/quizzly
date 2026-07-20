@@ -8,8 +8,7 @@ export function initSocket() {
 	const protocol = port ? "http" : "https";
 	const url = `${protocol}://${host}${port}/${siteName}`;
 
-	return io(url, {
-		withCredentials: true,
-		reconnectionAttempts: 5,
-	});
+	// No attempt cap: giving up strands the screen on the 20s resync watchdog for the
+	// rest of the game, and a quiz outlives most network blips.
+	return io(url, { withCredentials: true });
 }
