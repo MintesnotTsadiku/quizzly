@@ -1,5 +1,31 @@
 # Progress
 
+## Phase 5 leftovers: light theme and avatar strip (2026-07-20)
+
+Spec: `specs/phase-5-visual-identity.md`, both sections rewritten from "Deferred" to what shipped. Phase 5 now has nothing outstanding.
+
+### Light theme
+
+- The spec's plan was to make all eight tokens flip. That was the wrong split, and building it showed why: the four answer inks are the brand. A player learns "red is top-left" once, and a tile that changes hue with the room breaks the one thing the colour scheme exists to do. They do not theme at all.
+- What themes is the ground and what sits on it: `night` / `dusk` / `haze` / `paper`, plus `alert` / `accent` / `ok`. The second trio is the ember, gold and lagoon hues *as text on the ground*, which has to carry 4.5:1 and so darkens where the fill below it cannot. One token could not be both a vivid tile and legible small text on white; splitting the roles is what the original plan missed.
+- Fixed, never themed: `ember`, `lagoon`, `gold`, `orchid` (the tiles), `sunk` (the ink they carry), `card` (the QR quiet zone, which needs a light ground in either theme).
+- Tokens are RGB channel triplets, not hex, so Tailwind's opacity modifiers keep working: `text-paper/40` is used 13 times.
+- `prefers-color-scheme` picks the default. A Theme control on the host bar and in the lobby control row overrides it in both directions and persists in `localStorage`. The OS preference alone was not enough: the case this exists for is a bright room, and the laptop driving the projector is usually still set to dark. It is in the lobby row as well as the bar because the bar is hidden once a game starts, which is exactly when a host notices the screen washing out.
+- Deleted `SHAPES[].hex` in passing: dead since phase 5, nothing read it.
+
+### Avatar scroll strip
+
+- One horizontal `overflow-x: auto` row with `snap-x`, capped `max-w-sm` on desktop. It bleeds past the page gutter on a phone, because the faces cut off at both edges are the only thing that says it scrolls.
+- The opening pick is random and lands anywhere in the roster, so the selected button scrolls itself into view on mount. Without that the strip opens on the first face and nothing looks chosen.
+
+### Verified
+
+Full game in a real browser, host at 1440x900 and two guests: picker, lobby, read time, question (with and without an image), reveal, leaderboard, podium, plus both player views, in light and again in dark to check for regressions. Join screen at a real 390x844 viewport in both themes: the strip is one row and the join button clears the fold. Toggle checked to persist across a reload. 56 tests green, `pre-commit run --all-files` clean.
+
+### Known gap
+
+`--color-scheme` emulation reverted to dark partway through a browser session more than once, so the OS-preference path was confirmed on the join page and the toggle carried the rest of the run. The two paths set the same tokens.
+
 ## Fix: host screen on a phone (2026-07-20)
 
 No spec. `Host.vue` only, no API and no doctype change. Every host screen was sized for a projector and broke at 390px.
