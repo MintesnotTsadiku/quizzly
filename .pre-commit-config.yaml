@@ -56,7 +56,6 @@ repos:
         exclude: |
             (?x)^(
                 quizzly/public/dist/.*|
-                cypress/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
                 quizzly/templates/includes/.*|

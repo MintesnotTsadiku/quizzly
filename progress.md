@@ -1,5 +1,21 @@
 # Progress
 
+## CI workflow fixes (2026-07-20)
+
+Spec: `specs/phase-8-ci.md`, written after comparing our workflows against `frappe/wiki`. We already had wiki's server-test and linter jobs, on newer action and MariaDB versions than theirs. The one real gap is Playwright E2E, which wiki has and we don't, and which matters more here than there: quizzly is two browsers and a socket server, and the seam between them is exactly what `bench run-tests` cannot see.
+
+The E2E harness is not built. It is half a day of work (root `package.json`, config, auth setup, two-context helpers, socketio under CI, countdown-timer flake), and `/agent-browser` already covers every fix manually, so the gap is "no unattended gate", not "untested app". Deferred until someone else contributes or a realtime regression ships unnoticed.
+
+Three config fixes shipped now, no new dependency:
+
+- `ci.yml` concurrency group was `develop-quizzly-${{ github.event.number }}`. That expands to empty on `push`, so every push to develop shared one group key and cancelled the run before it. Now `${{ github.event.number || github.ref }}`.
+- `ci.yml` gained `paths-ignore` for `**.js`, `**.vue`, `**.css`, `**.ts`. Frontend-only changes no longer build a bench to run python tests that cannot have changed.
+- Dropped the `cypress/.*` exclude from the eslint pre-commit hook. Inherited from boilerplate; no such directory ever existed here.
+
+### Verified
+
+Both files parse as YAML. `paths-ignore` and the concurrency key only demonstrate themselves on a real PR, so neither is verified beyond that.
+
 ## Theme toggle on the player side (2026-07-20)
 
 The light theme shipped with a control on the host bar and in the lobby row, so only a logged-in host could switch. Players got whatever `prefers-color-scheme` said and no way out of it, which is backwards: the host is on one laptop they control, the players are on twenty phones in a room whose brightness nobody polled.
