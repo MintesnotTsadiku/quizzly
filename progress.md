@@ -8,6 +8,7 @@ Spec: `specs/phase-7-avatar-carousel.md`. Shipped as specced, `Join.vue` only, n
 - The ring, background, scale and opacity all moved onto a `<span>` inside the button. The button is now just the fixed slot, so the gold ring hugs the big face instead of a full-size slot around a shrunken one.
 - Centring became a `watch` on the selection with `flush: "post"` (plus the existing `onMounted` call, since an `immediate` watcher fires before the DOM exists). `motion-safe:scroll-smooth` animates it, and is `motion-safe` because CSS `scroll-behavior` is not covered by the global reduced-motion transition-duration override.
 - Strip moved out of the desktop right column (`md:col-span-2`) and dropped its `md:max-w-sm` cap, so desktop reads PIN, nickname, faces, join, the same order a phone already had.
+- Then the desktop layout went away entirely: `Join.vue` has no `md:` classes left. The two-column grid was only ever there to balance the tall 6-column avatar block, and once the faces were a strip the wide form was two stretched inputs next to each other and nothing else. One centred `max-w-sm` column at every width, so what a host sees on a laptop is what the players see on their phones. Same reason the strip keeps its gutter bleed on desktop now: the cut-off faces at the edge are what say it scrolls, at any width.
 
 ### Verified
 
