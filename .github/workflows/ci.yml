@@ -4,10 +4,20 @@ on:
   push:
     branches:
       - develop
+    paths-ignore:
+      - '**.js'
+      - '**.vue'
+      - '**.css'
+      - '**.ts'
   pull_request:
+    paths-ignore:
+      - '**.js'
+      - '**.vue'
+      - '**.css'
+      - '**.ts'
 
 concurrency:
-  group: develop-quizzly-${{ github.event.number }}
+  group: develop-quizzly-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
