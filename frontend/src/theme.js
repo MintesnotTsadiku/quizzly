@@ -22,5 +22,5 @@ watch(
 			document.documentElement.dataset.theme = value;
 		}
 	},
-	{ immediate: true },
+	{ immediate: true }
 );
