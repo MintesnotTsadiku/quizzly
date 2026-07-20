@@ -7,12 +7,14 @@
 				class="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-8 p-5 sm:p-8"
 			>
 				<div>
-					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-gold">Host</p>
+					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
+						Host
+					</p>
 					<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">
 						Pick a quiz
 					</h1>
 				</div>
-				<p v-if="error" class="text-ember">{{ error }}</p>
+				<p v-if="error" class="text-alert">{{ error }}</p>
 				<div v-if="quizzes.length" class="flex flex-col gap-2">
 					<button
 						v-for="(quiz, index) in quizzes"
@@ -26,7 +28,7 @@
 						<span class="flex-1 font-display text-xl font-bold text-paper">
 							{{ quiz.title }}
 						</span>
-						<span class="text-paper/25 transition group-hover:text-ember">→</span>
+						<span class="text-paper/25 transition group-hover:text-alert">→</span>
 					</button>
 				</div>
 				<p v-else-if="loaded" class="text-paper/50">
@@ -45,7 +47,9 @@
 					<div class="min-w-0 text-center sm:text-left">
 						<!-- inline, not a flex row: the icon has to follow the last line when a
 						     long join host wraps on a phone -->
-						<p class="break-all font-mono text-xs tracking-wide text-gold sm:text-sm">
+						<p
+							class="break-all font-mono text-xs tracking-wide text-accent sm:text-sm"
+						>
 							Join at {{ joinHost }}
 							<button
 								class="ml-1 inline-block translate-y-1 rounded-md p-1 text-paper/30 transition hover:bg-dusk hover:text-paper"
@@ -85,7 +89,7 @@
 						<img
 							:src="qrDataUrl"
 							alt="Join QR code"
-							class="size-40 rounded-2xl bg-paper p-2 transition group-hover:scale-105 sm:size-48"
+							class="size-40 rounded-2xl bg-card p-2 transition group-hover:scale-105 sm:size-48"
 						/>
 						<span
 							class="mt-2 block font-mono text-[11px] uppercase tracking-wider text-paper/35 transition group-hover:text-paper/70"
@@ -118,7 +122,7 @@
 							/>
 							<span>{{ participant.nickname }}</span>
 							<button
-								class="absolute -right-1 -top-1 grid size-6 place-items-center rounded-full bg-haze text-sm leading-none text-paper opacity-0 transition hover:bg-ember hover:text-night focus-visible:opacity-100 group-hover:opacity-100"
+								class="absolute -right-1 -top-1 grid size-6 place-items-center rounded-full bg-haze text-sm leading-none text-paper opacity-0 transition hover:bg-ember hover:text-sunk focus-visible:opacity-100 group-hover:opacity-100"
 								:aria-label="`Remove ${participant.nickname}`"
 								@click="kick(participant)"
 							>
@@ -141,6 +145,7 @@
 					<button class="ctl" @click="toggleMute">
 						{{ muted ? "Sound off" : "Sound on" }}
 					</button>
+					<button class="ctl" @click="cycleTheme">Theme: {{ theme }}</button>
 					<button class="ctl" @click="end">Exit</button>
 					<button
 						class="ctl ctl-go"
@@ -150,7 +155,7 @@
 						{{ starting ? "Starting…" : "Start game" }}
 					</button>
 				</div>
-				<p v-if="error" class="text-center text-ember">{{ error }}</p>
+				<p v-if="error" class="text-center text-alert">{{ error }}</p>
 			</div>
 
 			<dialog
@@ -162,7 +167,7 @@
 				<img
 					:src="qrDataUrl"
 					alt="Join QR code"
-					class="size-[min(78vh,88vw)] rounded-3xl bg-paper p-4"
+					class="size-[min(78vh,88vw)] rounded-3xl bg-card p-4"
 				/>
 				<p class="mt-4 text-center font-mono text-2xl tracking-[0.08em] text-paper">
 					{{ session.game_pin }}
@@ -198,7 +203,7 @@
 							{{ entry.score }}
 						</span>
 						<div
-							class="podium-rise flex w-full items-start justify-center rounded-t-2xl pt-3 font-mono text-2xl font-bold text-night sm:text-3xl"
+							class="podium-rise flex w-full items-start justify-center rounded-t-2xl pt-3 font-mono text-2xl font-bold text-sunk sm:text-3xl"
 							:class="PODIUM_FILL[entry.rank]"
 							:style="{ height: `${180 - (entry.rank - 1) * 45}px` }"
 						>
@@ -245,7 +250,7 @@
 					:percent="timerPercent"
 					:seconds="Math.ceil(remaining)"
 					:size="140"
-					color="#FFC43D"
+					color="rgb(var(--accent))"
 				/>
 			</div>
 		</template>
@@ -263,7 +268,7 @@
 							:percent="timerPercent"
 							:seconds="Math.ceil(remaining)"
 							:size="96"
-							:color="remaining <= 5 ? '#FF5A36' : '#17B0BE'"
+							:color="remaining <= 5 ? 'rgb(var(--alert))' : 'rgb(var(--ok))'"
 						/>
 						<div class="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
 							<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
@@ -299,19 +304,19 @@
 							:class="[shape.fill, dimmed(shape.id) ? 'opacity-25' : '']"
 						>
 							<svg
-								class="size-7 shrink-0 fill-night/55 sm:size-9"
+								class="size-7 shrink-0 fill-sunk/55 sm:size-9"
 								viewBox="0 0 24 24"
 							>
 								<path :d="shape.path" />
 							</svg>
 							<span
-								class="flex-1 font-display text-lg font-extrabold text-night sm:text-2xl"
+								class="flex-1 font-display text-lg font-extrabold text-sunk sm:text-2xl"
 							>
 								{{ question.options[Number(shape.id) - 1] }}
 							</span>
 							<span
 								v-if="phase === 'closed' && shape.id === String(correctOption)"
-								class="text-3xl text-night"
+								class="text-3xl text-sunk"
 								>✓</span
 							>
 						</div>
@@ -391,7 +396,7 @@
 							Auto-advance {{ autoAdvance ? "on" : "off" }}
 						</button>
 						<button class="ctl" @click="end">End game</button>
-						<p v-if="error" class="text-ember">{{ error }}</p>
+						<p v-if="error" class="text-alert">{{ error }}</p>
 					</div>
 				</div>
 			</div>
@@ -409,6 +414,7 @@ import AvatarPic from "@/components/AvatarPic.vue";
 import DrainRing from "@/components/DrainRing.vue";
 import HostBar from "@/components/HostBar.vue";
 import { initSound, muted, playCue, toggleMute } from "@/sound";
+import { cycleTheme, theme } from "@/theme";
 
 const PODIUM_FILL = { 1: "bg-gold", 2: "bg-lagoon", 3: "bg-orchid" };
 // remembered so a reload on the podium restores it: get_host_state only auto-finds live sessions
@@ -446,25 +452,25 @@ const error = ref("");
 watch(qrFullscreen, (open) => (open ? qrDialog.value.showModal() : qrDialog.value.close()));
 
 const joinUrl = computed(
-	() => `${window.location.origin}/quizzly/join?pin=${session.value.game_pin}`,
+	() => `${window.location.origin}/quizzly/join?pin=${session.value.game_pin}`
 );
 
 // The projector shows where to go, not the whole query string.
 const joinHost = computed(() => `${window.location.host}/quizzly/join`);
 
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
 );
 
 const visibleShapes = computed(() =>
-	SHAPES.filter((shape) => question.value?.options[Number(shape.id) - 1]),
+	SHAPES.filter((shape) => question.value?.options[Number(shape.id) - 1])
 );
 
 watch(
 	() => Math.ceil(remaining.value),
 	(secondsLeft) => {
 		if (phase.value === "question" && secondsLeft > 0 && secondsLeft <= 5) playCue("tick");
-	},
+	}
 );
 
 // tallest bar fills the chart; the rest scale against it
@@ -479,7 +485,7 @@ const dimmed = (optionId) => phase.value === "closed" && optionId !== String(cor
 
 // 2nd, 1st, 3rd — the winner stands in the middle
 const podiumOrder = computed(() =>
-	[leaderboard.value[1], leaderboard.value[0], leaderboard.value[2]].filter(Boolean),
+	[leaderboard.value[1], leaderboard.value[0], leaderboard.value[2]].filter(Boolean)
 );
 
 function onSessionEvent(message) {
@@ -639,7 +645,7 @@ async function hostCall(method, params = {}) {
 
 async function toggleLock() {
 	const lobby = await hostCall(
-		lobbyLocked.value ? "quizzly.api.unlock_lobby" : "quizzly.api.lock_lobby",
+		lobbyLocked.value ? "quizzly.api.unlock_lobby" : "quizzly.api.lock_lobby"
 	);
 	if (lobby) lobbyLocked.value = Boolean(lobby.lobby_locked);
 }

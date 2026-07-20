@@ -10,14 +10,26 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				night: "#16111F",
-				dusk: "#241C31",
-				haze: "#3A2F4D",
-				paper: "#F4F0FA",
+				// Themed — the ground and everything sitting on it. Values live in
+				// index.css so light mode can re-derive them.
+				night: "rgb(var(--night) / <alpha-value>)",
+				dusk: "rgb(var(--dusk) / <alpha-value>)",
+				haze: "rgb(var(--haze) / <alpha-value>)",
+				paper: "rgb(var(--paper) / <alpha-value>)",
+				// The same three hues as accent *text*, which has to carry 4.5:1
+				// against the ground, so it darkens where the fill below cannot.
+				alert: "rgb(var(--alert) / <alpha-value>)",
+				accent: "rgb(var(--accent) / <alpha-value>)",
+				ok: "rgb(var(--ok) / <alpha-value>)",
+				// Fixed. The four answer inks are the brand: a player learns "red is
+				// top-left" once, and a tile that shifts hue with the room breaks that.
+				// They carry `sunk` in both themes, so the tiles never theme at all.
 				ember: "#FF5A36",
 				lagoon: "#17B0BE",
 				gold: "#FFC43D",
 				orchid: "#9B6BFF",
+				sunk: "#16111F",
+				card: "#F4F0FA",
 			},
 			fontFamily: {
 				display: ['"Bricolage Grotesque"', "system-ui", "sans-serif"],
