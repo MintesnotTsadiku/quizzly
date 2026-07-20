@@ -242,6 +242,8 @@ const {
 	stop: stopCountdown,
 } = useCountdown();
 
+let stopRoom = () => {};
+
 const player = ref(loadPlayer());
 const phase = ref("lobby");
 const participants = ref(player.value?.participants || []);
@@ -275,13 +277,20 @@ const orderedOptions = computed(() =>
 	question.value ? optionOrder(question.value, player.value.token) : []
 );
 
+// Nothing left to follow once the host removes the player, so the room goes too:
+// its resync watchdog would otherwise keep asking for a session we are out of.
+function showKicked() {
+	stopRoom();
+	clearPlayer();
+	stopCountdown();
+	phase.value = "kicked";
+}
+
 function onSessionEvent(message) {
 	if (message.type === "lobby_update") {
 		participants.value = message.participants;
 	} else if (message.type === "kicked" && message.participant === player.value.participant) {
-		clearPlayer();
-		stopCountdown();
-		phase.value = "kicked";
+		showKicked();
 	} else if (message.type === "get_ready") {
 		showGetReady(message.question_text, message.q_index, message.total, message.seconds);
 	} else if (message.type === "question") {
@@ -393,13 +402,25 @@ onMounted(() => {
 		router.replace("/join");
 		return;
 	}
-	useSessionRoom(socket, player.value.pin, onSessionEvent, safeRestore);
+	stopRoom = useSessionRoom(socket, player.value.pin, onSessionEvent, safeRestore);
 });
 
 async function safeRestore() {
 	try {
 		await restore();
 	} catch (e) {
+		// The kick and cancel paths normally arrive over realtime. When that is down the
+		// resync watchdog is what learns about them, and retrying a session the player is
+		// no longer in just 404s every 20s until the tab closes.
+		if (e.exc_type === "DoesNotExistError") {
+			clearPlayer();
+			router.replace("/join");
+			return;
+		}
+		if (e.exc_type === "PermissionError") {
+			showKicked();
+			return;
+		}
 		error.value = e.messages?.[0] || e.message;
 	}
 }

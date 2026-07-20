@@ -1,6 +1,7 @@
 import { onBeforeUnmount, ref } from "vue";
 
 const SILENCE_LIMIT_MS = 20000;
+const OFFLINE_RESYNC_MS = 3000;
 
 // Colors are spelled out as full class names: Tailwind only generates what it can see.
 export const SHAPES = [
@@ -103,18 +104,26 @@ export function useSessionRoom(socket, pin, onEvent, resync) {
 
 	// A socket can go quiet without ever firing `connect` again: the room membership
 	// is lost or a reconnect never lands, and the screen then freezes for good. Long
-	// silences are normal between questions, so this only rejoins after a very quiet
-	// stretch, and rejoining costs one get_state.
+	// silences are normal between questions, so a live socket is only rejoined after a
+	// very quiet stretch. Once the socket is down this resync is the whole transport,
+	// and a quiz is unplayable if a question takes 20 seconds to show up.
 	const watchdog = setInterval(() => {
-		if (Date.now() - lastEventAt > SILENCE_LIMIT_MS) join();
-	}, 5000);
+		const limit = socket.connected ? SILENCE_LIMIT_MS : OFFLINE_RESYNC_MS;
+		if (Date.now() - lastEventAt > limit) join();
+	}, 1000);
 
-	onBeforeUnmount(() => {
+	let stopped = false;
+	function stop() {
+		if (stopped) return;
+		stopped = true;
 		clearInterval(watchdog);
 		socket.off(eventName, handle);
 		socket.off("connect", join);
 		socket.emit("qz_leave", pin);
-	});
+	}
+
+	onBeforeUnmount(stop);
+	return stop;
 }
 
 /** Local countdown. Ticks off elapsed wall time, never off the server clock. */
