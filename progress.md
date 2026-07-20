@@ -1,5 +1,45 @@
 # Progress
 
+## Phase 9: README with screenshots (2026-07-20)
+
+Spec: `specs/phase-9-documentation.md`. The README was still the app-scaffold
+default. It is now the front door: hero image, what-it-is, a collapsed gallery
+of eight screenshots, features, stack, dev setup, testing, contributing.
+
+### Done
+
+- Eight screenshots in `docs/images/`, all from one real session against
+  `quizzly.localhost` (520 KB total). Host shots at 1440x900, player shots at
+  390x844 with DPR 2, one player shot in dark theme. Podium needed 1440x1010
+  to fit its leaderboard and button in a single frame.
+- `scripts/seed_demo.py`: creates the "General Knowledge" demo quiz. Run with
+  `bench --site quizzly.localhost console < scripts/seed_demo.py`.
+- `scripts/demo_bots.py`: joins seven named players over the guest HTTP API and
+  answers questions for them at plausible accuracies, so the lobby,
+  distribution and podium look like a real game. Both scripts are throwaway
+  tooling for pictures, not fixtures.
+- No CI badges: this repo has no git remote yet, so the badge URLs would not
+  resolve. Add them with the remote.
+
+### Verified
+
+`bench --site quizzly.localhost run-tests --app quizzly`: 56 tests, all green.
+`pre-commit run --all-files`: clean. Every command in the README was run as
+written.
+
+### Notes
+
+- The bench runs a single `bench worker` serving short, default and long. The
+  game loop is enqueued on `long`, and while that worker was busy with another
+  site's scheduled jobs the loop never started, so `is_abandoned` fired at 30s
+  and every session jumped straight to an all-zero podium. Captures needed a
+  dedicated `frappe worker --queue long` alongside it. Not an app bug, but a
+  real deployment constraint: a live game needs a worker that is not competing
+  with scheduled jobs.
+- The podium screen scrolls inside its own container, not the window, so with
+  eight players a 900px-tall viewport clips the tail of the leaderboard and the
+  "New game" button. Reachable, but only if you know to scroll there.
+
 ## CI workflow fixes (2026-07-20)
 
 Spec: `specs/phase-8-ci.md`, written after comparing our workflows against `frappe/wiki`. We already had wiki's server-test and linter jobs, on newer action and MariaDB versions than theirs. The one real gap is Playwright E2E, which wiki has and we don't, and which matters more here than there: quizzly is two browsers and a socket server, and the seam between them is exactly what `bench run-tests` cannot see.
