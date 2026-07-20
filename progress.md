@@ -1,5 +1,18 @@
 # Progress
 
+## Phase 7: avatar carousel (2026-07-20)
+
+Spec: `specs/phase-7-avatar-carousel.md`. Shipped as specced, `Join.vue` only, no backend.
+
+- Every slot keeps the large size and only the face inside scales (`scale-[0.62]` unselected, `scale-100` selected). Sizing the button itself would reflow the row on every tap and jump the strip under the thumb; a transform does not reflow, so the row height and the join button below it stay put.
+- The ring, background, scale and opacity all moved onto a `<span>` inside the button. The button is now just the fixed slot, so the gold ring hugs the big face instead of a full-size slot around a shrunken one.
+- Centring became a `watch` on the selection with `flush: "post"` (plus the existing `onMounted` call, since an `immediate` watcher fires before the DOM exists). `motion-safe:scroll-smooth` animates it, and is `motion-safe` because CSS `scroll-behavior` is not covered by the global reduced-motion transition-duration override.
+- Strip moved out of the desktop right column (`md:col-span-2`) and dropped its `md:max-w-sm` cap, so desktop reads PIN, nickname, faces, join, the same order a phone already had.
+
+### Verified
+
+Headless browser at 390x844 and 1280 wide. Phone: opening random pick lands centred and big, tapping the last face in the roster scrolls the strip to its end (`scrollLeft` 890 of max 890) with the join button unmoved. Desktop: strip is the full-width row between the inputs and the join button. `pre-commit` clean on the changed file.
+
 ## Phase 5 leftovers: light theme and avatar strip (2026-07-20)
 
 Spec: `specs/phase-5-visual-identity.md`, both sections rewritten from "Deferred" to what shipped. Phase 5 now has nothing outstanding.
