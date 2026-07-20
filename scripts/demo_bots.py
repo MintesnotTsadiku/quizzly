@@ -68,7 +68,13 @@ def answer(pin):
 		else:
 			option = random.choice([o for o in "1234" if o != right])
 		try:
-			call("submit_answer", pin=pin, token=player["token"], question_row=question_row, selected_option=option)
+			call(
+				"submit_answer",
+				pin=pin,
+				token=player["token"],
+				question_row=question_row,
+				selected_option=option,
+			)
 			print(player["nickname"], "answered", option)
 		except requests.HTTPError as error:
 			print(player["nickname"], "rejected", error)
