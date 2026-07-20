@@ -197,3 +197,13 @@ body {
 		transition-duration: 0.01ms !important;
 	}
 }
+
+/* The avatar strip says "this scrolls" with faces cut off at the gutter, so
+   the bar underneath is noise. */
+.no-scrollbar {
+	scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
