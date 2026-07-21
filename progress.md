@@ -1,5 +1,40 @@
 # Progress
 
+## Live Quiz Rework Phase 1: Ticker Tracer (2026-07-21)
+
+Spec: `specs/live-quiz-rework/phase-1-ticker-tracer.md`. Replaced the per-game
+busy-wait loop (`run_game_loop`, one RQ job per session) with a shared ticker
+plus a per-session Redis state machine.
+
+### Done
+
+- `run_ticker`: one self-looping RQ job (`job_id="qz_ticker"`, `deduplicate=True`,
+  queue `long`). Each pass reads `qz:active_sessions`, per session pops control and
+  advances when a control fired or `now >= next_ts`, commits, sleeps `TICK_SECONDS`
+  (0.5). Exits when the active set is empty.
+- `advance_session(session_doc, state, control)` dispatches on `state["phase"]`
+  (`get_ready` -> `question` -> `stats` -> next / finish). `end` control finishes
+  any phase.
+- `get_ready` / `open_question` / `close_question` lost their internal while/sleep
+  loops; they now just write state (extended with `phase` and `next_ts`) and push.
+  `close_question` reads `auto_advance` fresh to size the stats wait.
+- `enqueue_game_loop` seeds the first `get_ready` state, `sadd`s the session, then
+  enqueues the shared ticker. `finish_session` `srem`s on the way out.
+- Deleted `run_game_loop`, `wait_question_window`, `wait_before_next`, `POLL_SECONDS`.
+- Tests green (`test_engine`, `test_game_ux`): `TestGameLoop` now drives the game via
+  `enqueue_game_loop` + `run_ticker`; added coverage for auto-advance-off hold and
+  advance-on-last-question finish.
+
+### Browser E2E (quizzly.localhost)
+
+- Full game played host + guest: get_ready pause -> question + countdown -> reveal
+  -> auto-advance -> podium. Host **skip** closed the question within ~0.5s; the
+  ticker exited with no lingering job after finish.
+- Env note: this bench's `long` RQ queue had no worker and was clogged with hanging
+  jobs from another site, so the browser run drove `run_ticker` synchronously via
+  `bench execute` (same realtime path). The RQ enqueue/dedup itself is unchanged
+  standard `frappe.enqueue`.
+
 ## Phase 9: README with screenshots (2026-07-20)
 
 Spec: `specs/phase-9-documentation.md`. The README was still the app-scaffold

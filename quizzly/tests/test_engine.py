@@ -102,11 +102,13 @@ class GameTestCase(IntegrationTestCase):
 		engine.set_state(
 			self.session,
 			{
+				"phase": "question",
 				"status": "question",
 				"q_index": index,
 				"question_row": question.name,
 				"opened_at": now,
 				"deadline_ts": now + window,
+				"next_ts": now + window + engine.GRACE_SECONDS,
 				"window_ms": window * 1000,
 				"total": len(self.questions),
 			},
@@ -207,12 +209,14 @@ class TestGameLoop(GameTestCase):
 		with (
 			patch("frappe.publish_realtime", side_effect=record),
 			patch("frappe.db.commit"),
+			patch("frappe.enqueue"),
 			patch.object(engine, "STATS_SECONDS", 0.25),
 			patch.object(engine, "GETREADY_SECONDS", 0.25),
 			patch.object(engine, "GRACE_SECONDS", 0.25),
-			patch.object(engine, "POLL_SECONDS", 0.05),
+			patch.object(engine, "TICK_SECONDS", 0.05),
 		):
-			engine.run_game_loop(self.session)
+			engine.enqueue_game_loop(self.session_doc)
+			engine.run_ticker()
 		return events
 
 	def submit_scripted_answers(self, message):
@@ -279,13 +283,38 @@ class TestGameLoop(GameTestCase):
 		self.assertEqual(answer.is_correct, 0)
 		self.assertEqual(answer.points, 0)
 
-	def test_skip_control_closes_window_early(self):
+	def test_skip_control_closes_question_early(self):
+		self.activate()
+		self.open_question(window=60)
 		engine.set_control(self.session, "skip")
-		started = time.time()
-		with patch.object(engine, "POLL_SECONDS", 0.05):
-			control = engine.wait_question_window(self.session, deadline_ts=time.time() + 60)
-		self.assertEqual(control, "skip")
-		self.assertLess(time.time() - started, 2)
+		state = engine.get_state(self.session)
+		control = engine.pop_control(self.session, ("skip", "advance", "end"))
+		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
+			engine.advance_session(self.session_doc, state, control)
+		self.assertEqual(engine.get_state(self.session)["phase"], "stats")
+
+	def test_stats_holds_for_host_when_auto_advance_off(self):
+		self.activate()
+		frappe.db.set_value("QZ Session", self.session, "auto_advance", 0)
+		question = self.open_question()
+		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
+			engine.close_question(self.session_doc, question, 0, len(self.questions))
+			state = engine.get_state(self.session)
+			self.assertEqual(state["phase"], "stats")
+			self.assertGreater(state["next_ts"] - time.time(), engine.STATS_SECONDS + 10)
+			engine.advance_session(self.session_doc, state, None)
+		self.assertEqual(engine.get_state(self.session)["phase"], "stats")
+
+	def test_advance_control_on_last_question_finishes(self):
+		self.activate()
+		frappe.db.set_value("QZ Session", self.session, "auto_advance", 0)
+		last = len(self.questions) - 1
+		question = self.open_question(index=last)
+		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
+			engine.close_question(self.session_doc, question, last, len(self.questions))
+			engine.advance_session(self.session_doc, engine.get_state(self.session), "advance")
+		self.assertIsNone(engine.get_state(self.session))
+		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
 
 	def test_end_session_from_lobby_cancels(self):
 		end_session(self.session)

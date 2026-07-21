@@ -1,6 +1,6 @@
 """Server-authoritative game loop and hot state for live sessions.
 
-One RQ job per active session drives the whole game. Clients never tick:
+One shared RQ ticker advances every active session's state machine. Clients never tick:
 each question payload carries a server-set deadline_ts and clients render
 their own countdown. Redis (frappe.cache) is the fast gate for submit
 validation; the DB is the durable record.
@@ -17,62 +17,90 @@ STATS_SECONDS = 5
 GETREADY_SECONDS = 3
 # ponytail: host gets 5 minutes to hit Next, then the game moves on by itself
 ADVANCE_WAIT_CAP = 300
-POLL_SECONDS = 0.25
+TICK_SECONDS = 0.5
 STATE_TTL_MARGIN = 30
 STREAK_CALLOUT_MIN = 3
+ACTIVE_SESSIONS_KEY = "qz:active_sessions"
+# ponytail: one shared ticker for all games; 6h covers any single game, re-enqueue on timeout is a Phase 2 scale concern
+TICKER_TIMEOUT = 21600
 
 
 def enqueue_game_loop(session_doc) -> None:
-	total_seconds = sum(question_window(q, session_doc) for q in get_quiz_questions(session_doc))
-	question_count = len(get_quiz_questions(session_doc))
-	per_question_overhead = (
-		GETREADY_SECONDS + STATS_SECONDS + (0 if session_doc.auto_advance else ADVANCE_WAIT_CAP)
-	)
-	timeout = int(total_seconds + question_count * (per_question_overhead + GRACE_SECONDS) + 60)
+	questions = get_quiz_questions(session_doc)
+	if not questions:
+		finish_session(session_doc)
+		return
+	clear_control(session_doc.name)
+	get_ready(session_doc, questions[0], 0, len(questions))
+	frappe.cache.sadd(ACTIVE_SESSIONS_KEY, session_doc.name)
 	frappe.enqueue(
-		"quizzly.engine.run_game_loop",
+		"quizzly.engine.run_ticker",
 		queue="long",
-		timeout=timeout,
-		job_id=f"qz_session_{session_doc.name}",
+		timeout=TICKER_TIMEOUT,
+		job_id="qz_ticker",
 		deduplicate=True,
 		enqueue_after_commit=True,
-		session=session_doc.name,
 	)
 
 
-def run_game_loop(session: str) -> None:
-	session_doc = frappe.get_doc("QZ Session", session)
-	if session_doc.status != "Active":
+def run_ticker() -> None:
+	"""One shared self-looping job. Advances every active session on time or host command."""
+	while True:
+		sessions = active_sessions()
+		if not sessions:
+			break
+		for session in sessions:
+			state = get_state(session)
+			if not state:
+				frappe.cache.srem(ACTIVE_SESSIONS_KEY, session)
+				continue
+			control = pop_control(session, ("skip", "advance", "end"))
+			if control or time.time() >= state["next_ts"]:
+				advance_session(frappe.get_doc("QZ Session", session), state, control)
+		frappe.db.commit()
+		time.sleep(TICK_SECONDS)
+
+
+def advance_session(session_doc, state: dict, control: str | None) -> None:
+	"""Walk the per-session state machine one step: phase + host control -> next phase."""
+	if control == "end":
+		finish_session(session_doc)
 		return
+
+	phase = state["phase"]
+	index = state["q_index"]
 	questions = get_quiz_questions(session_doc)
 	total = len(questions)
-	clear_control(session)
+	due = time.time() >= state["next_ts"]
 
-	for index, question in enumerate(questions):
-		if get_ready(session_doc, question, index, total) == "end":
-			break
-		deadline_ts = open_question(session_doc, question, index, total)
-		control = wait_question_window(session, deadline_ts)
-		close_question(session_doc, question, index, total)
-		if control == "end" or index == total - 1:
-			break
-		if wait_before_next(session_doc) == "end":
-			break
+	if phase == "get_ready":
+		if due:
+			open_question(session_doc, questions[index], index, total)
+	elif phase == "question":
+		if due or control == "skip":
+			close_question(session_doc, questions[index], index, total)
+	elif phase == "stats":
+		if due or control == "advance":
+			if index == total - 1:
+				finish_session(session_doc)
+			else:
+				get_ready(session_doc, questions[index + 1], index + 1, total)
 
-	finish_session(session_doc)
 
-
-def get_ready(session_doc, question, index: int, total: int) -> str | None:
+def get_ready(session_doc, question, index: int, total: int) -> None:
 	"""Read-the-question pause before the clock starts, Kahoot style."""
-	deadline_ts = time.time() + GETREADY_SECONDS
+	now = time.time()
+	deadline_ts = now + GETREADY_SECONDS
 	set_state(
 		session_doc.name,
 		{
+			"phase": "get_ready",
 			"status": "get_ready",
 			"q_index": index,
 			"question_row": question.name,
-			"opened_at": time.time(),
+			"opened_at": now,
 			"deadline_ts": deadline_ts,
+			"next_ts": deadline_ts,
 			"window_ms": question_window(question, session_doc) * 1000,
 			"total": total,
 		},
@@ -88,26 +116,22 @@ def get_ready(session_doc, question, index: int, total: int) -> str | None:
 			"seconds": GETREADY_SECONDS,
 		},
 	)
-	frappe.db.commit()
-	while time.time() < deadline_ts:
-		if pop_control(session_doc.name, ("end",)):
-			return "end"
-		time.sleep(POLL_SECONDS)
-	return None
 
 
-def open_question(session_doc, question, index: int, total: int) -> float:
+def open_question(session_doc, question, index: int, total: int) -> None:
 	window = question_window(question, session_doc)
 	opened_at = time.time()
 	deadline_ts = opened_at + window
 	set_state(
 		session_doc.name,
 		{
+			"phase": "question",
 			"status": "question",
 			"q_index": index,
 			"question_row": question.name,
 			"opened_at": opened_at,
 			"deadline_ts": deadline_ts,
+			"next_ts": deadline_ts + GRACE_SECONDS,
 			"window_ms": window * 1000,
 			"total": total,
 		},
@@ -115,26 +139,20 @@ def open_question(session_doc, question, index: int, total: int) -> float:
 	)
 	frappe.db.set_value("QZ Session", session_doc.name, "current_question", index)
 	publish_session_event(session_doc, question_payload(session_doc, question, index, total, deadline_ts))
-	frappe.db.commit()
-	return deadline_ts
-
-
-def wait_question_window(session: str, deadline_ts: float) -> str | None:
-	"""Sleep until deadline + grace, waking early on host skip/end."""
-	while time.time() < deadline_ts + GRACE_SECONDS:
-		control = pop_control(session, ("skip", "end"))
-		if control:
-			return control
-		time.sleep(POLL_SECONDS)
-	return None
 
 
 def close_question(session_doc, question, index: int, total: int) -> None:
 	state = get_state(session_doc.name) or {}
 	window_ms = state.get("window_ms") or question_window(question, session_doc) * 1000
+	auto_advance = frappe.db.get_value("QZ Session", session_doc.name, "auto_advance")
 	set_state(
 		session_doc.name,
-		{**state, "status": "closed"},
+		{
+			**state,
+			"phase": "stats",
+			"status": "closed",
+			"next_ts": time.time() + (STATS_SECONDS if auto_advance else ADVANCE_WAIT_CAP),
+		},
 		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
 	)
 	participants = get_live_participants(session_doc.name)
@@ -197,19 +215,9 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 	frappe.db.commit()
 
 
-def wait_before_next(session_doc) -> str | None:
-	"""Stats pause; then auto-advance, or wait (capped) for host next_question."""
-	waited = 0.0
-	# read fresh: the host can flip auto-advance mid-game
-	auto_advance = frappe.db.get_value("QZ Session", session_doc.name, "auto_advance")
-	cap = STATS_SECONDS if auto_advance else STATS_SECONDS + ADVANCE_WAIT_CAP
-	while waited < cap:
-		control = pop_control(session_doc.name, ("advance", "end"))
-		if control:
-			return control
-		time.sleep(POLL_SECONDS)
-		waited += POLL_SECONDS
-	return None
+def active_sessions() -> list[str]:
+	members = frappe.cache.smembers(ACTIVE_SESSIONS_KEY)
+	return [m.decode() if isinstance(m, bytes) else m for m in members]
 
 
 def is_loop_alive(session: str) -> bool:
@@ -260,6 +268,7 @@ def finish_session(session_doc) -> None:
 		{"type": "podium", "top_3": leaderboard[:3], "leaderboard": leaderboard},
 	)
 	clear_state(session_doc.name)
+	frappe.cache.srem(ACTIVE_SESSIONS_KEY, session_doc.name)
 	frappe.db.commit()
 
 
