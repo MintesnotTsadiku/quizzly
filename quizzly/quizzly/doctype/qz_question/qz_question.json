@@ -45,12 +45,14 @@
   {
    "fieldname": "option_3",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Option 3",
    "reqd": 1
   },
   {
    "fieldname": "option_4",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Option 4",
    "reqd": 1
   },
