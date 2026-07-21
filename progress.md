@@ -35,6 +35,12 @@ plus a per-session Redis state machine.
   `bench execute` (same realtime path). The RQ enqueue/dedup itself is unchanged
   standard `frappe.enqueue`.
 
+### Branches
+
+- Work committed on `feat/live-quiz-ticker` (spec commit + implementation commit).
+- Branched `experimental` off it and merged `feat/live-quiz-ticker` in (fast-forward,
+  same commits). Both branches local only, not pushed.
+
 ## Phase 9: README with screenshots (2026-07-20)
 
 Spec: `specs/phase-9-documentation.md`. The README was still the app-scaffold
