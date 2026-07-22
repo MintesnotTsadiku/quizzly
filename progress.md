@@ -12,6 +12,12 @@ payoff of Phase 1's redesign.
   `qz_tick` savepoint inside its own try/except, commits on success, and on error
   rolls back to the savepoint + `log_error`s and continues. One bad game can no
   longer stall or kill the ticker for the others.
+- Fixed a real ticker bug the self-heal path was hiding: `get_state` read through
+  Frappe's process-local cache (`use_local_cache` default True), so in the
+  long-lived ticker a session whose state had expired in Redis still returned its
+  last-seen dict forever. The `if not state: srem` self-heal never fired and the
+  ticker spun on the vanished session. `get_state` now reads with
+  `use_local_cache=False`, like `pop_control` already does.
 - Lifecycle was already airtight from Phase 1 and confirmed so: `active_sessions`
   is `srem`'d on finish, on `end`, and on abandon (all route through
   `finish_session`); the ticker `srem`s any session whose state has vanished; and

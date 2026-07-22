@@ -303,7 +303,9 @@ def set_state(session: str, state: dict, ttl: float) -> None:
 
 
 def get_state(session: str) -> dict | None:
-	return frappe.cache.get_value(state_key(session))
+	# never from process-local cache: the long-lived ticker must see state that
+	# expired or was written by another process, or it spins on a vanished session
+	return frappe.cache.get_value(state_key(session), use_local_cache=False)
 
 
 def clear_state(session: str) -> None:

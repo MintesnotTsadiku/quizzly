@@ -320,6 +320,8 @@ class TestGameLoop(GameTestCase):
 		"""A session that throws every pass must not stall the other live games."""
 		self.activate()
 
+		self.addCleanup(lambda: frappe.cache.srem(engine.ACTIVE_SESSIONS_KEY, "qz-bogus"))
+
 		def seed_bad_session():
 			frappe.cache.sadd(engine.ACTIVE_SESSIONS_KEY, "qz-bogus")
 			# state present (so it isn't srem'd) but get_doc will raise every pass; short TTL self-clears
