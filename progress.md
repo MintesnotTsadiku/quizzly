@@ -1,5 +1,47 @@
 # Progress
 
+## Live Quiz Rework Phase 3: Batch Scoring Writes (2026-07-23)
+
+Spec: `specs/live-quiz-rework/phase-3-batch-scoring.md`. Killed the N+1 write
+loops so reveal time stops scaling with player count.
+
+### Done
+
+- `close_question`: the participant loop now builds two in-memory dicts and no
+  longer does I/O per participant. `answer_updates` (`{answer: {is_correct,
+  points}}`) and `participant_updates` (`{participant: {score, streak}}`,
+  streak-reset-to-0 for non-answerers in the same dict) flush through two
+  `frappe.db.bulk_update` calls after the loop. Same commit + `question_closed`
+  push as before.
+- `finish_session`: ranks persist via one `frappe.db.bulk_update("QZ
+  Participant", {name: {"rank": rank}})` instead of one `set_value` per player.
+- `bulk_update` builds chunked CASE-WHEN UPDATEs and does **not** commit
+  internally, so the ticker's `qz_tick` savepoint isolation (Phase 2) is intact.
+  It also no-ops on an empty dict, so a question nobody answered is safe.
+
+### Tests
+
+- `run-tests --app quizzly`: 22 engine + 15 game-ux tests green. Scores, streaks,
+  ranks, and podium identical to before — batching changed no number.
+- Load check (`scripts`-style console driver, 200 participants, half correct):
+  `close_question` went **207.9 ms -> 36.7 ms**. The residual is the answer
+  fetch, not the writes; write time no longer scales with player count.
+
+### Browser E2E (quizzly.localhost)
+
+- Host + 3 guests (Alice/Bob/Cara) played "General Knowledge" driven by the real
+  async `long` RQ worker (not the synchronous driver Phases 1-2 fell back to).
+  The shared ticker marched through all 5 questions and rendered a correct podium
+  with ranks 1/2/3 on both host and player screens. `finish_session`'s batched
+  rank write and `close_question`'s batched score writes ran with **zero** Error
+  Log entries.
+- Pre-existing, out-of-scope: with the real async ticker, the **player** view
+  never advances from `get_ready` to the `question` phase (options never render),
+  so guests can't answer and everyone scores 0. Host advances fine and gets every
+  event. This is a player realtime/state issue untouched by this diff (which only
+  edits `close_question`/`finish_session` DB writes) and predates it. Flagged for
+  a separate fix; does not affect scoring correctness, which the unit suite gates.
+
 ## Live Quiz Rework Phase 2: Multi-Game Scale (2026-07-21)
 
 Spec: `specs/live-quiz-rework/phase-2-multi-game-scale.md`. Proved the shared

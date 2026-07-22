@@ -169,12 +169,14 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 	)
 	answer_by_participant = {a.participant: a for a in answers}
 	distribution = {"1": 0, "2": 0, "3": 0, "4": 0}
+	answer_updates = {}
+	participant_updates = {}
 
 	for participant in participants:
 		answer = answer_by_participant.get(participant.name)
 		if not answer:
 			participant.streak = 0
-			frappe.db.set_value("QZ Participant", participant.name, "streak", 0)
+			participant_updates[participant.name] = {"streak": 0}
 			continue
 		distribution[str(answer.selected_option)] += 1
 		is_correct = str(answer.selected_option) == str(question.correct_option)
@@ -187,12 +189,11 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 			participant.streak = 0
 			points = 0
 		participant.score += points
-		frappe.db.set_value("QZ Answer", answer.name, {"is_correct": int(is_correct), "points": points})
-		frappe.db.set_value(
-			"QZ Participant",
-			participant.name,
-			{"score": participant.score, "streak": participant.streak},
-		)
+		answer_updates[answer.name] = {"is_correct": int(is_correct), "points": points}
+		participant_updates[participant.name] = {"score": participant.score, "streak": participant.streak}
+
+	frappe.db.bulk_update("QZ Answer", answer_updates)
+	frappe.db.bulk_update("QZ Participant", participant_updates)
 
 	top_5 = [
 		{"nickname": p.nickname, "avatar": p.avatar, "score": p.score}
@@ -254,8 +255,9 @@ def finish_session(session_doc) -> None:
 	participants = get_live_participants(session_doc.name)
 	participants.sort(key=lambda p: (-p.score, p.joined_at or now_datetime()))
 	leaderboard = []
+	rank_updates = {}
 	for rank, participant in enumerate(participants, start=1):
-		frappe.db.set_value("QZ Participant", participant.name, "rank", rank)
+		rank_updates[participant.name] = {"rank": rank}
 		leaderboard.append(
 			{
 				"nickname": participant.nickname,
@@ -264,6 +266,7 @@ def finish_session(session_doc) -> None:
 				"rank": rank,
 			}
 		)
+	frappe.db.bulk_update("QZ Participant", rank_updates)
 	frappe.db.set_value(
 		"QZ Session",
 		session_doc.name,
