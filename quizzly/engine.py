@@ -18,6 +18,8 @@ GETREADY_SECONDS = 3
 # ponytail: host gets 5 minutes to hit Next, then the game moves on by itself
 ADVANCE_WAIT_CAP = 300
 TICK_SECONDS = 0.5
+# ponytail: broadcast the live "N answered" counter at most this often, not once per submit
+ANSWER_COUNT_THROTTLE = 0.3
 STATE_TTL_MARGIN = 30
 STREAK_CALLOUT_MIN = 3
 ACTIVE_SESSIONS_KEY = "qz:active_sessions"
@@ -45,10 +47,15 @@ def enqueue_game_loop(session_doc) -> None:
 
 def run_ticker() -> None:
 	"""One shared self-looping job. Advances every active session on time or host command."""
+	# process-local: the ticker is a single deduplicated job, so per-session throttle
+	# state and immutable pins live safely in memory for this run.
+	answer_count_state: dict = {}
+	pin_cache: dict = {}
 	while True:
 		sessions = active_sessions()
 		if not sessions:
 			break
+		prune_ticker_caches(sessions, answer_count_state, pin_cache)
 		for session in sessions:
 			frappe.db.savepoint("qz_tick")
 			try:
@@ -59,12 +66,50 @@ def run_ticker() -> None:
 				control = pop_control(session, ("skip", "advance", "end"))
 				if control or time.time() >= state["next_ts"]:
 					advance_session(frappe.get_doc("QZ Session", session), state, control)
+				else:
+					maybe_push_answer_count(session, state, answer_count_state, pin_cache)
 				frappe.db.commit()
 			except Exception:
 				# one bad session must not stall every other live game
 				frappe.db.rollback(save_point="qz_tick")
 				frappe.log_error(title=f"qz_ticker session {session}")
 		time.sleep(TICK_SECONDS)
+
+
+def maybe_push_answer_count(session: str, state: dict, throttle_state: dict, pin_cache: dict) -> None:
+	"""Broadcast the live answered count, but only while a question is open, only on change,
+	and at most every ANSWER_COUNT_THROTTLE seconds. Replaces the per-submit broadcast storm."""
+	if state["phase"] != "question":
+		return
+	question_row = state["question_row"]
+	count = answered_count(session, question_row)
+	prev = throttle_state.get(session)
+	now = time.time()
+	if prev and prev[0] == question_row:
+		if count == prev[1] or now - prev[2] < ANSWER_COUNT_THROTTLE:
+			return
+	elif count == 0:
+		# new question, nobody in yet: host already shows 0 from the question event
+		throttle_state[session] = (question_row, 0, now)
+		return
+	throttle_state[session] = (question_row, count, now)
+	pin = pin_cache.get(session)
+	if pin is None:
+		pin = frappe.db.get_value("QZ Session", session, "game_pin")
+		pin_cache[session] = pin
+	room = f"qz_session_{pin}"
+	frappe.publish_realtime(
+		event=room,
+		message={"type": "answer_count", "question_row": question_row, "count": count},
+		room=room,
+	)
+
+
+def prune_ticker_caches(sessions: list[str], *caches: dict) -> None:
+	live = set(sessions)
+	for cache in caches:
+		for stale in [s for s in cache if s not in live]:
+			del cache[stale]
 
 
 def advance_session(session_doc, state: dict, control: str | None) -> None:

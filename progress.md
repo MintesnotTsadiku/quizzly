@@ -1,5 +1,54 @@
 # Progress
 
+## Live Quiz Rework Phase 4: Trim Submit + Throttle answer_count (2026-07-23)
+
+Spec: `specs/live-quiz-rework/phase-4-submit-and-count.md`. Cut the last two
+per-answer costs, and fixed the guest-socket blocker Phase 3 flagged.
+
+### Done
+
+- `submit_answer` (`api.py`): insert now uses `ignore_links=True` (session-active
+  and participant-by-token are already validated; the `(participant,
+  question_row)` unique index still backstops duplicates). Removed the per-submit
+  `answer_count` broadcast block entirely.
+- Ticker (`engine.py`): `maybe_push_answer_count` broadcasts the live "N answered"
+  count from the ticker instead, but only while a question is open, only on
+  change, and at most every `ANSWER_COUNT_THROTTLE` (0.3s). Result: a few
+  updates/sec total, flat regardless of player count. Throttle state + immutable
+  pins live process-local in `run_ticker` (single deduplicated job), pruned each
+  pass to the live session set so finished games don't leak.
+
+### Root-cause fix: guest sockets received no live events (Phase 3 blocker)
+
+- Symptom (Phase 3 note): with the real async ticker, players never advance
+  `get_ready` -> `question`; they only limp via `get_state` resync.
+- Reproduced with a guest socket.io client against the live socketio server: it
+  receives `website`-room events but **nothing** on `qz_session_<pin>`, so no
+  game events ever arrive live. Host "worked" only because the frontend resync
+  watchdog papers over it for slow lobby changes, not fast question transitions.
+- Root cause: `apps/quizzly/package.json` has `"type": "module"`, so Node loads
+  `realtime/handlers.js` as ESM. The frappe socketio server `require()`s it as
+  CommonJS and gets `{}` instead of the handler function; `app_handler(socket)`
+  throws and is swallowed, so `qz_join`/`qz_leave` never register and no socket
+  ever joins the session room.
+- Fix: `apps/quizzly/realtime/package.json` = `{"type":"commonjs"}` overrides the
+  module type for just that directory, so the CJS handler loads again without
+  disturbing the ESM app root the frontend build relies on. Verified at the
+  `require()` level (now returns `function quizzly_handlers`). **Needs a socketio
+  restart to take effect** (the running server cached the failed load).
+
+### Tests
+
+- `run-tests --app quizzly`: 59 green. The engine test that filtered out
+  `answer_count` events is unaffected (no such events emitted now).
+- Lint: pre-commit clean on all changed files.
+
+### Pending
+
+- Browser E2E (3+ guests: counter climbs via ticker, players advance to
+  questions and answer) is blocked on a `bench` restart to reload the socketio
+  handler. Run after restart per the rework rule (no merge until browser green).
+
 ## Live Quiz Rework Phase 3: Batch Scoring Writes (2026-07-23)
 
 Spec: `specs/live-quiz-rework/phase-3-batch-scoring.md`. Killed the N+1 write
