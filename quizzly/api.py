@@ -237,17 +237,10 @@ def submit_answer(pin: str, token: str, question_row: str, selected_option: str)
 				"selected_option": str(selected_option),
 				"response_ms": int((received_at - state["opened_at"]) * 1000),
 			}
-		).insert(ignore_permissions=True)
+		).insert(ignore_permissions=True, ignore_links=True)
 	except frappe.UniqueValidationError:
 		frappe.throw(_("Already answered"))
-	publish_session_event(
-		session,
-		{
-			"type": "answer_count",
-			"question_row": question_row,
-			"count": engine.answered_count(session.name, question_row),
-		},
-	)
+	# the live answered count is now broadcast by the ticker (throttled), not per-submit
 	return {"ok": True}
 
 
