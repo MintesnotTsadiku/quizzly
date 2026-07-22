@@ -50,14 +50,20 @@ def run_ticker() -> None:
 		if not sessions:
 			break
 		for session in sessions:
-			state = get_state(session)
-			if not state:
-				frappe.cache.srem(ACTIVE_SESSIONS_KEY, session)
-				continue
-			control = pop_control(session, ("skip", "advance", "end"))
-			if control or time.time() >= state["next_ts"]:
-				advance_session(frappe.get_doc("QZ Session", session), state, control)
-		frappe.db.commit()
+			frappe.db.savepoint("qz_tick")
+			try:
+				state = get_state(session)
+				if not state:
+					frappe.cache.srem(ACTIVE_SESSIONS_KEY, session)
+					continue
+				control = pop_control(session, ("skip", "advance", "end"))
+				if control or time.time() >= state["next_ts"]:
+					advance_session(frappe.get_doc("QZ Session", session), state, control)
+				frappe.db.commit()
+			except Exception:
+				# one bad session must not stall every other live game
+				frappe.db.rollback(save_point="qz_tick")
+				frappe.log_error(title=f"qz_ticker session {session}")
 		time.sleep(TICK_SECONDS)
 
 

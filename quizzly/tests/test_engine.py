@@ -316,6 +316,38 @@ class TestGameLoop(GameTestCase):
 		self.assertIsNone(engine.get_state(self.session))
 		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
 
+	def test_ticker_survives_bad_session(self):
+		"""A session that throws every pass must not stall the other live games."""
+		self.activate()
+
+		def seed_bad_session():
+			frappe.cache.sadd(engine.ACTIVE_SESSIONS_KEY, "qz-bogus")
+			# state present (so it isn't srem'd) but get_doc will raise every pass; short TTL self-clears
+			engine.set_state("qz-bogus", {"phase": "get_ready", "q_index": 0, "next_ts": 0}, ttl=1)
+
+		events = []
+
+		def record(event=None, message=None, room=None, **kwargs):
+			if isinstance(message, dict) and "type" in message:
+				events.append(message)
+
+		with (
+			patch("frappe.publish_realtime", side_effect=record),
+			patch("frappe.db.commit"),
+			patch("frappe.enqueue"),
+			patch("frappe.log_error"),
+			patch.object(engine, "STATS_SECONDS", 0.25),
+			patch.object(engine, "GETREADY_SECONDS", 0.25),
+			patch.object(engine, "GRACE_SECONDS", 0.25),
+			patch.object(engine, "TICK_SECONDS", 0.05),
+		):
+			engine.enqueue_game_loop(self.session_doc)
+			seed_bad_session()
+			engine.run_ticker()
+
+		self.assertEqual(events[-1]["type"], "podium")
+		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
+
 	def test_end_session_from_lobby_cancels(self):
 		end_session(self.session)
 		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Cancelled")

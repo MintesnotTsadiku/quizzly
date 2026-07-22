@@ -1,5 +1,42 @@
 # Progress
 
+## Live Quiz Rework Phase 2: Multi-Game Scale (2026-07-21)
+
+Spec: `specs/live-quiz-rework/phase-2-multi-game-scale.md`. Proved the shared
+ticker drives many concurrent games on the same workers with no starvation, the
+payoff of Phase 1's redesign.
+
+### Done
+
+- `run_ticker` gained per-session isolation: each session's step runs under a
+  `qz_tick` savepoint inside its own try/except, commits on success, and on error
+  rolls back to the savepoint + `log_error`s and continues. One bad game can no
+  longer stall or kill the ticker for the others.
+- Lifecycle was already airtight from Phase 1 and confirmed so: `active_sessions`
+  is `srem`'d on finish, on `end`, and on abandon (all route through
+  `finish_session`); the ticker `srem`s any session whose state has vanished; and
+  `enqueue_game_loop` always re-enqueues the deduped `qz_ticker`, so starting any
+  new game self-heals a dead ticker and picks up every registered session.
+  `is_abandoned` still settles a session the ticker somehow dropped.
+
+### Tests
+
+- `test_ticker_survives_bad_session`: seeds a bogus session that raises every pass
+  alongside a real game; the real game still reaches the podium. Note: the guard
+  must roll back to the **savepoint**, not call bare `frappe.db.rollback()`, which
+  would discard the whole test transaction (and, in prod, sibling sessions' writes
+  from the same pass).
+
+### Browser E2E (quizzly.localhost)
+
+- 5 concurrent games: 5 isolated browser guests joined 5 lobbies, all started, all
+  rendered the same live question simultaneously (Q1 of 5), auto-advanced through
+  all five questions, and every player reached the podium ("You won").
+- Backend proof via `scripts/concurrent_games.py` (console driver, phases driven by
+  the real `long` RQ worker): 5 games marched in lockstep get_ready -> question ->
+  closed for q0..q4, with **exactly one** `qz_ticker` job the entire run
+  (`max concurrent qz_ticker jobs observed: 1`).
+
 ## Live Quiz Rework Phase 1: Ticker Tracer (2026-07-21)
 
 Spec: `specs/live-quiz-rework/phase-1-ticker-tracer.md`. Replaced the per-game
