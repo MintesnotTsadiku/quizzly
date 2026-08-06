@@ -67,34 +67,41 @@
 					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
 						Your face
 					</span>
-					<!-- Bleeds past the page gutter so the roster is visibly cut off at
-					     the edge, which is what says "this scrolls". -->
-					<div
-						class="no-scrollbar -mx-5 flex snap-x gap-1 overflow-x-auto px-5 py-1.5 motion-safe:scroll-smooth"
-					>
-						<!-- Every slot stays the large size and only the face inside scales,
-						     so picking one never reflows the row under the thumb. -->
-						<button
-							v-for="option in avatars"
-							:key="option.id"
-							:ref="(el) => option.id === avatar && (selectedButton = el)"
-							type="button"
-							class="shrink-0 snap-center"
-							:aria-label="option.id"
-							:aria-pressed="avatar === option.id"
-							@click="avatar = option.id"
+					<!-- The wrapper bleeds past the page gutter so the roster is visibly
+					     cut off at the edge, which is what says "this scrolls", and it
+					     gives the scroller a full-bleed box for its 50% end padding to
+					     measure against. That padding is what lets the first and last
+					     face reach the centre line like any other. -->
+					<div class="-mx-5">
+						<div
+							ref="scroller"
+							class="no-scrollbar flex snap-x snap-mandatory gap-1 overflow-x-auto px-[calc(50%-22px)] py-1.5 motion-safe:scroll-smooth"
+							@scroll="queuePick"
 						>
-							<span
-								class="block rounded-full p-0.5 transition duration-200"
-								:class="
-									avatar === option.id
-										? 'bg-gold ring-2 ring-gold'
-										: 'scale-[0.62] opacity-55 hover:opacity-100'
-								"
+							<!-- Every slot stays the large size and only the face inside scales,
+							     so picking one never reflows the row under the thumb. -->
+							<button
+								v-for="option in avatars"
+								:key="option.id"
+								:data-avatar="option.id"
+								type="button"
+								class="shrink-0 snap-center"
+								:aria-label="option.id"
+								:aria-pressed="avatar === option.id"
+								@click="select(option.id)"
 							>
-								<AvatarPic :id="option.id" :size="40" />
-							</span>
-						</button>
+								<span
+									class="block rounded-full p-0.5 transition duration-200"
+									:class="
+										avatar === option.id
+											? 'bg-gold ring-2 ring-gold'
+											: 'scale-[0.62] opacity-55 hover:opacity-100'
+									"
+								>
+									<AvatarPic :id="option.id" :size="40" />
+								</span>
+							</button>
+						</div>
 					</div>
 				</div>
 
@@ -114,7 +121,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { call } from "@/api";
 import { savePlayer } from "@/player";
@@ -133,15 +140,51 @@ const avatar = ref(randomAvatar());
 const suggestions = ref(suggestNicknames());
 const joining = ref(false);
 const error = ref("");
-const selectedButton = ref(null);
+const scroller = ref(null);
 
-// The opening pick is random, so it lands anywhere in the roster, and a face
-// tapped at the cut-off edge would otherwise stay half off-screen while big.
-const centerSelected = () =>
-	selectedButton.value?.scrollIntoView({ inline: "center", block: "nearest" });
+const centerSelected = (behavior) =>
+	scroller.value
+		?.querySelector(`[data-avatar="${avatar.value}"]`)
+		?.scrollIntoView({ inline: "center", block: "nearest", behavior });
 
-onMounted(centerSelected);
-watch(avatar, centerSelected, { flush: "post" });
+function select(id) {
+	avatar.value = id;
+	nextTick(() => centerSelected("smooth"));
+}
+
+// The roster is a centre-picker: the highlight stays put on the middle of the
+// row and the faces move under it, so whatever the scroll parks in the centre
+// is the pick. Snapping keeps it from resting between two faces.
+function pickCentered() {
+	const row = scroller.value;
+	if (!row) return;
+	const center = row.getBoundingClientRect().left + row.clientWidth / 2;
+	let closest = null;
+	let smallest = Infinity;
+	for (const slot of row.children) {
+		const box = slot.getBoundingClientRect();
+		const distance = Math.abs(box.left + box.width / 2 - center);
+		if (distance < smallest) {
+			smallest = distance;
+			closest = slot;
+		}
+	}
+	if (closest) avatar.value = closest.dataset.avatar;
+}
+
+let pickPending = false;
+function queuePick() {
+	if (pickPending) return;
+	pickPending = true;
+	requestAnimationFrame(() => {
+		pickPending = false;
+		pickCentered();
+	});
+}
+
+// The opening pick is random, so it lands anywhere in the roster and has to be
+// dragged to the centre line before the row makes sense.
+onMounted(() => centerSelected("instant"));
 
 async function join() {
 	error.value = "";
