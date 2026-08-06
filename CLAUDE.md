@@ -20,11 +20,12 @@ Quizzly is a live multiplayer quiz application built on Frappe. Guests join a ga
 - Always write tests, and make sure they work.
 - Build the minimum working app, then iterate towards your goals.
 
-## After every bug fix or feature:
+## Development and Testing
 
 - use the `/agent-browser` skill to test in the browser. site: quizzly.localhost
 - use Administrator/admin as credentials.
-- Send me a Telegram Message using `tg_bot -h`, attach relevant screenshots related to the fix/feature.
+- After every bug fix or feature: Send me a Telegram Message using `tg_bot -h`, attach relevant screenshots related to the fix/feature.
+- Kill all the browser session after testing.
 
 ## Planning / Spec-ing
 
