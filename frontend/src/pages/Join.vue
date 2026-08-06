@@ -67,19 +67,16 @@
 					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
 						Your face
 					</span>
-					<!-- The wrapper bleeds past the page gutter so the roster is visibly
-					     cut off at the edge, which is what says "this scrolls", and it
-					     gives the scroller a full-bleed box for its 50% end padding to
-					     measure against. That padding is what lets the first and last
-					     face reach the centre line like any other. -->
+					<!-- The bleed lives on the wrapper so the scroller's 50% end padding,
+					     which is what lets the first and last face reach the centre line,
+					     measures against the full-bleed width. -->
 					<div class="-mx-5">
 						<div
 							ref="scroller"
 							class="no-scrollbar flex snap-x snap-mandatory gap-1 overflow-x-auto px-[calc(50%-22px)] py-1.5 motion-safe:scroll-smooth"
 							@scroll="queuePick"
 						>
-							<!-- Every slot stays the large size and only the face inside scales,
-							     so picking one never reflows the row under the thumb. -->
+							<!-- Only the face inside scales, so picking never reflows the row. -->
 							<button
 								v-for="option in avatars"
 								:key="option.id"
@@ -152,9 +149,8 @@ function select(id) {
 	nextTick(() => centerSelected("smooth"));
 }
 
-// The roster is a centre-picker: the highlight stays put on the middle of the
-// row and the faces move under it, so whatever the scroll parks in the centre
-// is the pick. Snapping keeps it from resting between two faces.
+// The highlight stays put and the faces move under it, so the pick is whatever
+// the scroll parks in the centre. Snapping keeps it off the gaps between faces.
 function pickCentered() {
 	const row = scroller.value;
 	if (!row) return;
@@ -182,8 +178,7 @@ function queuePick() {
 	});
 }
 
-// The opening pick is random, so it lands anywhere in the roster and has to be
-// dragged to the centre line before the row makes sense.
+// The opening pick is random, so it lands anywhere in the roster.
 onMounted(() => centerSelected("instant"));
 
 async function join() {
