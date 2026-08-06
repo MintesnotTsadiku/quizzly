@@ -68,7 +68,7 @@ the game.
 - [Vue 3](https://vuejs.org) and [frappe-ui](https://github.com/frappe/frappe-ui) for the single-page app
 - [Socket.IO](https://socket.io) to push every state change to hosts and players
 - Redis for the hot session state each answer is validated against
-- RQ for the background job that drives the game loop
+- RQ for the single shared ticker that drives every live game loop
 
 ## Development setup
 
