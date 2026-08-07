@@ -182,6 +182,8 @@ def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
 	nickname = strip_html_tags(nickname or "").strip()[:NICKNAME_MAX_LENGTH]
 	if is_profane(nickname):
 		frappe.throw(_("Pick a nickname everyone can see on the big screen"))
+	if frappe.db.exists("QZ Participant", {"session": session.name, "nickname": nickname, "kicked": 0}):
+		frappe.throw(_("That nickname is taken, pick another"), frappe.DuplicateEntryError)
 
 	token = secrets.token_hex(32)
 	participant = frappe.get_doc(

@@ -297,6 +297,9 @@ def end_active_session(session_doc) -> None:
 
 
 def finish_session(session_doc) -> None:
+	status = frappe.db.get_value("QZ Session", session_doc.name, "status", for_update=True)
+	if status in ("Ended", "Cancelled"):
+		return
 	participants = get_live_participants(session_doc.name)
 	participants.sort(key=lambda p: (-p.score, p.joined_at or now_datetime()))
 	leaderboard = []
