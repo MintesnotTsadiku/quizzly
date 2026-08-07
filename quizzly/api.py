@@ -170,6 +170,8 @@ def list_quizzes() -> list[dict]:
 	return quizzes
 
 
+# Guests join by design (no login); rate-limited, PIN-gated, and input is sanitized below.
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
