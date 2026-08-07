@@ -316,6 +316,22 @@ class TestGameLoop(GameTestCase):
 		self.assertIsNone(engine.get_state(self.session))
 		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
 
+	def test_finish_session_is_idempotent(self):
+		"""Two host reads can both settle an abandoned game; ranks/podium must fire once."""
+		self.activate()
+		podiums = []
+
+		def record(event=None, message=None, room=None, **kwargs):
+			if isinstance(message, dict) and message.get("type") == "podium":
+				podiums.append(message)
+
+		with patch("frappe.publish_realtime", side_effect=record), patch("frappe.db.commit"):
+			engine.finish_session(self.session_doc)
+			engine.finish_session(self.session_doc)
+
+		self.assertEqual(len(podiums), 1)
+		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
+
 	def test_ticker_survives_bad_session(self):
 		"""A session that throws every pass must not stall the other live games."""
 		self.activate()
