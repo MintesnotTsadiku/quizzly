@@ -7,6 +7,7 @@
 # Writes pin + tokens to /tmp/quizzly_loadtest.json for scripts/loadtest.py to drive.
 
 import json
+import os
 import secrets
 from pathlib import Path
 
@@ -15,7 +16,7 @@ import frappe
 from quizzly import api, engine
 
 QUIZ_TITLE = "General Knowledge"
-PLAYERS = 100
+PLAYERS = int(os.environ.get("QZ_LOADTEST_PLAYERS", "100"))
 STATE_FILE = Path("/tmp/quizzly_loadtest.json")
 
 quiz = frappe.db.get_value("QZ Quiz", {"title": QUIZ_TITLE}, "name")
