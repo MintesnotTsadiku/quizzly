@@ -9,6 +9,7 @@
   "title",
   "description",
   "default_time_limit",
+  "show_explanation",
   "questions"
  ],
  "fields": [
@@ -30,6 +31,13 @@
    "fieldname": "default_time_limit",
    "fieldtype": "Int",
    "label": "Default Time Limit"
+  },
+  {
+   "default": "0",
+   "description": "Show a question's explanation before the scoreboard",
+   "fieldname": "show_explanation",
+   "fieldtype": "Check",
+   "label": "Explain Answers"
   },
   {
    "fieldname": "questions",

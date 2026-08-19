@@ -255,6 +255,64 @@
 			</div>
 		</template>
 
+		<!-- Why that answer: the beat between the buzzer and the scoreboard -->
+		<template v-else-if="phase === 'explanation'">
+			<div class="flex flex-1 flex-col p-4 sm:p-8">
+				<div
+					class="m-auto flex w-full max-w-4xl flex-col items-center gap-4 text-center sm:gap-6"
+				>
+					<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
+						Question {{ (question?.q_index ?? 0) + 1 }} of {{ question?.total }}
+					</p>
+					<h1
+						class="font-display text-2xl font-extrabold leading-tight text-paper sm:text-4xl"
+					>
+						{{ question?.question_text }}
+					</h1>
+					<div
+						v-if="correctShape"
+						class="flex items-center gap-3 rounded-2xl px-5 py-3 sm:gap-5 sm:px-7 sm:py-4"
+						:class="correctShape.fill"
+					>
+						<svg class="size-6 shrink-0 fill-sunk/55 sm:size-8" viewBox="0 0 24 24">
+							<path :d="correctShape.path" />
+						</svg>
+						<span class="font-display text-lg font-extrabold text-sunk sm:text-2xl">{{
+							correctAnswer
+						}}</span>
+						<span class="text-2xl text-sunk">✓</span>
+					</div>
+					<img
+						v-if="explanation?.image_url"
+						:src="explanation.image_url"
+						alt=""
+						class="max-h-[20vh] w-full object-contain sm:max-h-[30vh]"
+					/>
+					<p
+						v-if="explanation?.explanation"
+						class="max-w-3xl text-lg leading-relaxed text-paper/75 sm:text-2xl"
+					>
+						{{ explanation.explanation }}
+					</p>
+					<DrainRing
+						v-if="autoAdvance"
+						:percent="timerPercent"
+						:seconds="Math.ceil(remaining)"
+						:size="88"
+						color="rgb(var(--accent))"
+					/>
+					<div class="flex flex-wrap items-center justify-center gap-3">
+						<button class="ctl ctl-go" @click="next">Show results</button>
+						<button class="ctl" :data-on="autoAdvance" @click="toggleAutoAdvance">
+							Auto-advance {{ autoAdvance ? "on" : "off" }}
+						</button>
+						<button class="ctl" @click="end">End game</button>
+						<p v-if="error" class="text-alert">{{ error }}</p>
+					</div>
+				</div>
+			</div>
+		</template>
+
 		<!-- Question / results -->
 		<template v-else>
 			<!-- m-auto, not justify-center: a centered flex column clips its top when it overflows -->
@@ -409,7 +467,7 @@ import { computed, inject, onMounted, ref, watch } from "vue";
 import QRCode from "qrcode";
 import { call, readError } from "@/api";
 import { confirm } from "@/confirm";
-import { SHAPES, useCountdown, useSessionRoom } from "@/game";
+import { SHAPES, shapeFor, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 import ThemeButton from "@/components/ThemeButton.vue";
 import DrainRing from "@/components/DrainRing.vue";
@@ -438,6 +496,7 @@ const autoAdvance = ref(false);
 const question = ref(null);
 const answerCount = ref(0);
 const distribution = ref({});
+const explanation = ref(null);
 const correctOption = ref(null);
 const top5 = ref([]);
 const streaks = ref([]);
@@ -481,6 +540,12 @@ const barHeight = (optionId) => {
 	return Math.max(3, ((distribution.value[optionId] || 0) / max) * 100);
 };
 
+const correctShape = computed(() => shapeFor(correctOption.value));
+
+const correctAnswer = computed(
+	() => question.value?.options?.[Number(correctOption.value) - 1] || ""
+);
+
 const dimmed = (optionId) => phase.value === "closed" && optionId !== String(correctOption.value);
 
 // 2nd, 1st, 3rd — the winner stands in the middle
@@ -500,10 +565,18 @@ function onSessionEvent(message) {
 		question.value = message;
 		answerCount.value = 0;
 		correctOption.value = null;
+		explanation.value = null;
 		phase.value = "question";
 		startCountdown(message.window_ms / 1000);
 	} else if (message.type === "answer_count") {
 		answerCount.value = message.count;
+	} else if (message.type === "explanation") {
+		stopCountdown();
+		explanation.value = message;
+		correctOption.value = message.correct_option;
+		phase.value = "explanation";
+		// with auto-advance off the server waits the host out, so there is no clock to show
+		if (autoAdvance.value) startCountdown(message.seconds);
 	} else if (message.type === "question_closed") {
 		stopCountdown();
 		distribution.value = message.distribution;
@@ -576,10 +649,17 @@ async function applyState(state) {
 		answerCount.value = state.answer_count;
 		phase.value = "question";
 		startCountdown(state.remaining_seconds);
+	} else if (state.phase === "explanation") {
+		question.value = state.question;
+		explanation.value = state.explanation;
+		correctOption.value = state.question.correct_option;
+		phase.value = "explanation";
+		if (autoAdvance.value) startCountdown(state.remaining_seconds);
 	} else if (state.phase === "closed") {
 		question.value = state.question;
 		distribution.value = state.distribution || {};
 		correctOption.value = state.question.correct_option;
+		explanation.value = null;
 		phase.value = "closed";
 	} else {
 		phase.value = "get_ready";

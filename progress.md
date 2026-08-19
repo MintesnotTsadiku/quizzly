@@ -1,5 +1,52 @@
 # Progress
 
+## Phase 10: Answer explanation screen (2026-08-19)
+
+Spec: `specs/phase-10-answer-explanation.md`. A screen between the buzzer and
+the scoreboard that says why the answer is right.
+
+### Done
+
+- DocTypes: `explanation` (Small Text) and `explanation_image` (Attach Image) on
+  `QZ Question`, `show_explanation` (Check) on `QZ Quiz`.
+- Engine (`engine.py`): new `explanation` phase between `question` and `stats`.
+  `close_question` still settles scores, streaks, distribution and top 5 at the
+  buzzer; when the quiz explains answers it parks that payload in Redis state as
+  `closed_payload` and publishes an `explanation` event instead. `show_stats`
+  then publishes the parked payload unchanged, so nothing is computed twice.
+  `hold_seconds` is the shared rule for how long a phase waits:
+  `EXPLANATION_SECONDS` (10) with auto-advance on, `ADVANCE_WAIT_CAP` with it
+  off.
+- The phase is skipped when the toggle is off or the question has neither text
+  nor image, so a half-authored quiz never lands on a blank screen.
+- Reconnect: `get_host_state` and the player `get_state` return the stored
+  explanation payload while the phase is live, so a reload lands back on the
+  explanation screen instead of skipping it.
+- Host screen: question, the correct answer in its shape colour, image, the
+  explanation, a countdown ring (auto-advance only) and a **Show results**
+  button. Player screen keeps its own verdict and shows the explanation under
+  it, so nobody waits 10 seconds to find out they were right.
+- Authoring: one `Explanations on/off` toggle on the quiz, plus a text box and
+  an image uploader per question that appear with it.
+
+### Tests
+
+- `TestExplanationScreen` in `tests/test_engine.py`: the scoreboard is held back
+  behind the explanation, scores are already settled when it shows, it expires
+  into stats on its own, and it is skipped both when the quiz toggle is off and
+  when the question has nothing to say.
+- E2E on `quizzly.localhost` with the demo bots: explanation -> results on both
+  the host-driven and auto-advance paths, image and text-only questions, host
+  reload and player reload mid-explanation, and the editor toggle round-trip.
+
+### Notes
+
+- The bench's single `bench start` worker serves every queue, so a long
+  scheduled job from another app on this bench (navgold) blocked the `long`
+  queue and left a game with no ticker. Not a Quizzly bug: the game settled
+  itself through `is_abandoned`, which is exactly what that guard is for. A
+  dedicated `bench worker --queue long` unblocked testing.
+
 ## Live Quiz Rework Phase 4: Trim Submit + Throttle answer_count (2026-07-23)
 
 Spec: `specs/live-quiz-rework/phase-4-submit-and-count.md`. Cut the last two

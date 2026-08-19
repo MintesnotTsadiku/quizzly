@@ -369,3 +369,77 @@ class TestGameLoop(GameTestCase):
 	def test_end_session_from_lobby_cancels(self):
 		end_session(self.session)
 		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Cancelled")
+
+
+class TestExplanationScreen(GameTestCase):
+	def enable_explanation(self, text="Canberra it is.", image=None):
+		quiz = frappe.get_doc("QZ Quiz", self.quiz.name)
+		quiz.show_explanation = 1
+		quiz.questions[0].explanation = text
+		quiz.questions[0].explanation_image = image
+		quiz.save()
+		self.questions = frappe.get_doc("QZ Quiz", self.quiz.name).questions
+
+	def record_events(self, events):
+		def record(event=None, message=None, room=None, **kwargs):
+			if isinstance(message, dict) and "type" in message:
+				events.append(message)
+
+		return record
+
+	def test_explanation_holds_the_scoreboard_back(self):
+		self.activate()
+		self.enable_explanation()
+		question = self.open_question()
+		submit_answer(self.pin, self.alice["participant_token"], question.name, "2")
+		events = []
+
+		with patch("frappe.publish_realtime", side_effect=self.record_events(events)):
+			with patch("frappe.db.commit"):
+				engine.close_question(self.session_doc, question, 0, len(self.questions))
+				state = engine.get_state(self.session)
+				self.assertEqual(state["phase"], "explanation")
+				self.assertEqual([e["type"] for e in events], ["explanation"])
+				self.assertEqual(events[0]["explanation"], "Canberra it is.")
+				self.assertEqual(events[0]["correct_option"], "2")
+				# scores settle at close, so a player's own result is ready to read here
+				self.assertEqual(
+					frappe.db.get_value(
+						"QZ Answer",
+						{"participant": self.alice["participant"], "question_row": question.name},
+						"is_correct",
+					),
+					1,
+				)
+				engine.advance_session(self.session_doc, state, "advance")
+
+		self.assertEqual(engine.get_state(self.session)["phase"], "stats")
+		self.assertEqual([e["type"] for e in events], ["explanation", "question_closed"])
+		self.assertEqual(events[1]["distribution"]["2"], 1)
+
+	def test_explanation_expires_into_stats_on_its_own(self):
+		self.activate()
+		self.enable_explanation()
+		question = self.open_question()
+		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
+			with patch.object(engine, "EXPLANATION_SECONDS", 0):
+				engine.close_question(self.session_doc, question, 0, len(self.questions))
+			engine.advance_session(self.session_doc, engine.get_state(self.session), None)
+		self.assertEqual(engine.get_state(self.session)["phase"], "stats")
+
+	def test_no_explanation_phase_when_quiz_toggle_is_off(self):
+		self.activate()
+		self.enable_explanation()
+		frappe.db.set_value("QZ Quiz", self.quiz.name, "show_explanation", 0)
+		question = self.open_question()
+		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
+			engine.close_question(self.session_doc, question, 0, len(self.questions))
+		self.assertEqual(engine.get_state(self.session)["phase"], "stats")
+
+	def test_question_without_explanation_skips_the_screen(self):
+		self.activate()
+		self.enable_explanation(text=None)
+		question = self.open_question()
+		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
+			engine.close_question(self.session_doc, question, 0, len(self.questions))
+		self.assertEqual(engine.get_state(self.session)["phase"], "stats")

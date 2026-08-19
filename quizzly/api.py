@@ -106,6 +106,8 @@ def get_host_state(session: str | None = None) -> dict:
 			},
 		}
 	)
+	if state["status"] == "explanation":
+		result["explanation"] = state["explanation"]
 	if state["status"] == "closed":
 		distribution = {"1": 0, "2": 0, "3": 0, "4": 0}
 		for answer in answers:
@@ -283,6 +285,8 @@ def get_state(pin: str, token: str) -> dict:
 			),
 		}
 	)
+	if state["status"] == "explanation":
+		result["explanation"] = state["explanation"]
 	return result
 
 

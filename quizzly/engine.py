@@ -15,6 +15,7 @@ from frappe.utils import now_datetime, time_diff_in_seconds
 GRACE_SECONDS = 1.0
 STATS_SECONDS = 5
 GETREADY_SECONDS = 3
+EXPLANATION_SECONDS = 10
 # ponytail: host gets 5 minutes to hit Next, then the game moves on by itself
 ADVANCE_WAIT_CAP = 300
 TICK_SECONDS = 0.5
@@ -130,6 +131,9 @@ def advance_session(session_doc, state: dict, control: str | None) -> None:
 	elif phase == "question":
 		if due or control == "skip":
 			close_question(session_doc, questions[index], index, total)
+	elif phase == "explanation":
+		if due or control in ("advance", "skip"):
+			show_stats(session_doc, state, state["closed_payload"])
 	elif phase == "stats":
 		if due or control == "advance":
 			if index == total - 1:
@@ -195,17 +199,6 @@ def open_question(session_doc, question, index: int, total: int) -> None:
 def close_question(session_doc, question, index: int, total: int) -> None:
 	state = get_state(session_doc.name) or {}
 	window_ms = state.get("window_ms") or question_window(question, session_doc) * 1000
-	auto_advance = frappe.db.get_value("QZ Session", session_doc.name, "auto_advance")
-	set_state(
-		session_doc.name,
-		{
-			**state,
-			"phase": "stats",
-			"status": "closed",
-			"next_ts": time.time() + (STATS_SECONDS if auto_advance else ADVANCE_WAIT_CAP),
-		},
-		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
-	)
 	participants = get_live_participants(session_doc.name)
 	answers = frappe.get_all(
 		"QZ Answer",
@@ -249,22 +242,87 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 		for p in sorted(participants, key=lambda p: -p.streak)
 		if p.streak >= STREAK_CALLOUT_MIN
 	][:3]
-	publish_session_event(
-		session_doc,
-		{
-			"type": "question_closed",
-			"q_index": index,
-			"total": total,
-			"question_row": question.name,
-			"correct_option": question.correct_option,
-			"distribution": distribution,
-			"top_5": top_5,
-			"streaks": streaks,
-			"is_last": index == total - 1,
-		},
-	)
+	closed = {
+		"type": "question_closed",
+		"q_index": index,
+		"total": total,
+		"question_row": question.name,
+		"correct_option": question.correct_option,
+		"distribution": distribution,
+		"top_5": top_5,
+		"streaks": streaks,
+		"is_last": index == total - 1,
+	}
 	frappe.cache.delete_value(answered_key(session_doc.name, question.name))
+
+	seconds = hold_seconds(session_doc, EXPLANATION_SECONDS)
+	explanation = explanation_payload(session_doc, question, index, total, seconds)
+	if explanation:
+		show_explanation(session_doc, state, explanation, closed)
+	else:
+		show_stats(session_doc, state, closed)
 	frappe.db.commit()
+
+
+def show_explanation(session_doc, state: dict, explanation: dict, closed: dict) -> None:
+	"""Teaching beat between the buzzer and the scoreboard. The scoreboard payload rides
+	along in state so the stats step does not have to recompute what is already settled."""
+	next_ts = time.time() + explanation["seconds"]
+	set_state(
+		session_doc.name,
+		{
+			**state,
+			"phase": "explanation",
+			"status": "explanation",
+			"deadline_ts": next_ts,
+			"next_ts": next_ts,
+			"explanation": explanation,
+			"closed_payload": closed,
+		},
+		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
+	)
+	publish_session_event(session_doc, explanation)
+
+
+def show_stats(session_doc, state: dict, closed: dict) -> None:
+	next_ts = time.time() + hold_seconds(session_doc, STATS_SECONDS)
+	set_state(
+		session_doc.name,
+		{
+			**{k: v for k, v in state.items() if k not in ("explanation", "closed_payload")},
+			"phase": "stats",
+			"status": "closed",
+			"next_ts": next_ts,
+		},
+		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
+	)
+	publish_session_event(session_doc, closed)
+
+
+def hold_seconds(session_doc, timed: int) -> int:
+	"""With auto-advance off the host drives every step, so the phase waits them out."""
+	auto_advance = frappe.db.get_value("QZ Session", session_doc.name, "auto_advance")
+	return timed if auto_advance else ADVANCE_WAIT_CAP
+
+
+def explanation_payload(session_doc, question, index: int, total: int, seconds: int) -> dict | None:
+	"""Only when the quiz asks for it and the question has something to say."""
+	if not get_quiz(session_doc).show_explanation:
+		return None
+	if not (question.explanation or question.explanation_image):
+		return None
+	return {
+		"type": "explanation",
+		"q_index": index,
+		"total": total,
+		"question_row": question.name,
+		"question_text": question.question_text,
+		"options": [question.option_1, question.option_2, question.option_3, question.option_4],
+		"correct_option": question.correct_option,
+		"explanation": question.explanation,
+		"image_url": question.explanation_image or None,
+		"seconds": seconds,
+	}
 
 
 def active_sessions() -> list[str]:
