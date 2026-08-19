@@ -284,7 +284,9 @@
 						color="rgb(var(--accent))"
 					/>
 					<div class="flex flex-wrap items-center justify-center gap-3">
-						<button class="ctl ctl-go" @click="next">Show results</button>
+						<button class="ctl ctl-go" @click="next">
+							{{ explanation?.before_stats ? "Show results" : "Next question" }}
+						</button>
 						<button class="ctl" :data-on="autoAdvance" @click="toggleAutoAdvance">
 							Auto-advance {{ autoAdvance ? "on" : "off" }}
 						</button>
@@ -430,7 +432,7 @@
 					<div class="flex flex-wrap items-center gap-3">
 						<button v-if="phase === 'question'" class="ctl" @click="skip">Skip</button>
 						<button v-if="phase === 'closed'" class="ctl ctl-go" @click="next">
-							Next question
+							{{ explanationNext ? "Show explanation" : "Next question" }}
 						</button>
 						<button class="ctl" :data-on="autoAdvance" @click="toggleAutoAdvance">
 							Auto-advance {{ autoAdvance ? "on" : "off" }}
@@ -479,6 +481,7 @@ const question = ref(null);
 const answerCount = ref(0);
 const distribution = ref({});
 const explanation = ref(null);
+const explanationNext = ref(false);
 const correctOption = ref(null);
 const top5 = ref([]);
 const streaks = ref([]);
@@ -549,11 +552,13 @@ function onSessionEvent(message) {
 	} else if (message.type === "explanation") {
 		stopCountdown();
 		explanation.value = message;
+		explanationNext.value = false;
 		phase.value = "explanation";
 		// with auto-advance off the server waits the host out, so there is no clock to show
 		if (autoAdvance.value) startCountdown(message.seconds);
 	} else if (message.type === "question_closed") {
 		stopCountdown();
+		explanationNext.value = Boolean(message.explanation_next);
 		distribution.value = message.distribution;
 		correctOption.value = message.correct_option;
 		top5.value = message.top_5;
@@ -635,6 +640,7 @@ async function applyState(state) {
 		distribution.value = state.distribution || {};
 		correctOption.value = state.question.correct_option;
 		explanation.value = null;
+		explanationNext.value = Boolean(state.explanation_next);
 		phase.value = "closed";
 	} else {
 		phase.value = "get_ready";

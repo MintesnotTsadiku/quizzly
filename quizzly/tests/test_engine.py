@@ -418,6 +418,31 @@ class TestExplanationScreen(GameTestCase):
 		self.assertEqual([e["type"] for e in events], ["explanation", "question_closed"])
 		self.assertEqual(events[1]["distribution"]["2"], 1)
 
+	def test_explanation_after_stats_reverses_the_two_screens(self):
+		self.activate()
+		self.enable_explanation()
+		frappe.db.set_value("QZ Quiz", self.quiz.name, "explanation_position", "After Stats")
+		question = self.open_question()
+		events = []
+
+		with patch("frappe.publish_realtime", side_effect=self.record_events(events)):
+			with patch("frappe.db.commit"):
+				engine.close_question(self.session_doc, question, 0, len(self.questions))
+				state = engine.get_state(self.session)
+				self.assertEqual(state["phase"], "stats")
+				self.assertEqual([e["type"] for e in events], ["question_closed"])
+				# the host button has to say where it goes, so the stats event flags what follows
+				self.assertTrue(events[0]["explanation_next"])
+				engine.advance_session(self.session_doc, state, "advance")
+				state = engine.get_state(self.session)
+				self.assertEqual(state["phase"], "explanation")
+				self.assertFalse(state["explanation"]["before_stats"])
+				# nothing is owed to the room after it, so the next step is the next question
+				engine.advance_session(self.session_doc, state, "advance")
+
+		self.assertEqual([e["type"] for e in events], ["question_closed", "explanation", "get_ready"])
+		self.assertEqual(engine.get_state(self.session)["q_index"], 1)
+
 	def test_quiz_sets_how_long_the_explanation_stays_up(self):
 		self.activate()
 		self.enable_explanation()

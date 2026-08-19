@@ -113,6 +113,7 @@ def get_host_state(session: str | None = None) -> dict:
 		for answer in answers:
 			distribution[str(answer.selected_option)] += 1
 		result["distribution"] = distribution
+		result["explanation_next"] = bool(state.get("explanation_after"))
 	return result
 
 

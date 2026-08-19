@@ -18,7 +18,12 @@ quiz.
 
 ```
 get_ready -> question -> [explanation] -> stats -> get_ready(next) | podium
+get_ready -> question -> stats -> [explanation] -> get_ready(next) | podium
 ```
+
+Which of the two is a quiz setting, `explanation_position`, defaulting to
+before. Before keeps the teaching beat away from the scoreboard scramble; after
+lets the room see the split first and then hear why.
 
 `close_question` still settles everything at the buzzer: scoring, streaks,
 distribution, top 5. Only the *publish* moves. When the quiz explains answers and
@@ -41,6 +46,9 @@ The quiz's `explanation_time_limit` (default 10s) with auto-advance on,
 With auto-advance off the host clicks **Show results**, then **Next question**:
 two beats, both host-driven.
 
+The host buttons name the next screen rather than a fixed one, so the payloads
+carry `before_stats` on the explanation and `explanation_next` on the stats.
+
 ## Reconnect
 
 `get_host_state` and the player `get_state` both return the stored explanation
@@ -49,7 +57,8 @@ screen rather than skipping it.
 
 ## Authoring
 
-One toggle on the quiz (`Explanations on/off`), a seconds field beside it, and,
+One toggle on the quiz (`Explanations on/off`), a before/after button and a
+seconds field beside it, and,
 when it is on, a text box plus an image uploader per question. The per-question
 fields hide with the toggle rather than being deleted, so flipping it off and
 back on loses nothing.

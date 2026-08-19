@@ -42,13 +42,22 @@
 			</label>
 
 			<div class="flex flex-wrap items-center justify-between gap-4">
-				<button
-					class="ctl"
-					:data-on="showExplanation"
-					@click="showExplanation = !showExplanation"
-				>
-					Explanations {{ showExplanation ? "on" : "off" }}
-				</button>
+				<div class="flex flex-wrap items-center gap-3">
+					<button
+						class="ctl"
+						:data-on="showExplanation"
+						@click="showExplanation = !showExplanation"
+					>
+						Explanations {{ showExplanation ? "on" : "off" }}
+					</button>
+					<button v-if="showExplanation" class="ctl" @click="togglePosition">
+						{{
+							explanationPosition === "After Stats"
+								? "After results"
+								: "Before results"
+						}}
+					</button>
+				</div>
 				<label
 					v-if="showExplanation"
 					class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
@@ -246,6 +255,7 @@ const QUESTION_FIELDS = [
 ];
 const DEFAULT_TIME_LIMIT = 20;
 const DEFAULT_EXPLANATION_SECONDS = 10;
+const DEFAULT_EXPLANATION_POSITION = "Before Stats";
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 120;
 
@@ -260,6 +270,7 @@ const description = ref("");
 const defaultTimeLimit = ref(DEFAULT_TIME_LIMIT);
 const showExplanation = ref(false);
 const explanationTimeLimit = ref(DEFAULT_EXPLANATION_SECONDS);
+const explanationPosition = ref(DEFAULT_EXPLANATION_POSITION);
 const questions = ref([]);
 const saving = ref(false);
 const saved = ref(false);
@@ -288,6 +299,7 @@ onMounted(async () => {
 		defaultTimeLimit.value = quiz.default_time_limit || DEFAULT_TIME_LIMIT;
 		showExplanation.value = Boolean(quiz.show_explanation);
 		explanationTimeLimit.value = quiz.explanation_time_limit || DEFAULT_EXPLANATION_SECONDS;
+		explanationPosition.value = quiz.explanation_position || DEFAULT_EXPLANATION_POSITION;
 		loadedDoc.value = quiz;
 		// an unset Int comes back as 0; the field should read as empty, not as zero seconds
 		questions.value = quiz.questions.map((question) => ({
@@ -316,6 +328,11 @@ function blankQuestion() {
 	};
 }
 
+function togglePosition() {
+	explanationPosition.value =
+		explanationPosition.value === "After Stats" ? "Before Stats" : "After Stats";
+}
+
 function move(index, step) {
 	const [question] = questions.value.splice(index, 1);
 	questions.value.splice(index + step, 0, question);
@@ -334,6 +351,7 @@ async function save() {
 			show_explanation: Number(showExplanation.value),
 			explanation_time_limit:
 				clampSeconds(explanationTimeLimit.value) || DEFAULT_EXPLANATION_SECONDS,
+			explanation_position: explanationPosition.value,
 			// rebuilt without name or idx: frappe keeps an idx it is given, so a row that
 			// carried its old one would ignore the reorder
 			questions: questions.value.map((question) => ({

@@ -11,9 +11,13 @@ the scoreboard that says why the answer is right.
   `QZ Question`, `show_explanation` (Check) on `QZ Quiz`.
 - Engine (`engine.py`): new `explanation` phase between `question` and `stats`.
   `close_question` still settles scores, streaks, distribution and top 5 at the
-  buzzer; when the quiz explains answers it parks that payload in Redis state as
-  `closed_payload` and publishes an `explanation` event instead. `show_stats`
-  then publishes the parked payload unchanged, so nothing is computed twice.
+  buzzer; whichever screen goes second is parked in Redis state by the one that
+  goes first (`closed_payload` or `explanation_after`) and published unchanged,
+  so nothing is computed twice.
+- `explanation_position` on the quiz puts the screen before the stats (default)
+  or after them. The host buttons name the screen they actually open, off
+  `before_stats` on the explanation event and `explanation_next` on the stats
+  event.
   `hold_seconds` is the shared rule for how long a phase waits: the quiz's
   `explanation_time_limit` (default 10s) with auto-advance on,
   `ADVANCE_WAIT_CAP` with it off.
@@ -26,9 +30,9 @@ the scoreboard that says why the answer is right.
   explanation, a countdown ring (auto-advance only) and a **Show results**
   button. Player screen keeps its own verdict and shows the explanation under
   it, so nobody waits 10 seconds to find out they were right.
-- Authoring: one `Explanations on/off` toggle on the quiz, a seconds field
-  beside it, plus a text box and an image uploader per question that appear
-  with it.
+- Authoring: one `Explanations on/off` toggle on the quiz, a before/after
+  button and a seconds field beside it, plus a text box and an image uploader
+  per question that appear with it.
 
 ### Tests
 

@@ -133,13 +133,23 @@ def advance_session(session_doc, state: dict, control: str | None) -> None:
 			close_question(session_doc, questions[index], index, total)
 	elif phase == "explanation":
 		if due or control in ("advance", "skip"):
-			show_stats(session_doc, state, state["closed_payload"])
+			if state.get("closed_payload"):
+				show_stats(session_doc, state, state["closed_payload"])
+			else:
+				next_question(session_doc, questions, index, total)
 	elif phase == "stats":
 		if due or control == "advance":
-			if index == total - 1:
-				finish_session(session_doc)
+			if state.get("explanation_after"):
+				show_explanation(session_doc, state, state["explanation_after"])
 			else:
-				get_ready(session_doc, questions[index + 1], index + 1, total)
+				next_question(session_doc, questions, index, total)
+
+
+def next_question(session_doc, questions, index: int, total: int) -> None:
+	if index == total - 1:
+		finish_session(session_doc)
+	else:
+		get_ready(session_doc, questions[index + 1], index + 1, total)
 
 
 def get_ready(session_doc, question, index: int, total: int) -> None:
@@ -255,48 +265,56 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 	}
 	frappe.cache.delete_value(answered_key(session_doc.name, question.name))
 
-	seconds = hold_seconds(session_doc, explanation_window(session_doc))
-	explanation = explanation_payload(session_doc, question, index, total, seconds)
-	if explanation:
-		show_explanation(session_doc, state, explanation, closed)
+	explanation = explanation_payload(session_doc, question, index, total)
+	if explanation and explanation_first(session_doc):
+		show_explanation(session_doc, state, explanation, closed=closed)
 	else:
-		show_stats(session_doc, state, closed)
+		show_stats(session_doc, state, closed, explanation_after=explanation)
 	frappe.db.commit()
 
 
-def show_explanation(session_doc, state: dict, explanation: dict, closed: dict) -> None:
-	"""Teaching beat between the buzzer and the scoreboard. The scoreboard payload rides
-	along in state so the stats step does not have to recompute what is already settled."""
-	next_ts = time.time() + explanation["seconds"]
+def show_explanation(session_doc, state: dict, explanation: dict, closed: dict | None = None) -> None:
+	"""Teaching beat. `closed` is the scoreboard payload still owed to the room, parked in
+	state so the stats step does not recompute what is already settled; with the explanation
+	set to come after the stats there is nothing left to park."""
+	seconds = hold_seconds(session_doc, explanation_window(session_doc))
+	explanation = {**explanation, "seconds": seconds, "before_stats": bool(closed)}
+	next_ts = time.time() + seconds
 	set_state(
 		session_doc.name,
 		{
-			**state,
+			**carry_over(state),
 			"phase": "explanation",
 			"status": "explanation",
 			"deadline_ts": next_ts,
 			"next_ts": next_ts,
 			"explanation": explanation,
-			"closed_payload": closed,
+			**({"closed_payload": closed} if closed else {}),
 		},
 		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
 	)
 	publish_session_event(session_doc, explanation)
 
 
-def show_stats(session_doc, state: dict, closed: dict) -> None:
+def show_stats(session_doc, state: dict, closed: dict, explanation_after: dict | None = None) -> None:
 	next_ts = time.time() + hold_seconds(session_doc, STATS_SECONDS)
 	set_state(
 		session_doc.name,
 		{
-			**{k: v for k, v in state.items() if k not in ("explanation", "closed_payload")},
+			**carry_over(state),
 			"phase": "stats",
 			"status": "closed",
 			"next_ts": next_ts,
+			**({"explanation_after": explanation_after} if explanation_after else {}),
 		},
 		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
 	)
-	publish_session_event(session_doc, closed)
+	publish_session_event(session_doc, {**closed, "explanation_next": bool(explanation_after)})
+
+
+def carry_over(state: dict) -> dict:
+	"""Whatever a phase parked for the next one is that phase's business, never the one after."""
+	return {k: v for k, v in state.items() if k not in ("explanation", "closed_payload", "explanation_after")}
 
 
 def hold_seconds(session_doc, timed: int) -> int:
@@ -309,7 +327,11 @@ def explanation_window(session_doc) -> int:
 	return get_quiz(session_doc).explanation_time_limit or EXPLANATION_SECONDS
 
 
-def explanation_payload(session_doc, question, index: int, total: int, seconds: int) -> dict | None:
+def explanation_first(session_doc) -> bool:
+	return get_quiz(session_doc).explanation_position != "After Stats"
+
+
+def explanation_payload(session_doc, question, index: int, total: int) -> dict | None:
 	"""Only when the quiz asks for it and the question has something to say."""
 	if not get_quiz(session_doc).show_explanation:
 		return None
@@ -322,7 +344,6 @@ def explanation_payload(session_doc, question, index: int, total: int, seconds: 
 		"question_row": question.name,
 		"explanation": question.explanation,
 		"image_url": question.explanation_image or None,
-		"seconds": seconds,
 	}
 
 
