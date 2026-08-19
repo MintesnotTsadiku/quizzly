@@ -21,19 +21,27 @@
 				</div>
 			</div>
 
-			<div class="flex flex-wrap items-center gap-4">
-				<label
-					class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
-				>
-					Seconds per question
-					<input
-						v-model.number="defaultTimeLimit"
-						type="number"
-						:min="MIN_SECONDS"
-						:max="MAX_SECONDS"
-						class="field w-20"
-					/>
-				</label>
+			<textarea
+				v-model="description"
+				rows="2"
+				class="field"
+				placeholder="Description (optional)"
+			/>
+
+			<label
+				class="flex items-center gap-2 self-start whitespace-nowrap font-mono text-xs text-paper/50"
+			>
+				Seconds per question
+				<input
+					v-model.number="defaultTimeLimit"
+					type="number"
+					:min="MIN_SECONDS"
+					:max="MAX_SECONDS"
+					class="field !w-20"
+				/>
+			</label>
+
+			<div class="flex flex-wrap items-center justify-between gap-4">
 				<button
 					class="ctl"
 					:data-on="showExplanation"
@@ -51,14 +59,9 @@
 						type="number"
 						:min="MIN_SECONDS"
 						:max="MAX_SECONDS"
-						class="field w-20"
+						class="field !w-20"
 					/>
 				</label>
-				<input
-					v-model="description"
-					class="field flex-1 basis-full sm:basis-0"
-					placeholder="Description (optional)"
-				/>
 			</div>
 
 			<p v-if="error" class="text-alert">{{ error }}</p>
