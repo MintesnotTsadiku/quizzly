@@ -10,6 +10,7 @@
   "description",
   "default_time_limit",
   "show_explanation",
+  "explanation_time_limit",
   "questions"
  ],
  "fields": [
@@ -38,6 +39,14 @@
    "fieldname": "show_explanation",
    "fieldtype": "Check",
    "label": "Explain Answers"
+  },
+  {
+   "default": "10",
+   "depends_on": "show_explanation",
+   "description": "Seconds the explanation stays up when auto-advance is on",
+   "fieldname": "explanation_time_limit",
+   "fieldtype": "Int",
+   "label": "Explanation Time Limit"
   },
   {
    "fieldname": "questions",

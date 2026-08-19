@@ -255,7 +255,7 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 	}
 	frappe.cache.delete_value(answered_key(session_doc.name, question.name))
 
-	seconds = hold_seconds(session_doc, EXPLANATION_SECONDS)
+	seconds = hold_seconds(session_doc, explanation_window(session_doc))
 	explanation = explanation_payload(session_doc, question, index, total, seconds)
 	if explanation:
 		show_explanation(session_doc, state, explanation, closed)
@@ -303,6 +303,10 @@ def hold_seconds(session_doc, timed: int) -> int:
 	"""With auto-advance off the host drives every step, so the phase waits them out."""
 	auto_advance = frappe.db.get_value("QZ Session", session_doc.name, "auto_advance")
 	return timed if auto_advance else ADVANCE_WAIT_CAP
+
+
+def explanation_window(session_doc) -> int:
+	return get_quiz(session_doc).explanation_time_limit or EXPLANATION_SECONDS
 
 
 def explanation_payload(session_doc, question, index: int, total: int, seconds: int) -> dict | None:

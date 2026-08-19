@@ -418,12 +418,23 @@ class TestExplanationScreen(GameTestCase):
 		self.assertEqual([e["type"] for e in events], ["explanation", "question_closed"])
 		self.assertEqual(events[1]["distribution"]["2"], 1)
 
+	def test_quiz_sets_how_long_the_explanation_stays_up(self):
+		self.activate()
+		self.enable_explanation()
+		frappe.db.set_value("QZ Quiz", self.quiz.name, "explanation_time_limit", 25)
+		frappe.db.set_value("QZ Session", self.session, "auto_advance", 1)
+		question = self.open_question()
+		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
+			engine.close_question(self.session_doc, question, 0, len(self.questions))
+		state = engine.get_state(self.session)
+		self.assertAlmostEqual(state["next_ts"] - time.time(), 25, delta=2)
+
 	def test_explanation_expires_into_stats_on_its_own(self):
 		self.activate()
 		self.enable_explanation()
 		question = self.open_question()
 		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
-			with patch.object(engine, "EXPLANATION_SECONDS", 0):
+			with patch.object(engine, "explanation_window", return_value=0):
 				engine.close_question(self.session_doc, question, 0, len(self.questions))
 			engine.advance_session(self.session_doc, engine.get_state(self.session), None)
 		self.assertEqual(engine.get_state(self.session)["phase"], "stats")

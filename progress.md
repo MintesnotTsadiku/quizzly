@@ -14,9 +14,9 @@ the scoreboard that says why the answer is right.
   buzzer; when the quiz explains answers it parks that payload in Redis state as
   `closed_payload` and publishes an `explanation` event instead. `show_stats`
   then publishes the parked payload unchanged, so nothing is computed twice.
-  `hold_seconds` is the shared rule for how long a phase waits:
-  `EXPLANATION_SECONDS` (10) with auto-advance on, `ADVANCE_WAIT_CAP` with it
-  off.
+  `hold_seconds` is the shared rule for how long a phase waits: the quiz's
+  `explanation_time_limit` (default 10s) with auto-advance on,
+  `ADVANCE_WAIT_CAP` with it off.
 - The phase is skipped when the toggle is off or the question has neither text
   nor image, so a half-authored quiz never lands on a blank screen.
 - Reconnect: `get_host_state` and the player `get_state` return the stored
@@ -26,8 +26,9 @@ the scoreboard that says why the answer is right.
   explanation, a countdown ring (auto-advance only) and a **Show results**
   button. Player screen keeps its own verdict and shows the explanation under
   it, so nobody waits 10 seconds to find out they were right.
-- Authoring: one `Explanations on/off` toggle on the quiz, plus a text box and
-  an image uploader per question that appear with it.
+- Authoring: one `Explanations on/off` toggle on the quiz, a seconds field
+  beside it, plus a text box and an image uploader per question that appear
+  with it.
 
 ### Tests
 

@@ -41,6 +41,19 @@
 				>
 					Explanations {{ showExplanation ? "on" : "off" }}
 				</button>
+				<label
+					v-if="showExplanation"
+					class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
+				>
+					Seconds per explanation
+					<input
+						v-model.number="explanationTimeLimit"
+						type="number"
+						:min="MIN_SECONDS"
+						:max="MAX_SECONDS"
+						class="field w-20"
+					/>
+				</label>
 				<input
 					v-model="description"
 					class="field flex-1 basis-full sm:basis-0"
@@ -229,6 +242,7 @@ const QUESTION_FIELDS = [
 	"points_multiplier",
 ];
 const DEFAULT_TIME_LIMIT = 20;
+const DEFAULT_EXPLANATION_SECONDS = 10;
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 120;
 
@@ -242,6 +256,7 @@ const title = ref("");
 const description = ref("");
 const defaultTimeLimit = ref(DEFAULT_TIME_LIMIT);
 const showExplanation = ref(false);
+const explanationTimeLimit = ref(DEFAULT_EXPLANATION_SECONDS);
 const questions = ref([]);
 const saving = ref(false);
 const saved = ref(false);
@@ -269,6 +284,7 @@ onMounted(async () => {
 		description.value = quiz.description || "";
 		defaultTimeLimit.value = quiz.default_time_limit || DEFAULT_TIME_LIMIT;
 		showExplanation.value = Boolean(quiz.show_explanation);
+		explanationTimeLimit.value = quiz.explanation_time_limit || DEFAULT_EXPLANATION_SECONDS;
 		loadedDoc.value = quiz;
 		// an unset Int comes back as 0; the field should read as empty, not as zero seconds
 		questions.value = quiz.questions.map((question) => ({
@@ -313,6 +329,8 @@ async function save() {
 			description: description.value,
 			default_time_limit: clampSeconds(defaultTimeLimit.value) || DEFAULT_TIME_LIMIT,
 			show_explanation: Number(showExplanation.value),
+			explanation_time_limit:
+				clampSeconds(explanationTimeLimit.value) || DEFAULT_EXPLANATION_SECONDS,
 			// rebuilt without name or idx: frappe keeps an idx it is given, so a row that
 			// carried its old one would ignore the reorder
 			questions: questions.value.map((question) => ({

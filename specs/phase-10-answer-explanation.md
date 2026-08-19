@@ -34,9 +34,12 @@ neither text nor image, so a half-authored quiz never stalls on a blank screen.
 
 ## Timing
 
-`EXPLANATION_SECONDS` (10) with auto-advance on, `ADVANCE_WAIT_CAP` with it off,
-the same rule the stats phase already follows. With auto-advance off the host
-clicks **Show results**, then **Next question**: two beats, both host-driven.
+The quiz's `explanation_time_limit` (default 10s) with auto-advance on,
+`ADVANCE_WAIT_CAP` with it off, the same rule the stats phase already follows.
+`EXPLANATION_SECONDS` is only the fallback for a quiz that never set one.
+
+With auto-advance off the host clicks **Show results**, then **Next question**:
+two beats, both host-driven.
 
 ## Reconnect
 
@@ -46,9 +49,10 @@ screen rather than skipping it.
 
 ## Authoring
 
-One toggle on the quiz (`Explanations on/off`) and, when it is on, a text box
-plus an image uploader per question. The per-question fields hide with the
-toggle rather than being deleted, so flipping it off and back on loses nothing.
+One toggle on the quiz (`Explanations on/off`), a seconds field beside it, and,
+when it is on, a text box plus an image uploader per question. The per-question
+fields hide with the toggle rather than being deleted, so flipping it off and
+back on loses nothing.
 
 ## Out of scope
 
