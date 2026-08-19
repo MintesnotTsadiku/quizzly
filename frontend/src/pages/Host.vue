@@ -264,33 +264,15 @@
 					<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
 						Question {{ (question?.q_index ?? 0) + 1 }} of {{ question?.total }}
 					</p>
-					<h1
-						class="font-display text-2xl font-extrabold leading-tight text-paper sm:text-4xl"
-					>
-						{{ question?.question_text }}
-					</h1>
-					<div
-						v-if="correctShape"
-						class="flex items-center gap-3 rounded-2xl px-5 py-3 sm:gap-5 sm:px-7 sm:py-4"
-						:class="correctShape.fill"
-					>
-						<svg class="size-6 shrink-0 fill-sunk/55 sm:size-8" viewBox="0 0 24 24">
-							<path :d="correctShape.path" />
-						</svg>
-						<span class="font-display text-lg font-extrabold text-sunk sm:text-2xl">{{
-							correctAnswer
-						}}</span>
-						<span class="text-2xl text-sunk">✓</span>
-					</div>
 					<img
 						v-if="explanation?.image_url"
 						:src="explanation.image_url"
 						alt=""
-						class="max-h-[20vh] w-full object-contain sm:max-h-[30vh]"
+						class="max-h-[28vh] w-full object-contain sm:max-h-[42vh]"
 					/>
 					<p
 						v-if="explanation?.explanation"
-						class="max-w-3xl text-lg leading-relaxed text-paper/75 sm:text-2xl"
+						class="max-w-3xl font-display text-xl font-bold leading-snug text-paper sm:text-3xl"
 					>
 						{{ explanation.explanation }}
 					</p>
@@ -467,7 +449,7 @@ import { computed, inject, onMounted, ref, watch } from "vue";
 import QRCode from "qrcode";
 import { call, readError } from "@/api";
 import { confirm } from "@/confirm";
-import { SHAPES, shapeFor, useCountdown, useSessionRoom } from "@/game";
+import { SHAPES, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 import ThemeButton from "@/components/ThemeButton.vue";
 import DrainRing from "@/components/DrainRing.vue";
@@ -540,12 +522,6 @@ const barHeight = (optionId) => {
 	return Math.max(3, ((distribution.value[optionId] || 0) / max) * 100);
 };
 
-const correctShape = computed(() => shapeFor(correctOption.value));
-
-const correctAnswer = computed(
-	() => question.value?.options?.[Number(correctOption.value) - 1] || ""
-);
-
 const dimmed = (optionId) => phase.value === "closed" && optionId !== String(correctOption.value);
 
 // 2nd, 1st, 3rd — the winner stands in the middle
@@ -573,7 +549,6 @@ function onSessionEvent(message) {
 	} else if (message.type === "explanation") {
 		stopCountdown();
 		explanation.value = message;
-		correctOption.value = message.correct_option;
 		phase.value = "explanation";
 		// with auto-advance off the server waits the host out, so there is no clock to show
 		if (autoAdvance.value) startCountdown(message.seconds);

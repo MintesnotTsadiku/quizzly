@@ -401,7 +401,8 @@ class TestExplanationScreen(GameTestCase):
 				self.assertEqual(state["phase"], "explanation")
 				self.assertEqual([e["type"] for e in events], ["explanation"])
 				self.assertEqual(events[0]["explanation"], "Canberra it is.")
-				self.assertEqual(events[0]["correct_option"], "2")
+				# the screen is the explanation alone: no question text, no answer
+				self.assertNotIn("correct_option", events[0])
 				# scores settle at close, so a player's own result is ready to read here
 				self.assertEqual(
 					frappe.db.get_value(
