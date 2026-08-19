@@ -250,6 +250,8 @@ def submit_answer(pin: str, token: str, question_row: str, selected_option: str)
 	return {"ok": True}
 
 
+# Players are guests by design; the participant token gates every read below.
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @frappe.whitelist(allow_guest=True)
 @rate_limit(key="token", limit=60, seconds=60)
 def get_state(pin: str, token: str) -> dict:
