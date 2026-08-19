@@ -106,11 +106,14 @@ def get_host_state(session: str | None = None) -> dict:
 			},
 		}
 	)
+	if state["status"] == "explanation":
+		result["explanation"] = state["explanation"]
 	if state["status"] == "closed":
 		distribution = {"1": 0, "2": 0, "3": 0, "4": 0}
 		for answer in answers:
 			distribution[str(answer.selected_option)] += 1
 		result["distribution"] = distribution
+		result["explanation_next"] = bool(state.get("explanation_after"))
 	return result
 
 
@@ -248,6 +251,8 @@ def submit_answer(pin: str, token: str, question_row: str, selected_option: str)
 	return {"ok": True}
 
 
+# Players are guests by design; the participant token gates every read below.
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @frappe.whitelist(allow_guest=True)
 @rate_limit(key="token", limit=60, seconds=60)
 def get_state(pin: str, token: str) -> dict:
@@ -283,6 +288,8 @@ def get_state(pin: str, token: str) -> dict:
 			),
 		}
 	)
+	if state["status"] == "explanation":
+		result["explanation"] = state["explanation"]
 	return result
 
 

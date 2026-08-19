@@ -12,6 +12,8 @@
   "option_3",
   "option_4",
   "correct_option",
+  "explanation",
+  "explanation_image",
   "time_limit",
   "points_multiplier"
  ],
@@ -63,6 +65,17 @@
    "label": "Correct Option",
    "options": "1\n2\n3\n4",
    "reqd": 1
+  },
+  {
+   "description": "Shown after the question closes, if the quiz explains answers.",
+   "fieldname": "explanation",
+   "fieldtype": "Small Text",
+   "label": "Explanation"
+  },
+  {
+   "fieldname": "explanation_image",
+   "fieldtype": "Attach Image",
+   "label": "Explanation Image"
   },
   {
    "description": "Seconds. Blank uses the quiz default.",

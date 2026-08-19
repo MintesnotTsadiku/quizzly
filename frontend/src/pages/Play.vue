@@ -156,6 +156,18 @@
 				<p class="font-mono text-xs uppercase tracking-[0.2em] text-paper/40">
 					Rank {{ result.rank }} · {{ result.score }} pts
 				</p>
+				<img
+					v-if="explanation?.image_url"
+					:src="explanation.image_url"
+					alt=""
+					class="max-h-[22vh] w-full object-contain"
+				/>
+				<p
+					v-if="explanation?.explanation"
+					class="max-w-sm text-sm leading-relaxed text-paper/60"
+				>
+					{{ explanation.explanation }}
+				</p>
 				<ul class="mt-2 w-full max-w-xs text-left">
 					<li
 						v-for="(entry, index) in result.top_5"
@@ -243,6 +255,7 @@ const {
 } = useCountdown();
 
 let stopRoom = () => {};
+let shownResultFor = null;
 
 const player = ref(loadPlayer());
 const phase = ref("lobby");
@@ -254,6 +267,7 @@ const total = ref(0);
 const selected = ref(null);
 const score = ref(0);
 const result = ref({});
+const explanation = ref(null);
 const leaderboard = ref([]);
 const myRank = ref(0);
 const error = ref("");
@@ -295,6 +309,9 @@ function onSessionEvent(message) {
 		showGetReady(message.question_text, message.q_index, message.total, message.seconds);
 	} else if (message.type === "question") {
 		showQuestion(message, message.window_ms / 1000);
+	} else if (message.type === "explanation") {
+		explanation.value = message;
+		showResult(message);
 	} else if (message.type === "question_closed") {
 		showResult(message);
 	} else if (message.type === "podium") {
@@ -318,12 +335,17 @@ function showQuestion(payload, remainingSeconds) {
 	total.value = payload.total;
 	selected.value = null;
 	error.value = "";
+	explanation.value = null;
 	phase.value = "question";
 	startCountdown(remainingSeconds);
 }
 
 async function showResult(closedMessage) {
 	stopCountdown();
+	// the explanation screen already settled this question; the close event that
+	// follows it must not refetch the same result
+	if (phase.value === "result" && shownResultFor === closedMessage.question_row) return;
+	shownResultFor = closedMessage.question_row;
 	result.value = await call("quizzly.api.get_result", {
 		pin: player.value.pin,
 		token: player.value.token,
@@ -389,7 +411,8 @@ async function restore() {
 			phase.value = "locked";
 			stopCountdown();
 		}
-	} else if (state.phase === "closed") {
+	} else if (state.phase === "closed" || state.phase === "explanation") {
+		explanation.value = state.explanation || null;
 		await showResult({ question_row: state.question.question_row });
 	} else {
 		phase.value = "waiting";

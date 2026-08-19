@@ -21,24 +21,56 @@
 				</div>
 			</div>
 
-			<div class="flex flex-wrap items-center gap-4">
+			<textarea
+				v-model="description"
+				rows="2"
+				class="field"
+				placeholder="Description (optional)"
+			/>
+
+			<label
+				class="flex items-center gap-2 self-start whitespace-nowrap font-mono text-xs text-paper/50"
+			>
+				Seconds per question
+				<input
+					v-model.number="defaultTimeLimit"
+					type="number"
+					:min="MIN_SECONDS"
+					:max="MAX_SECONDS"
+					class="field !w-20"
+				/>
+			</label>
+
+			<div class="flex flex-wrap items-center justify-between gap-4">
+				<div class="flex flex-wrap items-center gap-3">
+					<button
+						class="ctl"
+						:data-on="showExplanation"
+						@click="showExplanation = !showExplanation"
+					>
+						Explanations {{ showExplanation ? "on" : "off" }}
+					</button>
+					<button v-if="showExplanation" class="ctl" @click="togglePosition">
+						{{
+							explanationPosition === "After Stats"
+								? "After results"
+								: "Before results"
+						}}
+					</button>
+				</div>
 				<label
+					v-if="showExplanation"
 					class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
 				>
-					Seconds per question
+					Seconds per explanation
 					<input
-						v-model.number="defaultTimeLimit"
+						v-model.number="explanationTimeLimit"
 						type="number"
 						:min="MIN_SECONDS"
 						:max="MAX_SECONDS"
-						class="field w-20"
+						class="field !w-20"
 					/>
 				</label>
-				<input
-					v-model="description"
-					class="field flex-1 basis-full sm:basis-0"
-					placeholder="Description (optional)"
-				/>
 			</div>
 
 			<p v-if="error" class="text-alert">{{ error }}</p>
@@ -125,6 +157,47 @@
 					</label>
 				</div>
 
+				<div v-if="showExplanation" class="flex flex-col gap-3">
+					<textarea
+						v-model="question.explanation"
+						rows="2"
+						class="field"
+						placeholder="Why is that the answer? Shown before the scoreboard."
+					/>
+					<div class="flex flex-wrap items-center gap-4">
+						<img
+							v-if="question.explanation_image"
+							:src="question.explanation_image"
+							alt=""
+							class="h-24 rounded-xl object-contain"
+						/>
+						<FileUploader
+							file-types="image/*"
+							:upload-args="{ private: 0, optimize: true }"
+							@success="(file) => (question.explanation_image = file.file_url)"
+						>
+							<template #default="{ openFileSelector, uploading, progress }">
+								<button class="ctl" @click="openFileSelector">
+									{{
+										uploading
+											? `Uploading ${progress}%`
+											: question.explanation_image
+											? "Replace explanation image"
+											: "Add explanation image"
+									}}
+								</button>
+							</template>
+						</FileUploader>
+						<button
+							v-if="question.explanation_image"
+							class="ctl"
+							@click="question.explanation_image = null"
+						>
+							Remove image
+						</button>
+					</div>
+				</div>
+
 				<div class="flex flex-wrap gap-4">
 					<label
 						class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
@@ -175,10 +248,14 @@ const QUESTION_FIELDS = [
 	"option_3",
 	"option_4",
 	"correct_option",
+	"explanation",
+	"explanation_image",
 	"time_limit",
 	"points_multiplier",
 ];
 const DEFAULT_TIME_LIMIT = 20;
+const DEFAULT_EXPLANATION_SECONDS = 10;
+const DEFAULT_EXPLANATION_POSITION = "Before Stats";
 const MIN_SECONDS = 5;
 const MAX_SECONDS = 120;
 
@@ -191,14 +268,21 @@ const loadedDoc = ref(null);
 const title = ref("");
 const description = ref("");
 const defaultTimeLimit = ref(DEFAULT_TIME_LIMIT);
+const showExplanation = ref(false);
+const explanationTimeLimit = ref(DEFAULT_EXPLANATION_SECONDS);
+const explanationPosition = ref(DEFAULT_EXPLANATION_POSITION);
 const questions = ref([]);
 const saving = ref(false);
 const saved = ref(false);
 const error = ref("");
 
-watch([title, description, defaultTimeLimit, questions], () => (saved.value = false), {
-	deep: true,
-});
+watch(
+	[title, description, defaultTimeLimit, showExplanation, questions],
+	() => (saved.value = false),
+	{
+		deep: true,
+	}
+);
 
 onMounted(async () => {
 	if (isNew.value) {
@@ -213,6 +297,9 @@ onMounted(async () => {
 		title.value = quiz.title;
 		description.value = quiz.description || "";
 		defaultTimeLimit.value = quiz.default_time_limit || DEFAULT_TIME_LIMIT;
+		showExplanation.value = Boolean(quiz.show_explanation);
+		explanationTimeLimit.value = quiz.explanation_time_limit || DEFAULT_EXPLANATION_SECONDS;
+		explanationPosition.value = quiz.explanation_position || DEFAULT_EXPLANATION_POSITION;
 		loadedDoc.value = quiz;
 		// an unset Int comes back as 0; the field should read as empty, not as zero seconds
 		questions.value = quiz.questions.map((question) => ({
@@ -234,9 +321,16 @@ function blankQuestion() {
 		option_3: "",
 		option_4: "",
 		correct_option: "1",
+		explanation: "",
+		explanation_image: null,
 		time_limit: null,
 		points_multiplier: "1",
 	};
+}
+
+function togglePosition() {
+	explanationPosition.value =
+		explanationPosition.value === "After Stats" ? "Before Stats" : "After Stats";
 }
 
 function move(index, step) {
@@ -254,6 +348,10 @@ async function save() {
 			title: title.value,
 			description: description.value,
 			default_time_limit: clampSeconds(defaultTimeLimit.value) || DEFAULT_TIME_LIMIT,
+			show_explanation: Number(showExplanation.value),
+			explanation_time_limit:
+				clampSeconds(explanationTimeLimit.value) || DEFAULT_EXPLANATION_SECONDS,
+			explanation_position: explanationPosition.value,
 			// rebuilt without name or idx: frappe keeps an idx it is given, so a row that
 			// carried its old one would ignore the reorder
 			questions: questions.value.map((question) => ({

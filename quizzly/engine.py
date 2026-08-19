@@ -15,6 +15,7 @@ from frappe.utils import now_datetime, time_diff_in_seconds
 GRACE_SECONDS = 1.0
 STATS_SECONDS = 5
 GETREADY_SECONDS = 3
+EXPLANATION_SECONDS = 10
 # ponytail: host gets 5 minutes to hit Next, then the game moves on by itself
 ADVANCE_WAIT_CAP = 300
 TICK_SECONDS = 0.5
@@ -130,12 +131,25 @@ def advance_session(session_doc, state: dict, control: str | None) -> None:
 	elif phase == "question":
 		if due or control == "skip":
 			close_question(session_doc, questions[index], index, total)
+	elif phase == "explanation":
+		if due or control in ("advance", "skip"):
+			if state.get("closed_payload"):
+				show_stats(session_doc, state, state["closed_payload"])
+			else:
+				next_question(session_doc, questions, index, total)
 	elif phase == "stats":
 		if due or control == "advance":
-			if index == total - 1:
-				finish_session(session_doc)
+			if state.get("explanation_after"):
+				show_explanation(session_doc, state, state["explanation_after"])
 			else:
-				get_ready(session_doc, questions[index + 1], index + 1, total)
+				next_question(session_doc, questions, index, total)
+
+
+def next_question(session_doc, questions, index: int, total: int) -> None:
+	if index == total - 1:
+		finish_session(session_doc)
+	else:
+		get_ready(session_doc, questions[index + 1], index + 1, total)
 
 
 def get_ready(session_doc, question, index: int, total: int) -> None:
@@ -195,17 +209,6 @@ def open_question(session_doc, question, index: int, total: int) -> None:
 def close_question(session_doc, question, index: int, total: int) -> None:
 	state = get_state(session_doc.name) or {}
 	window_ms = state.get("window_ms") or question_window(question, session_doc) * 1000
-	auto_advance = frappe.db.get_value("QZ Session", session_doc.name, "auto_advance")
-	set_state(
-		session_doc.name,
-		{
-			**state,
-			"phase": "stats",
-			"status": "closed",
-			"next_ts": time.time() + (STATS_SECONDS if auto_advance else ADVANCE_WAIT_CAP),
-		},
-		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
-	)
 	participants = get_live_participants(session_doc.name)
 	answers = frappe.get_all(
 		"QZ Answer",
@@ -249,22 +252,99 @@ def close_question(session_doc, question, index: int, total: int) -> None:
 		for p in sorted(participants, key=lambda p: -p.streak)
 		if p.streak >= STREAK_CALLOUT_MIN
 	][:3]
-	publish_session_event(
-		session_doc,
-		{
-			"type": "question_closed",
-			"q_index": index,
-			"total": total,
-			"question_row": question.name,
-			"correct_option": question.correct_option,
-			"distribution": distribution,
-			"top_5": top_5,
-			"streaks": streaks,
-			"is_last": index == total - 1,
-		},
-	)
+	closed = {
+		"type": "question_closed",
+		"q_index": index,
+		"total": total,
+		"question_row": question.name,
+		"correct_option": question.correct_option,
+		"distribution": distribution,
+		"top_5": top_5,
+		"streaks": streaks,
+		"is_last": index == total - 1,
+	}
 	frappe.cache.delete_value(answered_key(session_doc.name, question.name))
+
+	explanation = explanation_payload(session_doc, question, index, total)
+	if explanation and explanation_first(session_doc):
+		show_explanation(session_doc, state, explanation, closed=closed)
+	else:
+		show_stats(session_doc, state, closed, explanation_after=explanation)
 	frappe.db.commit()
+
+
+def show_explanation(session_doc, state: dict, explanation: dict, closed: dict | None = None) -> None:
+	"""Teaching beat. `closed` is the scoreboard payload still owed to the room, parked in
+	state so the stats step does not recompute what is already settled; with the explanation
+	set to come after the stats there is nothing left to park."""
+	seconds = hold_seconds(session_doc, explanation_window(session_doc))
+	explanation = {**explanation, "seconds": seconds, "before_stats": bool(closed)}
+	next_ts = time.time() + seconds
+	set_state(
+		session_doc.name,
+		{
+			**carry_over(state),
+			"phase": "explanation",
+			"status": "explanation",
+			"deadline_ts": next_ts,
+			"next_ts": next_ts,
+			"explanation": explanation,
+			**({"closed_payload": closed} if closed else {}),
+		},
+		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
+	)
+	publish_session_event(session_doc, explanation)
+
+
+def show_stats(session_doc, state: dict, closed: dict, explanation_after: dict | None = None) -> None:
+	next_ts = time.time() + hold_seconds(session_doc, STATS_SECONDS)
+	set_state(
+		session_doc.name,
+		{
+			**carry_over(state),
+			"phase": "stats",
+			"status": "closed",
+			"next_ts": next_ts,
+			**({"explanation_after": explanation_after} if explanation_after else {}),
+		},
+		ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN,
+	)
+	publish_session_event(session_doc, {**closed, "explanation_next": bool(explanation_after)})
+
+
+def carry_over(state: dict) -> dict:
+	"""Whatever a phase parked for the next one is that phase's business, never the one after."""
+	return {k: v for k, v in state.items() if k not in ("explanation", "closed_payload", "explanation_after")}
+
+
+def hold_seconds(session_doc, timed: int) -> int:
+	"""With auto-advance off the host drives every step, so the phase waits them out."""
+	auto_advance = frappe.db.get_value("QZ Session", session_doc.name, "auto_advance")
+	return timed if auto_advance else ADVANCE_WAIT_CAP
+
+
+def explanation_window(session_doc) -> int:
+	return get_quiz(session_doc).explanation_time_limit or EXPLANATION_SECONDS
+
+
+def explanation_first(session_doc) -> bool:
+	return get_quiz(session_doc).explanation_position != "After Stats"
+
+
+def explanation_payload(session_doc, question, index: int, total: int) -> dict | None:
+	"""Only when the quiz asks for it and the question has something to say."""
+	if not get_quiz(session_doc).show_explanation:
+		return None
+	if not (question.explanation or question.explanation_image):
+		return None
+	return {
+		"type": "explanation",
+		"q_index": index,
+		"total": total,
+		"question_row": question.name,
+		"explanation": question.explanation,
+		"image_url": question.explanation_image or None,
+	}
 
 
 def active_sessions() -> list[str]:

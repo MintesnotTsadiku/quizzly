@@ -9,6 +9,9 @@
   "title",
   "description",
   "default_time_limit",
+  "show_explanation",
+  "explanation_position",
+  "explanation_time_limit",
   "questions"
  ],
  "fields": [
@@ -30,6 +33,30 @@
    "fieldname": "default_time_limit",
    "fieldtype": "Int",
    "label": "Default Time Limit"
+  },
+  {
+   "default": "0",
+   "description": "Show a question's explanation before the scoreboard",
+   "fieldname": "show_explanation",
+   "fieldtype": "Check",
+   "label": "Explain Answers"
+  },
+  {
+   "default": "Before Stats",
+   "depends_on": "show_explanation",
+   "description": "Where the explanation sits relative to the answer distribution",
+   "fieldname": "explanation_position",
+   "fieldtype": "Select",
+   "label": "Explanation Position",
+   "options": "Before Stats\nAfter Stats"
+  },
+  {
+   "default": "10",
+   "depends_on": "show_explanation",
+   "description": "Seconds the explanation stays up when auto-advance is on",
+   "fieldname": "explanation_time_limit",
+   "fieldtype": "Int",
+   "label": "Explanation Time Limit"
   },
   {
    "fieldname": "questions",
