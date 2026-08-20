@@ -2,22 +2,31 @@
 	<div class="flex h-full flex-col overflow-y-auto bg-night">
 		<HostBar />
 		<div class="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-5 sm:p-8">
-			<div class="flex items-end justify-between gap-4">
-				<div class="min-w-0 flex-1">
-					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
-						{{ isNew ? "New quiz" : "Editing" }}
-					</p>
+			<div class="flex flex-col gap-2">
+				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
+					{{ isNew ? "New quiz" : "Editing" }}
+				</p>
+				<!-- title and actions on one line: bottom-aligned pills read as dropped
+				     against a field this tall -->
+				<div class="flex items-center gap-4">
 					<input
 						v-model="title"
-						class="field mt-2 font-display text-2xl font-extrabold sm:text-3xl"
+						class="field min-w-0 flex-1 font-display text-2xl font-extrabold sm:text-3xl"
 						placeholder="Quiz title"
 					/>
-				</div>
-				<div class="flex shrink-0 items-center gap-2">
-					<span v-if="saved" class="font-mono text-xs text-ok">Saved</span>
-					<button class="ctl ctl-go" :disabled="saving" @click="save">
-						{{ saving ? "Saving…" : "Save" }}
-					</button>
+					<div class="flex shrink-0 items-center gap-2">
+						<span v-if="saved" class="font-mono text-xs text-ok">Saved</span>
+						<button
+							class="ctl"
+							:disabled="!questions.length"
+							@click="previewing = true"
+						>
+							Preview
+						</button>
+						<button class="ctl ctl-go" :disabled="saving" @click="save">
+							{{ saving ? "Saving…" : "Save" }}
+						</button>
+					</div>
 				</div>
 			</div>
 
@@ -235,6 +244,16 @@
 				<button class="ctl" @click="questions.push(blankQuestion())">Add question</button>
 			</div>
 		</div>
+
+		<QuizPreview
+			:open="previewing"
+			:questions="questions"
+			:default-seconds="defaultTimeLimit"
+			:show-explanation="showExplanation"
+			:explanation-position="explanationPosition"
+			:explanation-seconds="explanationTimeLimit"
+			@close="previewing = false"
+		/>
 	</div>
 </template>
 
@@ -245,6 +264,7 @@ import { FileUploader } from "frappe-ui";
 import { call, readError } from "@/api";
 import { SHAPES } from "@/game";
 import HostBar from "@/components/HostBar.vue";
+import QuizPreview from "@/components/QuizPreview.vue";
 
 const QUESTION_FIELDS = [
 	"question_text",
@@ -279,6 +299,7 @@ const showHostControls = ref(false);
 const explanationTimeLimit = ref(DEFAULT_EXPLANATION_SECONDS);
 const explanationPosition = ref(DEFAULT_EXPLANATION_POSITION);
 const questions = ref([]);
+const previewing = ref(false);
 const saving = ref(false);
 const saved = ref(false);
 const error = ref("");

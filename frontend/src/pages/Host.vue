@@ -343,31 +343,10 @@
 						class="max-h-[22vh] w-full object-contain sm:max-h-[40vh]"
 					/>
 
-					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-						<div
-							v-for="shape in visibleShapes"
-							:key="shape.id"
-							class="flex items-center gap-3 rounded-2xl px-4 py-4 transition sm:gap-5 sm:px-6 sm:py-7"
-							:class="[shape.fill, dimmed(shape.id) ? 'opacity-25' : '']"
-						>
-							<svg
-								class="size-7 shrink-0 fill-sunk/55 sm:size-9"
-								viewBox="0 0 24 24"
-							>
-								<path :d="shape.path" />
-							</svg>
-							<span
-								class="flex-1 font-display text-lg font-extrabold text-sunk sm:text-2xl"
-							>
-								{{ question.options[Number(shape.id) - 1] }}
-							</span>
-							<span
-								v-if="phase === 'closed' && shape.id === String(correctOption)"
-								class="text-3xl text-sunk"
-								>✓</span
-							>
-						</div>
-					</div>
+					<AnswerGrid
+						:options="question.options"
+						:correct-option="phase === 'closed' ? correctOption : null"
+					/>
 
 					<template v-if="phase === 'closed'">
 						<div class="flex h-32 w-full items-stretch gap-3">
@@ -468,6 +447,7 @@ import QRCode from "qrcode";
 import { call, readError } from "@/api";
 import { confirm } from "@/confirm";
 import { SHAPES, useCountdown, useSessionRoom } from "@/game";
+import AnswerGrid from "@/components/AnswerGrid.vue";
 import AvatarPic from "@/components/AvatarPic.vue";
 import ThemeButton from "@/components/ThemeButton.vue";
 import DrainRing from "@/components/DrainRing.vue";
@@ -541,8 +521,6 @@ const barHeight = (optionId) => {
 	// keep a sliver visible so an empty bar still reads as a bar
 	return Math.max(3, ((distribution.value[optionId] || 0) / max) * 100);
 };
-
-const dimmed = (optionId) => phase.value === "closed" && optionId !== String(correctOption.value);
 
 // 2nd, 1st, 3rd — the winner stands in the middle
 const podiumOrder = computed(() =>
