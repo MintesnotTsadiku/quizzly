@@ -87,10 +87,16 @@ body {
 
 /* Host controls: pill toggles that stay quiet so the game owns the screen. */
 .ctl {
+	/* inline-flex with its own line-height: a bold pill picks up a fallback face
+	   whose metrics would otherwise make it taller than the pill beside it */
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	border: 1px solid rgb(var(--haze));
 	border-radius: 999px;
 	padding: 0.5rem 1.1rem;
 	font-size: 0.875rem;
+	line-height: 1.25rem;
 	color: rgb(var(--paper) / 0.7);
 	transition: 0.15s ease;
 }
