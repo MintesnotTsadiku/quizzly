@@ -10,14 +10,17 @@ screens with no session and nobody in the lobby.
 - `AnswerGrid.vue`: the projector answer grid lifted out of `Host.vue` unchanged,
   with `correctOption` as the reveal switch (null while the answer is still out).
   The host screen and the preview now render the same component.
-- `QuizPreview.vue`: fullscreen `<dialog>` over the editor. Per question it walks
-  question -> answer, with the explanation before or after the answer per
-  `explanation_position`, and only when the quiz explains answers and the question
-  has text or an image. Same skip rule as the engine.
-- The question step parks the countdown ring at the question's own time limit, so
-  a too-short window shows up before a room sits through it.
-- Left/right arrows or the footer buttons step, Esc closes, and the walk clamps
-  itself when an edit shortens the quiz while the dialog is open.
+- `QuizPreview.vue`: fullscreen `<dialog>` over the editor that plays itself. Per
+  question: read screen (3s), question (its own time limit), answer (5s), and the
+  explanation before or after the answer per `explanation_position`, skipped when
+  the question has nothing to explain. Engine constants are mirrored client-side.
+- The ring drains for real and turns red under five seconds, so a too-short window
+  shows up before a room sits through it.
+- Pause holds the clock and resumes from where it stopped: the ring is measured
+  against the beat's window, not the countdown's, so `useCountdown` is reused
+  as-is instead of growing a pause. Back/Next and the arrow keys jump a beat, space
+  toggles, the last beat offers Replay, Esc closes and stops the clock.
+- The walk clamps itself when an edit shortens the quiz while the dialog is open.
 - Preview reads the editor's reactive state, not the saved doc: it covers unsaved
   edits, needs no API and works on a quiz that has never been saved.
 - Editor header gets a **Preview** button, disabled until there is a question.
@@ -26,17 +29,19 @@ screens with no session and nobody in the lobby.
 
 Every screen that only exists because players do: lobby, distribution bars, top 5,
 streaks, podium. Previewing those means inventing players and scores, and a made-up
-scoreboard teaches an author nothing. The get-ready screen is left out too, it is
-the question screen with the answers held back.
+scoreboard teaches an author nothing. Sound too: a preview at a desk is not the room.
 
 ### Verified
 
 E2E on `quizzly.localhost` as Administrator, build served from the app:
 
-- Preview on a 2-question quiz with explanations after results: 6 beats, question
-  screen (ring at 10s, four shapes), answer screen (correct ticked, rest dimmed),
-  explanation screen with image and text. Arrow keys stepped to 6/6 with Next
-  disabled at the end, Esc closed back to the editor.
+- Preview on a 2-question quiz with explanations after results: 8 beats, played
+  through unattended. Read screen counted 3 down, question ran its 10s window with
+  the ring going red under five, answer screen held 5s with the correct option
+  ticked and the rest dimmed, explanation held its 5s. Pause froze the clock at 4s
+  across three seconds of wall time and resumed to 2s without refilling the ring.
+  Replay restarted at 1/8, Next disabled on the last beat, Esc closed and stopped
+  the clock.
 - Regression on the live host screen after the `AnswerGrid` extraction: hosted a
   real session with a player joined, question screen and stats screen (tick, dim,
   distribution bars, top 5) render exactly as before.

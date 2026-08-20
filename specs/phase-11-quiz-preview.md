@@ -15,31 +15,47 @@ from what is on the page, with no session, no PIN and nobody joining.
    those same screens. **Feedback: Preview shows question 1 on a blank site.**
 3. Preview button in the editor header.
 
-## What it shows
+## What it plays
+
+Preview runs itself. It opens playing and moves on when the clock runs out, on
+the same timings the engine uses, so an author watches the quiz rather than
+clicking through slides.
 
 Per question, in order:
 
 ```
-question -> [explanation] -> answer                 (explanations before stats)
-question -> answer -> [explanation]                 (explanations after stats)
+read -> question -> [explanation] -> answer         (explanations before stats)
+read -> question -> answer -> [explanation]         (explanations after stats)
 ```
 
-- **question**: index, text, image, the four answers, the countdown ring parked
-  at the question's own time limit.
-- **answer**: the same screen with the correct option ticked and the rest dimmed.
-- **explanation**: text and image, only when the quiz explains answers and the
-  question has something to say. This is the same skip rule the engine uses.
+| Screen | Clock |
+| --- | --- |
+| **read**: the question alone, answers held back | `GETREADY_SECONDS`, 3s |
+| **question**: text, image, the four answers | the question's own time limit |
+| **answer**: correct option ticked, the rest dimmed | `STATS_SECONDS`, 5s |
+| **explanation**: text and image | the quiz's `explanation_time_limit` |
 
-Left/right or the footer buttons step through, Esc closes.
+The ring drains like the real one and turns red under five seconds. The
+explanation screen appears only when the quiz explains answers and the question
+has something to say, the same skip rule the engine uses.
+
+Pause holds the clock where it is and resumes from there: the ring is measured
+against the beat's own window, not the countdown's, so a resume does not refill
+it. Back and Next jump a beat and restart its clock, left/right arrows and space
+do the same from the keyboard, and the last beat offers Replay. Esc closes and
+stops the clock.
+
+Preview mirrors the engine's constants rather than asking the server for them. A
+timing change would have to be made twice, which is cheaper than an API round
+trip and a payload for two integers.
 
 ## Deliberately not shown
 
 Every screen that only exists because players do: the lobby, the answer
 distribution bars, the top 5, the streaks and the podium. Rendering those in
 preview means inventing players and inventing scores, and a made-up scoreboard
-teaches an author nothing about their quiz. The get-ready read screen is left out
-too: it is the question screen with the answers held back, so it shows nothing
-the question step does not.
+teaches an author nothing about their quiz. Sound is left out too: a preview at a
+desk is not the room.
 
 ## Where the data comes from
 

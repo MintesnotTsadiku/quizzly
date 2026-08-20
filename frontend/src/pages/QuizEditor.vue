@@ -245,6 +245,7 @@
 			:default-seconds="defaultTimeLimit"
 			:show-explanation="showExplanation"
 			:explanation-position="explanationPosition"
+			:explanation-seconds="explanationTimeLimit"
 			@close="previewing = false"
 		/>
 	</div>
