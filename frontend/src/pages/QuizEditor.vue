@@ -28,20 +28,18 @@
 				placeholder="Description (optional)"
 			/>
 
-			<label
-				class="flex items-center gap-2 self-start whitespace-nowrap font-mono text-xs text-paper/50"
-			>
-				Seconds per question
-				<input
-					v-model.number="defaultTimeLimit"
-					type="number"
-					:min="MIN_SECONDS"
-					:max="MAX_SECONDS"
-					class="field !w-20"
-				/>
-			</label>
+			<div class="flex flex-col gap-4">
+				<label class="flex items-center gap-2 self-start font-mono text-xs text-paper/50">
+					<span class="w-52 whitespace-nowrap">Seconds per question</span>
+					<input
+						v-model.number="defaultTimeLimit"
+						type="number"
+						:min="MIN_SECONDS"
+						:max="MAX_SECONDS"
+						class="field !w-20"
+					/>
+				</label>
 
-			<div class="flex flex-wrap items-center justify-between gap-4">
 				<div class="flex flex-wrap items-center gap-3">
 					<button
 						class="ctl"
@@ -65,11 +63,12 @@
 						Host controls {{ showHostControls ? "on" : "off" }}
 					</button>
 				</div>
+
 				<label
 					v-if="showExplanation"
-					class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
+					class="flex items-center gap-2 self-start font-mono text-xs text-paper/50"
 				>
-					Seconds per explanation
+					<span class="w-52 whitespace-nowrap">Seconds per explanation</span>
 					<input
 						v-model.number="explanationTimeLimit"
 						type="number"
