@@ -57,6 +57,13 @@
 								: "Before results"
 						}}
 					</button>
+					<button
+						class="ctl"
+						:data-on="showHostControls"
+						@click="showHostControls = !showHostControls"
+					>
+						Host controls {{ showHostControls ? "on" : "off" }}
+					</button>
 				</div>
 				<label
 					v-if="showExplanation"
@@ -269,6 +276,7 @@ const title = ref("");
 const description = ref("");
 const defaultTimeLimit = ref(DEFAULT_TIME_LIMIT);
 const showExplanation = ref(false);
+const showHostControls = ref(false);
 const explanationTimeLimit = ref(DEFAULT_EXPLANATION_SECONDS);
 const explanationPosition = ref(DEFAULT_EXPLANATION_POSITION);
 const questions = ref([]);
@@ -277,7 +285,7 @@ const saved = ref(false);
 const error = ref("");
 
 watch(
-	[title, description, defaultTimeLimit, showExplanation, questions],
+	[title, description, defaultTimeLimit, showExplanation, showHostControls, questions],
 	() => (saved.value = false),
 	{
 		deep: true,
@@ -298,6 +306,7 @@ onMounted(async () => {
 		description.value = quiz.description || "";
 		defaultTimeLimit.value = quiz.default_time_limit || DEFAULT_TIME_LIMIT;
 		showExplanation.value = Boolean(quiz.show_explanation);
+		showHostControls.value = Boolean(quiz.show_host_controls);
 		explanationTimeLimit.value = quiz.explanation_time_limit || DEFAULT_EXPLANATION_SECONDS;
 		explanationPosition.value = quiz.explanation_position || DEFAULT_EXPLANATION_POSITION;
 		loadedDoc.value = quiz;
@@ -349,6 +358,7 @@ async function save() {
 			description: description.value,
 			default_time_limit: clampSeconds(defaultTimeLimit.value) || DEFAULT_TIME_LIMIT,
 			show_explanation: Number(showExplanation.value),
+			show_host_controls: Number(showHostControls.value),
 			explanation_time_limit:
 				clampSeconds(explanationTimeLimit.value) || DEFAULT_EXPLANATION_SECONDS,
 			explanation_position: explanationPosition.value,

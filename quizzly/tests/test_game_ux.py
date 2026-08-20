@@ -39,6 +39,13 @@ class TestHostState(GameTestCase):
 		self.assertEqual(state["status"], "Lobby")
 		self.assertEqual(len(state["participants"]), 2)
 
+	def test_in_game_host_controls_are_off_until_the_quiz_turns_them_on(self):
+		self.assertFalse(get_host_state(self.session)["show_host_controls"])
+
+		frappe.db.set_value("QZ Quiz", self.quiz.name, "show_host_controls", 1)
+		frappe.clear_cache(doctype="QZ Quiz")
+		self.assertTrue(get_host_state(self.session)["show_host_controls"])
+
 	def test_finds_live_session_without_argument(self):
 		self.assertEqual(get_host_state()["session"], self.session)
 
