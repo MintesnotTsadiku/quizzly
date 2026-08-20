@@ -287,10 +287,15 @@
 						<button class="ctl ctl-go" @click="next">
 							{{ explanation?.before_stats ? "Show results" : "Next question" }}
 						</button>
-						<button class="ctl" :data-on="autoAdvance" @click="toggleAutoAdvance">
+						<button
+							v-if="showHostControls"
+							class="ctl"
+							:data-on="autoAdvance"
+							@click="toggleAutoAdvance"
+						>
 							Auto-advance {{ autoAdvance ? "on" : "off" }}
 						</button>
-						<button class="ctl" @click="end">End game</button>
+						<button v-if="showHostControls" class="ctl" @click="end">End game</button>
 						<p v-if="error" class="text-alert">{{ error }}</p>
 					</div>
 				</div>
@@ -430,14 +435,25 @@
 					</template>
 
 					<div class="flex flex-wrap items-center gap-3">
-						<button v-if="phase === 'question'" class="ctl" @click="skip">Skip</button>
+						<button
+							v-if="showHostControls && phase === 'question'"
+							class="ctl"
+							@click="skip"
+						>
+							Skip
+						</button>
 						<button v-if="phase === 'closed'" class="ctl ctl-go" @click="next">
 							{{ explanationNext ? "Show explanation" : "Next question" }}
 						</button>
-						<button class="ctl" :data-on="autoAdvance" @click="toggleAutoAdvance">
+						<button
+							v-if="showHostControls"
+							class="ctl"
+							:data-on="autoAdvance"
+							@click="toggleAutoAdvance"
+						>
 							Auto-advance {{ autoAdvance ? "on" : "off" }}
 						</button>
-						<button class="ctl" @click="end">End game</button>
+						<button v-if="showHostControls" class="ctl" @click="end">End game</button>
 						<p v-if="error" class="text-alert">{{ error }}</p>
 					</div>
 				</div>
@@ -477,6 +493,7 @@ const phase = ref("lobby");
 const participants = ref([]);
 const lobbyLocked = ref(false);
 const autoAdvance = ref(false);
+const showHostControls = ref(false);
 const question = ref(null);
 const answerCount = ref(0);
 const distribution = ref({});
@@ -614,6 +631,7 @@ async function applyState(state) {
 	participants.value = state.participants || [];
 	lobbyLocked.value = Boolean(state.lobby_locked);
 	autoAdvance.value = Boolean(state.auto_advance);
+	showHostControls.value = Boolean(state.show_host_controls);
 	top5.value = state.top_5 || [];
 	qrDataUrl.value = await renderQr(joinUrl.value);
 

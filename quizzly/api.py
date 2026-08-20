@@ -69,11 +69,13 @@ def get_host_state(session: str | None = None) -> dict:
 		# the host reloaded into a game whose worker is gone: settle it and show the podium
 		engine.finish_session(session_doc)
 		session_doc.reload()
+	quiz = engine.get_quiz(session_doc)
 	result = {
 		"session": session_doc.name,
 		"game_pin": session_doc.game_pin,
-		"quiz_title": frappe.db.get_value("QZ Quiz", session_doc.quiz, "title"),
+		"quiz_title": quiz.title,
 		"auto_advance": session_doc.auto_advance,
+		"show_host_controls": quiz.show_host_controls,
 		**get_lobby_state(session_doc),
 	}
 	if session_doc.status == "Lobby":
