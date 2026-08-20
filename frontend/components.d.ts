@@ -8,10 +8,12 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AnswerGrid: typeof import('./src/components/AnswerGrid.vue')['default']
     AvatarPic: typeof import('./src/components/AvatarPic.vue')['default']
     ConfirmDialog: typeof import('./src/components/ConfirmDialog.vue')['default']
     DrainRing: typeof import('./src/components/DrainRing.vue')['default']
     HostBar: typeof import('./src/components/HostBar.vue')['default']
+    QuizPreview: typeof import('./src/components/QuizPreview.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ThemeButton: typeof import('./src/components/ThemeButton.vue')['default']

@@ -15,6 +15,9 @@
 				</div>
 				<div class="flex shrink-0 items-center gap-2">
 					<span v-if="saved" class="font-mono text-xs text-ok">Saved</span>
+					<button class="ctl" :disabled="!questions.length" @click="previewing = true">
+						Preview
+					</button>
 					<button class="ctl ctl-go" :disabled="saving" @click="save">
 						{{ saving ? "Saving…" : "Save" }}
 					</button>
@@ -229,6 +232,15 @@
 				<button class="ctl" @click="questions.push(blankQuestion())">Add question</button>
 			</div>
 		</div>
+
+		<QuizPreview
+			:open="previewing"
+			:questions="questions"
+			:default-seconds="defaultTimeLimit"
+			:show-explanation="showExplanation"
+			:explanation-position="explanationPosition"
+			@close="previewing = false"
+		/>
 	</div>
 </template>
 
@@ -239,6 +251,7 @@ import { FileUploader } from "frappe-ui";
 import { call, readError } from "@/api";
 import { SHAPES } from "@/game";
 import HostBar from "@/components/HostBar.vue";
+import QuizPreview from "@/components/QuizPreview.vue";
 
 const QUESTION_FIELDS = [
 	"question_text",
@@ -272,6 +285,7 @@ const showExplanation = ref(false);
 const explanationTimeLimit = ref(DEFAULT_EXPLANATION_SECONDS);
 const explanationPosition = ref(DEFAULT_EXPLANATION_POSITION);
 const questions = ref([]);
+const previewing = ref(false);
 const saving = ref(false);
 const saved = ref(false);
 const error = ref("");
