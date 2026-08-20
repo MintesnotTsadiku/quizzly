@@ -1,5 +1,46 @@
 # Progress
 
+## Phase 11: Quiz preview (2026-08-20)
+
+Spec: `specs/phase-11-quiz-preview.md`. Preview in the editor plays the quiz
+screens with no session and nobody in the lobby.
+
+### Done
+
+- `AnswerGrid.vue`: the projector answer grid lifted out of `Host.vue` unchanged,
+  with `correctOption` as the reveal switch (null while the answer is still out).
+  The host screen and the preview now render the same component.
+- `QuizPreview.vue`: fullscreen `<dialog>` over the editor. Per question it walks
+  question -> answer, with the explanation before or after the answer per
+  `explanation_position`, and only when the quiz explains answers and the question
+  has text or an image. Same skip rule as the engine.
+- The question step parks the countdown ring at the question's own time limit, so
+  a too-short window shows up before a room sits through it.
+- Left/right arrows or the footer buttons step, Esc closes, and the walk clamps
+  itself when an edit shortens the quiz while the dialog is open.
+- Preview reads the editor's reactive state, not the saved doc: it covers unsaved
+  edits, needs no API and works on a quiz that has never been saved.
+- Editor header gets a **Preview** button, disabled until there is a question.
+
+### Deliberately not built
+
+Every screen that only exists because players do: lobby, distribution bars, top 5,
+streaks, podium. Previewing those means inventing players and scores, and a made-up
+scoreboard teaches an author nothing. The get-ready screen is left out too, it is
+the question screen with the answers held back.
+
+### Verified
+
+E2E on `quizzly.localhost` as Administrator, build served from the app:
+
+- Preview on a 2-question quiz with explanations after results: 6 beats, question
+  screen (ring at 10s, four shapes), answer screen (correct ticked, rest dimmed),
+  explanation screen with image and text. Arrow keys stepped to 6/6 with Next
+  disabled at the end, Esc closed back to the editor.
+- Regression on the live host screen after the `AnswerGrid` extraction: hosted a
+  real session with a player joined, question screen and stats screen (tick, dim,
+  distribution bars, top 5) render exactly as before.
+
 ## Phase 10: Answer explanation screen (2026-08-19)
 
 Spec: `specs/phase-10-answer-explanation.md`. A screen between the buzzer and
