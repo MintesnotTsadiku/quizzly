@@ -42,7 +42,7 @@
 
 		<!-- Lobby -->
 		<template v-else-if="phase === 'lobby'">
-			<div class="flex flex-1 flex-col justify-center gap-8 p-5 sm:gap-12 sm:p-8">
+			<div class="flex min-h-0 flex-1 flex-col justify-center gap-8 p-5 sm:gap-12 sm:p-8">
 				<div class="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
 					<div class="min-w-0 text-center sm:text-left">
 						<!-- inline, not a flex row: the icon has to follow the last line when a
@@ -99,7 +99,7 @@
 					</button>
 				</div>
 
-				<div class="flex flex-col items-center gap-5">
+				<div class="flex min-h-0 flex-1 flex-col items-center justify-center gap-5">
 					<p
 						v-if="participants.length"
 						class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40"
@@ -107,7 +107,12 @@
 						{{ participants.length }}
 						{{ participants.length === 1 ? "player" : "players" }} in
 					</p>
-					<div class="flex max-w-5xl flex-wrap justify-center gap-2.5">
+					<!-- shrinks to the space left over and scrolls inside it, so a full room of
+					     players cannot push Start off the projector. No flex-1: the box has to
+					     hug its rows, or a half-empty lobby strands them below the count. -->
+					<div
+						class="no-scrollbar flex min-h-24 w-full max-w-5xl flex-wrap justify-center gap-2.5 overflow-y-auto p-1"
+					>
 						<!-- The chip itself is not the kick target: a full-name-sized button is
 						     too easy to hit by accident on a projector. -->
 						<div
@@ -178,7 +183,7 @@
 		<!-- Podium -->
 		<template v-else-if="phase === 'podium'">
 			<div
-				class="flex flex-1 flex-col items-center justify-center gap-8 p-5 sm:gap-10 sm:p-8"
+				class="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 p-5 sm:gap-10 sm:p-8"
 			>
 				<h1 class="font-display text-4xl font-extrabold text-paper sm:text-6xl">
 					Final results
@@ -211,9 +216,9 @@
 						</div>
 					</div>
 				</div>
-				<ol class="w-full max-w-md">
+				<ol class="no-scrollbar min-h-24 w-full max-w-md overflow-y-auto">
 					<li
-						v-for="entry in leaderboard"
+						v-for="entry in leaderboard.slice(0, 25)"
 						:key="entry.nickname"
 						class="flex items-center justify-between gap-3 border-b border-haze py-2.5 text-base text-paper/70 sm:text-lg"
 					>
