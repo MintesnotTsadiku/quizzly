@@ -1,5 +1,13 @@
 <template>
 	<div class="flex h-full flex-col overflow-y-auto bg-night">
+		<!-- Looking back is host-side only, so the room needs to be told the game is still
+		     waiting where it was. -->
+		<p
+			v-if="reviewing"
+			class="pointer-events-none fixed inset-x-0 top-0 z-10 bg-dusk/90 py-2 text-center font-mono text-[11px] uppercase tracking-[0.28em] text-accent"
+		>
+			Looking back · press → to return to the game
+		</p>
 		<!-- A live game owns the projector; nav on it is something the room looks at instead of the PIN. -->
 		<template v-if="!session">
 			<HostBar />
@@ -234,7 +242,7 @@
 						<span class="shrink-0 font-mono tabular-nums">{{ entry.score }}</span>
 					</li>
 				</ol>
-				<button class="ctl" @click="reset">New game</button>
+				<button v-if="!reviewing" class="ctl" @click="reset">New game</button>
 			</div>
 		</template>
 
@@ -304,7 +312,7 @@
 					</li>
 				</ul>
 
-				<div class="flex flex-wrap items-center justify-center gap-3">
+				<div v-if="!reviewing" class="flex flex-wrap items-center justify-center gap-3">
 					<button class="ctl ctl-go" @click="next">Next question</button>
 					<button
 						v-if="showHostControls"
@@ -370,7 +378,10 @@
 						:size="88"
 						color="rgb(var(--accent))"
 					/>
-					<div class="flex flex-wrap items-center justify-center gap-3">
+					<div
+						v-if="!reviewing"
+						class="flex flex-wrap items-center justify-center gap-3"
+					>
 						<button class="ctl ctl-go" @click="next">
 							{{ explanation?.before_stats ? "Show results" : afterQuestionLabel }}
 						</button>
@@ -458,7 +469,7 @@
 						</div>
 					</template>
 
-					<div class="flex flex-wrap items-center gap-3">
+					<div v-if="!reviewing" class="flex flex-wrap items-center gap-3">
 						<button
 							v-if="showHostControls && phase === 'question'"
 							class="ctl"
@@ -541,6 +552,10 @@ const qrDialog = ref(null);
 const copied = ref(false);
 const starting = ref(false);
 const error = ref("");
+// screens the room has already seen, oldest first; the last one is what is on the projector
+const history = ref([]);
+const reviewAt = ref(null);
+let liveFrame = null;
 
 watch(qrFullscreen, (open) => (open ? qrDialog.value.showModal() : qrDialog.value.close()));
 
@@ -581,12 +596,15 @@ const afterQuestionLabel = computed(() =>
 		: "Show scores"
 );
 
+const reviewing = computed(() => reviewAt.value !== null);
+
 // 2nd, 1st, 3rd — the winner stands in the middle
 const podiumOrder = computed(() =>
 	[leaderboard.value[1], leaderboard.value[0], leaderboard.value[2]].filter(Boolean)
 );
 
 function onSessionEvent(message) {
+	leaveReview();
 	if (message.type === "lobby_update") {
 		participants.value = message.participants;
 		lobbyLocked.value = Boolean(message.lobby_locked);
@@ -610,19 +628,30 @@ function onSessionEvent(message) {
 		phase.value = "explanation";
 		// with auto-advance off the server waits the host out, so there is no clock to show
 		if (autoAdvance.value) startCountdown(message.seconds);
+		pushFrame();
 	} else if (message.type === "question_closed") {
 		stopCountdown();
 		explanationNext.value = Boolean(message.explanation_next);
 		distribution.value = message.distribution;
 		correctOption.value = message.correct_option;
 		phase.value = "closed";
+		pushFrame();
 	} else if (message.type === "scoreboard") {
 		stopCountdown();
 		showScoreboard(message);
+		// the frame keeps where the rows landed, not the half-played climb
+		const entries = message.standings || [];
+		pushFrame({
+			...readFrame(),
+			standings: byRank(entries, "rank"),
+			shownScores: scoresAt(entries, (entry) => entry.score),
+			settled: true,
+		});
 	} else if (message.type === "podium") {
 		stopCountdown();
 		leaderboard.value = message.leaderboard;
 		phase.value = "podium";
+		pushFrame();
 		playCue("podium");
 	}
 }
@@ -748,6 +777,11 @@ async function applyState(state) {
 		question.value = { ...state.question, options: [] };
 		startCountdown(state.remaining_seconds);
 	}
+	// a resync is the new truth: the look-back starts again from what is on screen now,
+	// or from nothing when the screen is not one the host can look back at
+	reviewAt.value = null;
+	liveFrame = null;
+	history.value = REVIEW_PHASES.includes(phase.value) ? [readFrame()] : [];
 }
 
 async function refresh() {
@@ -834,6 +868,74 @@ async function start() {
 	if (!(await hostCall("quizzly.api.start_session"))) starting.value = false;
 }
 const next = () => hostCall("quizzly.api.next_question");
+
+// With auto-advance off the host drives every beat, often from the back of the room with
+// a clicker, and a clicker sends arrow keys. Back is a look at screens the room already
+// saw, held on the projector only: the game itself never rewinds.
+const FORWARD_KEYS = ["ArrowRight", "ArrowDown", "PageDown"];
+const BACK_KEYS = ["ArrowLeft", "ArrowUp", "PageUp"];
+const REVIEW_PHASES = ["closed", "explanation", "scoreboard", "podium"];
+
+// Everything the review screens paint. Frames are shallow copies because every handler
+// replaces these values rather than mutating them.
+const frameRefs = {
+	phase,
+	question,
+	explanation,
+	explanationNext,
+	correctOption,
+	distribution,
+	scoreboard,
+	standings,
+	leaderboard,
+	shownScores,
+	settled,
+	streaks,
+};
+const readFrame = () =>
+	Object.fromEntries(Object.entries(frameRefs).map(([key, r]) => [key, r.value]));
+const writeFrame = (frame) =>
+	Object.entries(frame).forEach(([key, value]) => (frameRefs[key].value = value));
+
+const pushFrame = (frame) => history.value.push(frame || readFrame());
+
+// Walk the remembered screens. The last frame is the live one, so sitting on it is not
+// review at all: reviewAt goes back to null and the game controls come back.
+function step(delta) {
+	const at = reviewAt.value ?? history.value.length - 1;
+	const target = at + delta;
+	if (target < 0 || target >= history.value.length) return false;
+	if (reviewAt.value === null) liveFrame = readFrame();
+	const live = target === history.value.length - 1;
+	reviewAt.value = live ? null : target;
+	writeFrame(live ? liveFrame : history.value[target]);
+	return true;
+}
+
+// The room is moving on: whatever the host was looking back at, the live screen wins.
+function leaveReview() {
+	if (reviewAt.value === null) return;
+	reviewAt.value = null;
+	writeFrame(liveFrame);
+}
+
+function onKeydown(event) {
+	if (autoAdvance.value || event.metaKey || event.ctrlKey || event.altKey) return;
+	if (!REVIEW_PHASES.includes(phase.value)) return;
+	// a confirm or the fullscreen QR owns the screen: the keys answer it, not the game
+	if (document.querySelector("dialog[open]")) return;
+	if (BACK_KEYS.includes(event.key)) {
+		event.preventDefault();
+		step(-1);
+	} else if (FORWARD_KEYS.includes(event.key)) {
+		event.preventDefault();
+		// forward off the newest screen is the game moving on, and past the podium there is
+		// nothing left to move on to
+		if (!step(1) && phase.value !== "podium") next();
+	}
+}
+
+onMounted(() => window.addEventListener("keydown", onKeydown));
 const skip = () => hostCall("quizzly.api.skip_question");
 
 async function end() {
@@ -848,7 +950,10 @@ async function end() {
 	if ((await hostCall("quizzly.api.end_session")) && inLobby) reset();
 }
 
-onUnmounted(() => clearTimeout(climbTimer));
+onUnmounted(() => {
+	clearTimeout(climbTimer);
+	window.removeEventListener("keydown", onKeydown);
+});
 
 function reset() {
 	localStorage.removeItem(HOSTED_SESSION_KEY);
