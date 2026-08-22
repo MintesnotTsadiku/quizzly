@@ -107,7 +107,7 @@
 					</button>
 				</div>
 
-				<div class="flex min-h-0 flex-1 flex-col items-center justify-center gap-5">
+				<div class="flex min-h-0 flex-col items-center justify-center gap-5">
 					<p
 						v-if="participants.length"
 						class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40"
@@ -115,16 +115,16 @@
 						{{ participants.length }}
 						{{ participants.length === 1 ? "player" : "players" }} in
 					</p>
-					<!-- shrinks to the space left over and scrolls inside it, so a full room of
-					     players cannot push Start off the projector. No flex-1: the box has to
-					     hug its rows, or a half-empty lobby strands them below the count. -->
+					<!-- only a sample of the room gets a chip: a full lobby of names reads as
+					     noise on a projector and pushes Start off the screen. -->
 					<div
-						class="no-scrollbar flex min-h-24 w-full max-w-5xl flex-wrap content-center items-center justify-center gap-2.5 overflow-y-auto p-1"
+						v-if="participants.length"
+						class="flex w-full max-w-5xl flex-wrap items-center justify-center gap-2.5 p-1"
 					>
 						<!-- The chip itself is not the kick target: a full-name-sized button is
 						     too easy to hit by accident on a projector. -->
 						<div
-							v-for="participant in participants"
+							v-for="participant in visibleParticipants"
 							:key="participant.name"
 							class="group relative flex items-center gap-2 rounded-full border border-haze bg-dusk py-1 pl-1 pr-4 text-base font-medium text-paper sm:gap-3 sm:pr-5 sm:text-xl"
 						>
@@ -141,6 +141,12 @@
 							>
 								×
 							</button>
+						</div>
+						<div
+							v-if="overflowCount"
+							class="flex items-center rounded-full border border-haze bg-dusk px-4 py-2.5 text-base font-medium text-paper/50 sm:px-5 sm:text-xl"
+						>
+							+{{ overflowCount }} more
 						</div>
 					</div>
 					<p v-if="!participants.length" class="text-paper/35">
@@ -562,6 +568,12 @@ watch(qrFullscreen, (open) => (open ? qrDialog.value.showModal() : qrDialog.valu
 const joinUrl = computed(
 	() => `${window.location.origin}/quizzly/join?pin=${session.value.game_pin}`
 );
+
+const LOBBY_CHIP_LIMIT = 10;
+
+// The newest joins are the ones still looking for their own name on the screen.
+const visibleParticipants = computed(() => participants.value.slice(-LOBBY_CHIP_LIMIT));
+const overflowCount = computed(() => Math.max(0, participants.value.length - LOBBY_CHIP_LIMIT));
 
 // The projector shows where to go, not the whole query string.
 const joinHost = computed(() => `${window.location.host}/quizzly/join`);
