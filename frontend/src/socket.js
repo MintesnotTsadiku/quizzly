@@ -3,9 +3,7 @@ import { io } from "socket.io-client";
 export function initSocket() {
 	const host = window.location.hostname;
 	const siteName = window.site_name || host;
-	const port = window.location.port && window.socketio_port
-		? `:${window.socketio_port}`
-		: "";
+	const port = window.location.port && window.socketio_port ? `:${window.socketio_port}` : "";
 	const protocol = port ? "http" : "https";
 	const url = `${protocol}://${host}${port}/${siteName}`;
 

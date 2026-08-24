@@ -20,7 +20,7 @@ class QuizGame(GameModule):
 		summary="Timed live quiz questions, speed-aware scoring, streaks and a podium.",
 		min_players=1,
 		max_players=None,
-		recommended_players="4–100+",
+		recommended_players="4-100+",
 		typical_minutes=15,
 		interaction_tags=("quiz",),
 		status="Available",

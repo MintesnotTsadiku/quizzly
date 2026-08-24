@@ -80,11 +80,12 @@ function mulberry32(seed) {
  * Subscribe to a session's realtime room.
  *
  * socket.io reconnects on its own but the server-side room membership is gone,
- * so every reconnect has to re-emit qz_join. `resync` then repairs whatever was
- * missed while the socket was down.
+ * so every reconnect has to re-emit the join. `resync` then repairs whatever was
+ * missed while the socket was down. `prefix` selects the platform room family:
+ * "qz" for quiz sessions, "gp" for GatherPlay ones.
  */
-export function useSessionRoom(socket, pin, onEvent, resync) {
-	const eventName = `qz_session_${pin}`;
+export function useSessionRoom(socket, pin, onEvent, resync, prefix = "qz") {
+	const eventName = `${prefix}_session_${pin}`;
 	let lastEventAt = Date.now();
 
 	function handle(message) {
@@ -93,7 +94,7 @@ export function useSessionRoom(socket, pin, onEvent, resync) {
 	}
 
 	function join() {
-		socket.emit("qz_join", pin);
+		socket.emit(`${prefix}_join`, pin);
 		lastEventAt = Date.now();
 		resync();
 	}
@@ -119,7 +120,7 @@ export function useSessionRoom(socket, pin, onEvent, resync) {
 		clearInterval(watchdog);
 		socket.off(eventName, handle);
 		socket.off("connect", join);
-		socket.emit("qz_leave", pin);
+		socket.emit(`${prefix}_leave`, pin);
 	}
 
 	onBeforeUnmount(stop);

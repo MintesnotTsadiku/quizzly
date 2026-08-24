@@ -41,7 +41,7 @@ class CueCastGame(GameModule):
 		summary="Act it or describe it: race through team prompts before the buzzer.",
 		min_players=4,
 		max_players=30,
-		recommended_players="6–20",
+		recommended_players="6-20",
 		typical_minutes=20,
 		interaction_tags=("acting", "teams", "performance"),
 		status="Available",
@@ -295,9 +295,10 @@ class CueCastGame(GameModule):
 		if state["phase"] not in ("turn_ready", "turn_open"):
 			return None
 		module_state = dict(state["module_state"])
-		if not participant or frappe.db.get_value(
-			"GP Participant", participant, "team"
-		) != module_state["actor_team"]:
+		if (
+			not participant
+			or frappe.db.get_value("GP Participant", participant, "team") != module_state["actor_team"]
+		):
 			frappe.throw(_("Pick a player from the performing team"))
 		module_state["actor_participant"] = participant
 		return Transition(
@@ -315,10 +316,22 @@ class CueCastGame(GameModule):
 
 	def serialize_public_state(self, ctx, state) -> dict:
 		module_state = state["module_state"]
+		actor_team_name = None
+		teams = []
+		for team in frappe.get_all(
+			"GP Team",
+			filters={"session": ctx.session},
+			fields=["name", "team_name", "color", "score"],
+			order_by="seed asc",
+		):
+			if team.name == module_state.get("actor_team"):
+				actor_team_name = team.team_name
+			teams.append(dict(team))
 		view = {
 			"phase": state["phase"],
 			"turn": module_state.get("turn_number"),
-			**self.team_views(ctx),
+			"actor_team_name": actor_team_name,
+			"teams": teams,
 			"performer": self.participant_card(module_state.get("actor_participant")),
 			"solved": self.solved_count(ctx, state),
 		}
@@ -408,9 +421,7 @@ class CueCastGame(GameModule):
 	def participant_card(self, participant: str | None) -> dict | None:
 		if not participant:
 			return None
-		row = frappe.db.get_value(
-			"GP Participant", participant, ["name", "nickname", "avatar"], as_dict=True
-		)
+		row = frappe.db.get_value("GP Participant", participant, ["name", "nickname", "avatar"], as_dict=True)
 		return dict(row) if row else None
 
 	def solved_count(self, ctx, state) -> int:

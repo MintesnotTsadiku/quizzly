@@ -25,7 +25,9 @@ NICKNAME_MAX_LENGTH = 20
 # --- discovery ---------------------------------------------------------------
 
 
-@frappe.whitelist()
+# The catalog is browsable without an account (product spec §5).
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
+@frappe.whitelist(allow_guest=True)
 def list_games() -> list[dict]:
 	"""The /play catalog: backend manifests are authoritative."""
 	from quizzly.games import manifests
@@ -45,6 +47,25 @@ def list_games() -> list[dict]:
 		}
 		for m in sorted(manifests(), key=lambda m: m.title)
 	]
+
+
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
+@frappe.whitelist(allow_guest=True)
+def list_public_decks(game_key: str | None = None) -> list[dict]:
+	"""Demo decks are marketing content: browsable by guests, playable by hosts."""
+	if game_key and game_key != "cuecast":
+		return []
+	roster = frappe.get_all(
+		"GP Cue Deck",
+		filters={"is_demo": 1},
+		fields=["name", "title", "mode", "demo_key"],
+		order_by="title asc",
+	)
+	for deck in roster:
+		deck.prompt_count = frappe.db.count(
+			"GP Cue Prompt", {"parent": deck.name, "parenttype": "GP Cue Deck"}
+		)
+	return roster
 
 
 # --- host --------------------------------------------------------------------
@@ -203,9 +224,7 @@ def end_session(session: str) -> dict:
 		session_doc.status = "Cancelled"
 		session_doc.ended_at = now_datetime()
 		session_doc.save()
-		gpe.publish_session_event(
-			session_doc, {}, "platform.session_ended", {"cancelled": True}
-		)
+		gpe.publish_session_event(session_doc, {}, "platform.session_ended", {"cancelled": True})
 	elif session_doc.status == "Active":
 		gpe.end_active_session(session_doc)
 	return {"ok": True}
@@ -299,7 +318,10 @@ def get_player_state(pin: str, token: str) -> dict:
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_public_state(pin: str) -> dict:
-	session_doc = get_session_by_pin(pin)
+	session_doc = get_session_by_pin(pin, graceful=True)
+	if not session_doc:
+		# a projector polling a stale or wrong pin degrades quietly, not with 404 spam
+		return {"status": "Unknown"}
 	result = {
 		"status": session_doc.status,
 		"game_key": session_doc.game_key,
@@ -403,12 +425,14 @@ def get_live_host_session():
 	return None
 
 
-def get_session_by_pin(pin: str):
+def get_session_by_pin(pin: str, graceful: bool = False):
 	pin = (pin or "").strip()
 	name = pin and frappe.db.get_value(
 		"GP Session", {"game_pin": pin, "status": ("in", ("Lobby", "Active", "Ended"))}
 	)
 	if not name:
+		if graceful:
+			return None
 		frappe.throw(_("Invalid game PIN"), frappe.DoesNotExistError)
 	return frappe.get_doc("GP Session", name)
 

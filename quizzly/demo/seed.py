@@ -65,6 +65,6 @@ def verify_all() -> list[dict]:
 
 
 def hide_all() -> None:
-	"""Demos stay playable but drop out of pickers when a site opts out of demo content."""
+	"""Demos stay playable but disappear from the catalog when a site opts out."""
 	for name in frappe.get_all("GP Cue Deck", filters={"is_demo": 1}, pluck="name"):
-		frappe.db.set_value("GP Cue Deck", name, "disabled", 1)
+		frappe.db.set_value("GP Cue Deck", name, "is_demo", 0)

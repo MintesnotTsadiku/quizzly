@@ -26,6 +26,8 @@ fixtures = [{"dt": "Role", "filters": [["name", "in", ["Quiz Host"]]]}]
 website_route_rules = [
 	{"from_route": "/quizzly/<path:app_path>", "to_route": "quizzly"},
 	{"from_route": "/play/<path:app_path>", "to_route": "quizzly"},
+	# the bare catalog home
+	{"from_route": "/play", "to_route": "quizzly"},
 ]
 
 export_python_type_annotations = True

@@ -263,13 +263,9 @@ def finish_session(session_doc, result=None) -> None:
 	if status in ("Ended", "Cancelled"):
 		return
 	state = get_state(session_doc.name) or {"module_state": {}, "version": 0}
-	result = result or get_game_module(session_doc.game_key).finish_game(
-		context_for(session_doc), state
-	)
+	result = result or get_game_module(session_doc.game_key).finish_game(context_for(session_doc), state)
 	persist_leaderboard(result.leaderboard)
-	frappe.db.set_value(
-		"GP Session", session_doc.name, {"status": "Ended", "ended_at": now_datetime()}
-	)
+	frappe.db.set_value("GP Session", session_doc.name, {"status": "Ended", "ended_at": now_datetime()})
 	publish_session_event(session_doc, state, "platform.session_ended", result.publish)
 	clear_state(session_doc.name)
 	frappe.cache.srem(ACTIVE_SESSIONS_KEY, session_doc.name)
@@ -409,7 +405,9 @@ def create_teams(session: str, participants: list[dict], team_count: int) -> lis
 	team_count = max(1, min(team_count, len(participants)))
 	for membership in frappe.get_all("GP Team Membership", filters={"session": session}, pluck="name"):
 		frappe.delete_doc("GP Team Membership", membership, force=True)
-	frappe.db.sql("""update `tabGP Participant` set team = null where session = %(session)s""", {"session": session})
+	frappe.db.sql(
+		"""update `tabGP Participant` set team = null where session = %(session)s""", {"session": session}
+	)
 	for name in frappe.get_all("GP Team", filters={"session": session}, pluck="name"):
 		frappe.delete_doc("GP Team", name, force=True)
 	teams = []
