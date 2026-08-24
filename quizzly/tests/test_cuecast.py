@@ -6,14 +6,14 @@ from frappe.tests import IntegrationTestCase
 from quizzly.games import engine as gpe
 from quizzly.games.api import (
 	create_session,
+	end_session,
 	get_host_state,
 	get_player_state,
 	get_public_state,
+	host_command,
 	join_session,
 	start_session,
 	submit_action,
-	host_command,
-	end_session,
 )
 
 
@@ -108,14 +108,14 @@ class TestTurnFlow(CueCastTestCase):
 
 		public = get_public_state(self.pin)
 		self.assertNotIn("prompt", public["view"])
-		other = [n for n in self.players if n != performer_nick][0]
+		other = next(n for n in self.players if n != performer_nick)
 		ops = get_player_state(self.pin, self.players[other]["participant_token"])
 		self.assertNotIn("prompt", ops["view"])
 
 	def test_only_performer_scores_prompts(self):
 		hs = self.tick_to("turn_open")
 		performer_nick = hs["view"]["performer"]["nickname"]
-		other = [n for n in self.players if n != performer_nick][0]
+		other = next(n for n in self.players if n != performer_nick)
 		with self.assertRaises(frappe.ValidationError):
 			submit_action(
 				self.pin,
@@ -211,12 +211,8 @@ class TestHostControls(IntegrationTestCase):
 
 	def test_end_session_from_lobby_cancels(self):
 		frappe.set_user("Administrator")
-		from quizzly.games.api import create_session, end_session, get_host_state
-
 		created = create_session("quiz", {})
 		end_session(created["session"])
-		self.assertEqual(
-			frappe.db.get_value("GP Session", created["session"], "status"), "Cancelled"
-		)
+		self.assertEqual(frappe.db.get_value("GP Session", created["session"], "status"), "Cancelled")
 		frappe.delete_doc("GP Session", created["session"], force=True, ignore_permissions=True)
 		frappe.db.commit()

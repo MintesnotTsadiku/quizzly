@@ -124,7 +124,9 @@ class TestJoinGauntlet(PlatformTestCase):
 		self.activate()
 		self.open_turn_state()
 		with self.assertRaises(frappe.PermissionError):
-			submit_action(self.pin, self.players["bob"]["participant_token"], "correct_prompt", str(uuid.uuid4()))
+			submit_action(
+				self.pin, self.players["bob"]["participant_token"], "correct_prompt", str(uuid.uuid4())
+			)
 
 
 class TestSubmitGauntlet(PlatformTestCase):
@@ -134,15 +136,15 @@ class TestSubmitGauntlet(PlatformTestCase):
 		self.open_turn_state()
 
 	def submit(self, nick="ada", action_type="correct_prompt", key=None):
-		return submit_action(self.pin, self.players[nick]["participant_token"], action_type, key or str(uuid.uuid4()))
+		return submit_action(
+			self.pin, self.players[nick]["participant_token"], action_type, key or str(uuid.uuid4())
+		)
 
 	def test_action_persists_with_idempotency(self):
 		key = str(uuid.uuid4())
 		self.submit(key=key)
 		self.submit(key=key)  # replay collapses
-		self.assertEqual(
-			frappe.db.count("GP Action", {"session": self.session, "idempotency_key": key}), 1
-		)
+		self.assertEqual(frappe.db.count("GP Action", {"session": self.session, "idempotency_key": key}), 1)
 
 	def test_db_unique_backstops_redis_bypass(self):
 		key = str(uuid.uuid4())
@@ -189,7 +191,9 @@ class TestPublicSafety(PlatformTestCase):
 			self.open_turn_state()
 			state = gpe.get_state(self.session)
 		module = get_game_module("cuecast")
-		view = module.serialize_public_state(gpe.context_for(frappe.get_doc("GP Session", self.session)), state)
+		view = module.serialize_public_state(
+			gpe.context_for(frappe.get_doc("GP Session", self.session)), state
+		)
 		public = get_public_state(self.pin)
 		blob = str(view) + str(public.get("view") or {})
 		self.assertNotIn("prompt_text", blob.lower())
