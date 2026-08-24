@@ -9,7 +9,10 @@ import { initSocket } from "./socket";
 setConfig("resourceFetcher", frappeRequest);
 
 const app = createApp(App);
-app.use(FrappeUI);
+// Quizzly owns its realtime connection so it can use the port advertised by
+// the active bench at runtime. Prevent FrappeUI from opening a second socket
+// with its development default (port 9000).
+app.use(FrappeUI, { socketio: false });
 app.use(router);
 app.provide("$socket", initSocket());
 app.mount("#app");
