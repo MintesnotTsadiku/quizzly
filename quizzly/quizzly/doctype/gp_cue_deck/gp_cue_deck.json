@@ -4,7 +4,7 @@
  "creation": "2026-08-24 12:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
- "field_order": ["title", "mode", "is_demo", "prompts"],
+ "field_order": ["title", "mode", "is_demo", "demo_key", "prompts"],
  "fields": [
   {
    "fieldname": "title",
@@ -27,6 +27,13 @@
    "fieldtype": "Check",
    "label": "Is Demo",
    "read_only": 1
+  },
+  {
+   "fieldname": "demo_key",
+   "fieldtype": "Data",
+   "label": "Demo Key",
+   "read_only": 1,
+   "unique": 1
   },
   {
    "fieldname": "prompts",
