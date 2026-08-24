@@ -1,5 +1,81 @@
 # Progress
 
+## GatherPlay Phase 1+2: Platform kernel + CueCast (2026-08-25)
+
+Specs: `specs/gatherplay/phase-1-platform-kernel.md`, `specs/gatherplay/phase-2-cuecast.md`.
+Quizzly is now the first registered module of a game platform, and CueCast is the first
+native game: teams, a private performer, rotation, adjudication and prompt secrecy,
+delivered end to end.
+
+### Done
+
+- Kernel (`quizzly/games/`): `GameModule` contract + `GameManifest`, registry off the
+  `quizzly_game_modules` hook, value objects (`Transition`, `ActionDecision`,
+  `ScoreDelta`, `Resolution`, `GameResult`). Modules return; the orchestrator persists
+  and broadcasts. `QuizGame` registers the shipped quiz as a compatibility adapter —
+  no QZ data or route was touched.
+- GP DocTypes: Session, Participant (role/status), Team, Team Membership, Round,
+  Action (unique on session+participant+idempotency key), Score Event (unique per
+  session+key — the ledger's final word). Pins are generated against both QZ and GP
+  tables, so a quiz and a GatherPlay game can never share a PIN.
+- GP engine: Redis envelope (`gp:{session}:state`, versioned), a shared self-looping
+  `gp_ticker` with per-session savepoint isolation, `tick_once()` for deterministic
+  driving from tests and E2E, the submit gauntlet (rate limit → active → token →
+  module verdict → redis dedupe → DB unique), an immutable score-event ledger with
+  materialized totals, throttled progress broadcasts, and role-aware serializer
+  dispatch. Abandoned sessions settle like the quiz's do.
+- CueCast module: Act/Describe decks (`GP Cue Deck` + `GP Cue Prompt`), 30/60/90s
+  rounds, 2–6 teams, equal-turns rotation, performer-only correct/pass (+1 ledger
+  deltas, compensating invalidate), sudden-death tie rounds, review → scoreboard
+  beats, podium with competition ranking. The live prompt exists only in the
+  performer's token-gated snapshot and Redis module state — serializer tests assert
+  the leak both ways.
+- Demo system: three 24-prompt decks (church/Bible, family/general, big-room) under
+  `quizzly/demo_data/`, seeded and verified idempotently by
+  `bench --site … execute quizzly.demo.seed.seed_all|verify_all` (stable `demo_key`).
+- Frontend: one SPA now serves two bases — `/quizzly` (untouched) and `/play` (new).
+  `/play` catalog + how-to pages with the three demo cards and a reserved video slot;
+  host console (setup, team lobby with balancing/rename/kick, live phase views);
+  public projector route separate from the console; phone join + controller where the
+  performer privately sees the word. Team colors ride payloads from one backend
+  constant onto the existing token system; sounds reuse the shared cues.
+- Verification: 24 new integration tests (`test_platform.py`, `test_cuecast.py`) —
+  93 green across the app; a multiplayer Playwright driver (host + projector + three
+  phones through a full game, 18 screenshots in `docs/images/gatherplay/`); an Agent
+  Plane Browser QA manifest (`qa/manifests/gatherplay.yaml`) whose four scenarios —
+  guest catalog, how-to page, join, unknown-pin projector — run clean on console and
+  network errors (run BQA-2026-00114). `pre-commit run --all-files` green.
+
+### Fixed while testing
+
+- `frappe.cache.sadd` returns `None` on v16, so a trusted return value silently
+  swallowed every action as a replay; the gate now pre-checks membership like the
+  quiz's `mark_answered`.
+- `db.set_value` does not JSON-encode dicts: the round-resolution write needed an
+  explicit `json.dumps`.
+- The GP Round row is now opened by every state write that declares a round (the
+  first one shares `current_round = 0`, which the old index-diff guard skipped).
+- Bare `/play` needs its own `website_route_rules` entry (the `<path>` rule does not
+  match the empty suffix), and Frappe caches the rules in redis — `bench clear-cache`
+  after hook changes.
+- Guest avatars: the platform join page now reads the boot pack the same way the
+  quiz's does, and `GP Participant.validate` mirrors the quiz's avatar
+  validation-with-default.
+- Guest-safe APIs for public surfaces: `list_games` and a new `list_public_decks`
+  are `allow_guest`; the projector's snapshot degrades to `{"status": "Unknown"}`
+  for stale pins instead of 404 noise.
+
+### Environment notes (this bench, not app code)
+
+- The bench's Procfile processes died mid-session; web, redis (18331/18131),
+  socketio (19031) and a worker were restored as detached processes. `setsid` is
+  what makes them survive the shell — plain `nohup … &` children died.
+- `serve_default_site` and `default_site` were set to training.localhost so browser
+  tooling can reach the site via `127.0.0.1` (no sudo for `/etc/hosts`); the
+  socketio auth middleware resolves namespaces from the Host header.
+- The RQ `long` queue has no stable worker here, so tests and the E2E driver call
+  `tick_once()` directly; production still runs the self-looping `gp_ticker`.
+
 ## Phase 12: Scoreboard screen (2026-08-22)
 
 Spec: `specs/phase-12-scoreboard-screen.md`. The screen that ends a question is
