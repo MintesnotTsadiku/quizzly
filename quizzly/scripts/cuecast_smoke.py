@@ -67,7 +67,7 @@ def run():
 	ps = get_player_state(pin, perf_token)
 	print("performer private prompt:", repr(ps["view"].get("prompt")))
 
-	other = [n for n in players if n != perf_nick][0]
+	other = next(n for n in players if n != perf_nick)
 	ops = get_player_state(pin, players[other]["participant_token"])
 	print("guesser sees prompt?", ops["view"].get("prompt"), "| is_performer:", ops["view"]["is_performer"])
 
@@ -90,10 +90,30 @@ def run():
 	hs = wait_phase("turn_review")
 	assert hs, "never reached turn_review"
 	print("review played:", hs["view"]["played"], "solved:", hs["view"]["solved_count"])
-	print("[forensics] rounds:", frappe.get_all("GP Round", filters={"session": created["session"]}, fields=["round_index", "status", "resolution"]))
-	print("[forensics] actions:", frappe.get_all("GP Action", filters={"session": created["session"]}, fields=["round", "action_type", "accepted"]))
-	print("[forensics] events:", frappe.get_all("GP Score Event", filters={"session": created["session"]}, fields=["points", "category"]))
-	print("[forensics] teams:", frappe.get_all("GP Team", filters={"session": created["session"]}, fields=["team_name", "score"]))
+	print(
+		"[forensics] rounds:",
+		frappe.get_all(
+			"GP Round",
+			filters={"session": created["session"]},
+			fields=["round_index", "status", "resolution"],
+		),
+	)
+	print(
+		"[forensics] actions:",
+		frappe.get_all(
+			"GP Action", filters={"session": created["session"]}, fields=["round", "action_type", "accepted"]
+		),
+	)
+	print(
+		"[forensics] events:",
+		frappe.get_all(
+			"GP Score Event", filters={"session": created["session"]}, fields=["points", "category"]
+		),
+	)
+	print(
+		"[forensics] teams:",
+		frappe.get_all("GP Team", filters={"session": created["session"]}, fields=["team_name", "score"]),
+	)
 	hs = wait_phase("scoreboard")
 	assert hs, "never reached scoreboard"
 	print("scoreboard teams:", [(t["team_name"], t["score"]) for t in hs["view"]["teams"]])
@@ -102,7 +122,9 @@ def run():
 	if hs:
 		print("second turn performer:", hs["view"]["performer"]["nickname"], "(no actions)")
 	final = wait_phase("podium", timeout=300) or {}
-	print("final teams:", [(t.get("team_name"), t.get("score"), t.get("rank")) for t in final.get("podium", [])])
+	print(
+		"final teams:", [(t.get("team_name"), t.get("score"), t.get("rank")) for t in final.get("podium", [])]
+	)
 	doc = frappe.get_doc("GP Session", created["session"])
 	print("session status:", doc.status)
 	events = frappe.get_all(

@@ -1,0 +1,77 @@
+app: quizzly
+base_url: http://127.0.0.1:18033
+artifact_root: /tmp/agent_browser_qa/quizzly
+capture_trace: false
+capture_video: false
+scenarios:
+  - id: gatherplay_catalog
+    title: GatherPlay discovery catalog renders for guests
+    viewport:
+      width: 1440
+      height: 960
+    checks:
+      - no_console_errors
+    routes:
+      - path: /play
+        assertions:
+          - type: network_idle
+          - type: visible_text
+            value: Pick a game
+          - type: visible_text
+            value: CueCast
+          - type: visible_text
+            value: Quizzly
+          - type: no_blank_page
+          - type: screenshot_not_blank
+
+  - id: gatherplay_game_detail
+    title: CueCast how-to page shows guide and demo packs
+    viewport:
+      width: 1440
+      height: 960
+    checks:
+      - no_console_errors
+    routes:
+      - path: /play/games/cuecast
+        assertions:
+          - type: network_idle
+          - type: visible_text
+            value: How to play
+          - type: visible_text
+            value: Play a demo
+          - type: visible_text
+            value: Bible Characters in Motion
+          - type: no_blank_page
+          - type: screenshot_not_blank
+
+  - id: gatherplay_join
+    title: Guest join screen accepts a PIN
+    viewport:
+      width: 390
+      height: 844
+    checks:
+      - no_console_errors
+    routes:
+      - path: /play/join?pin=000000
+        assertions:
+          - type: network_idle
+          - type: visible_selector
+            value: 'input[placeholder="000000"]'
+          - type: visible_text
+            value: GatherPlay
+          - type: no_blank_page
+          - type: screenshot_not_blank
+
+  - id: gatherplay_projector_lobby_unknown_pin
+    title: Projector screen with an unknown pin degrades gracefully
+    viewport:
+      width: 1920
+      height: 1080
+    checks:
+      - no_console_errors
+    routes:
+      - path: /play/s/999999/screen
+        assertions:
+          - type: network_idle
+          - type: no_blank_page
+          - type: screenshot_not_blank
