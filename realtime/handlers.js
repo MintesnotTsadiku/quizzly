@@ -12,6 +12,18 @@ function quizzly_handlers(socket) {
 			socket.leave("qz_session_" + pin);
 		}
 	});
+
+	socket.on("gp_join", (pin) => {
+		if (typeof pin === "string" && GAME_PIN.test(pin)) {
+			socket.join("gp_session_" + pin);
+		}
+	});
+
+	socket.on("gp_leave", (pin) => {
+		if (typeof pin === "string" && GAME_PIN.test(pin)) {
+			socket.leave("gp_session_" + pin);
+		}
+	});
 }
 
 module.exports = quizzly_handlers;

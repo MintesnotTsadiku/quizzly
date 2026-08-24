@@ -1,0 +1,123 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-08-24 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "game_key",
+  "host",
+  "game_pin",
+  "status",
+  "lobby_locked",
+  "configuration",
+  "current_round",
+  "started_at",
+  "ended_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "game_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Game Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "host",
+   "fieldtype": "Link",
+   "label": "Host",
+   "options": "User",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "game_pin",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Game PIN",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "default": "Lobby",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Lobby\nActive\nPaused\nEnded\nCancelled"
+  },
+  {
+   "default": "0",
+   "fieldname": "lobby_locked",
+   "fieldtype": "Check",
+   "label": "Lobby Locked"
+  },
+  {
+   "fieldname": "configuration",
+   "fieldtype": "JSON",
+   "label": "Configuration"
+  },
+  {
+   "default": "0",
+   "fieldname": "current_round",
+   "fieldtype": "Int",
+   "label": "Current Round",
+   "read_only": 1
+  },
+  {
+   "fieldname": "started_at",
+   "fieldtype": "Datetime",
+   "label": "Started At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ended_at",
+   "fieldtype": "Datetime",
+   "label": "Ended At",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-08-24 12:00:00",
+ "modified_by": "Administrator",
+ "module": "Quizzly",
+ "name": "GP Session",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "if_owner": 1,
+   "read": 1,
+   "role": "Quiz Host",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Quiz Host",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

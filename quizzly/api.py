@@ -431,6 +431,9 @@ def generate_game_pin() -> str:
 	# ponytail: pins stay unique forever (DB unique column); revisit if sessions ever near 1M
 	for _attempt in range(20):
 		pin = f"{secrets.randbelow(1_000_000):06d}"
-		if not frappe.db.exists("QZ Session", {"game_pin": pin}):
+		taken = frappe.db.exists("QZ Session", {"game_pin": pin}) or frappe.db.exists(
+			"GP Session", {"game_pin": pin}
+		)
+		if not taken:
 			return pin
 	frappe.throw(_("Could not allocate a game PIN, please retry"))

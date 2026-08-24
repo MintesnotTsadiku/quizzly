@@ -1,0 +1,109 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-08-24 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "session",
+  "round_index",
+  "module_key",
+  "status",
+  "actor_team",
+  "actor_participant",
+  "opened_at",
+  "deadline_ts",
+  "resolved_at",
+  "resolution"
+ ],
+ "fields": [
+  {
+   "fieldname": "session",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Session",
+   "options": "GP Session",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "round_index",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Round Index"
+  },
+  {
+   "fieldname": "module_key",
+   "fieldtype": "Data",
+   "label": "Module Key"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nResolved"
+  },
+  {
+   "fieldname": "actor_team",
+   "fieldtype": "Link",
+   "label": "Actor Team",
+   "options": "GP Team"
+  },
+  {
+   "fieldname": "actor_participant",
+   "fieldtype": "Link",
+   "label": "Actor Participant",
+   "options": "GP Participant"
+  },
+  {
+   "fieldname": "opened_at",
+   "fieldtype": "Datetime",
+   "label": "Opened At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "deadline_ts",
+   "fieldtype": "Datetime",
+   "label": "Deadline",
+   "read_only": 1
+  },
+  {
+   "fieldname": "resolved_at",
+   "fieldtype": "Datetime",
+   "label": "Resolved At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "resolution",
+   "fieldtype": "JSON",
+   "label": "Resolution"
+  }
+ ],
+ "links": [],
+ "modified": "2026-08-24 12:00:00",
+ "modified_by": "Administrator",
+ "module": "Quizzly",
+ "name": "GP Round",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
