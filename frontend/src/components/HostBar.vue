@@ -11,6 +11,9 @@
 		</RouterLink>
 		<nav class="flex items-center gap-2">
 			<RouterLink class="ctl" :data-on="isHosting" to="/host">Host</RouterLink>
+			<RouterLink class="ctl" :data-on="route.name === 'HostDashboard'" to="/host/dashboard"
+				>Dashboard</RouterLink
+			>
 			<RouterLink class="ctl" :data-on="isAuthoring" to="/host/quizzes">Quizzes</RouterLink>
 		</nav>
 		<span class="ml-auto flex items-center gap-4">

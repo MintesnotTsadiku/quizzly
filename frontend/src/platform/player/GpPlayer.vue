@@ -120,6 +120,12 @@
 						>
 					</li>
 				</ol>
+				<button
+					class="text-sm text-paper/40 underline-offset-4 hover:text-paper hover:underline"
+					@click="goHome"
+				>
+					Back to all games
+				</button>
 			</template>
 
 			<!-- Podium -->
@@ -156,12 +162,10 @@
 						>
 					</li>
 				</ol>
-				<button
-					class="rounded-full border border-haze px-5 py-2 text-sm text-paper/60 transition hover:border-ember hover:text-alert"
-					@click="router.replace({ name: 'GpJoin' })"
-				>
-					Back to join
-				</button>
+				<div class="flex flex-wrap justify-center gap-2">
+					<button class="ctl ctl-go" @click="clearPlayerAndGo">Join another game</button>
+					<button class="ctl" @click="goHome">Back to all games</button>
+				</div>
 			</template>
 
 			<template v-else>
@@ -313,6 +317,12 @@ function clearPlayerAndGo() {
 	stopRoom();
 	clearGpPlayer();
 	router.replace({ name: "GpJoin" });
+}
+
+function goHome() {
+	stopRoom();
+	clearGpPlayer();
+	router.replace({ name: "Catalog" });
 }
 
 async function safeRestore() {

@@ -49,6 +49,11 @@ const platformRoutes = [
 		component: () => import("@/platform/host/GpHost.vue"),
 	},
 	{
+		path: "/host/dashboard",
+		name: "HostDashboard",
+		component: () => import("@/platform/host/HostDashboard.vue"),
+	},
+	{
 		path: "/host/content/crowd-compass",
 		name: "CrowdPackEditor",
 		component: () => import("@/platform/host/PackEditor.vue"),
@@ -70,7 +75,9 @@ const router = createRouter({
 // Hosting needs a real user; guests would otherwise land on an empty host screen.
 router.beforeEach((to) => {
 	if (
-		["GpHost", "CrowdPackEditor", "Host", "Quizzes", "QuizEditor"].includes(to.name) &&
+		["GpHost", "HostDashboard", "CrowdPackEditor", "Host", "Quizzes", "QuizEditor"].includes(
+			to.name
+		) &&
 		window.session_user === "Guest"
 	) {
 		window.location.href = `/login?redirect-to=${encodeURIComponent(`${BASE}${to.fullPath}`)}`;

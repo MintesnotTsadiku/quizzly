@@ -189,6 +189,12 @@
 						<span class="font-mono tabular-nums">{{ entry.score }}</span>
 					</li>
 				</ul>
+				<button
+					class="text-sm text-paper/40 underline-offset-4 hover:text-paper hover:underline"
+					@click="goHome"
+				>
+					Back to all games
+				</button>
 			</template>
 
 			<template v-else-if="phase === 'podium'">
@@ -217,12 +223,10 @@
 						<span class="font-mono tabular-nums">{{ entry.score }}</span>
 					</li>
 				</ul>
-				<button
-					class="mt-3 rounded-full border border-haze px-5 py-2 text-sm text-paper/60 transition hover:border-ember hover:text-alert"
-					@click="playAgain"
-				>
-					Back to join
-				</button>
+				<div class="mt-3 flex flex-wrap justify-center gap-2">
+					<button class="ctl ctl-go" @click="playAgain">Join another game</button>
+					<button class="ctl" @click="goHome">Back to all games</button>
+				</div>
 			</template>
 
 			<template v-else>
@@ -465,5 +469,10 @@ async function leave() {
 function playAgain() {
 	clearPlayer();
 	router.replace("/join");
+}
+
+function goHome() {
+	clearPlayer();
+	router.replace({ name: "Catalog" });
 }
 </script>

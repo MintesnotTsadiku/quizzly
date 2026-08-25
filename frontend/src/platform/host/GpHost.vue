@@ -292,7 +292,31 @@
 		>
 			<div class="flex flex-wrap items-center justify-center gap-10">
 				<div class="text-center sm:text-left">
-					<p class="break-all font-mono text-sm text-accent">Join at {{ joinHost }}</p>
+					<p class="break-all font-mono text-sm text-accent">
+						Join at {{ joinUrl() }}
+						<button
+							class="ml-1 inline-flex translate-y-1 rounded-md p-1 text-paper/35 transition hover:bg-dusk hover:text-paper"
+							:title="copied ? 'Copied' : `Copy ${joinUrl()}`"
+							:aria-label="`Copy ${joinUrl()}`"
+							@click="copyJoinUrl"
+						>
+							<svg
+								class="size-4"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<polyline v-if="copied" points="20 6 9 17 4 12" />
+								<template v-else>
+									<rect x="9" y="9" width="13" height="13" rx="2" />
+									<path
+										d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+									/>
+								</template>
+							</svg>
+						</button>
+					</p>
 					<p
 						class="mt-2 font-mono text-7xl font-bold tracking-[0.08em] text-paper sm:text-8xl"
 					>
@@ -507,7 +531,11 @@
 						>
 					</li>
 				</ol>
-				<button class="ctl ctl-go mt-2" @click="newRoom">New room</button>
+				<div class="mt-2 flex flex-wrap justify-center gap-2">
+					<button class="ctl ctl-go" @click="newRoom">New room</button>
+					<RouterLink class="ctl" :to="{ name: 'HostDashboard' }">Dashboard</RouterLink>
+					<RouterLink class="ctl" :to="{ name: 'Catalog' }">All games</RouterLink>
+				</div>
 			</template>
 
 			<template v-else>
@@ -733,7 +761,7 @@ const hostableGames = [
 ];
 
 const inLiveSession = computed(() => Boolean(session.value));
-const joinHost = computed(() => `${window.location.host}/play/join`);
+const copied = ref(false);
 const setupTitle = computed(
 	() => hostableGames.find((g) => g.key === setupGame.value)?.title || ""
 );
@@ -872,6 +900,16 @@ async function applyState(state) {
 
 function joinUrl() {
 	return `${window.location.origin}/play/join?pin=${pin.value}`;
+}
+
+async function copyJoinUrl() {
+	try {
+		await navigator.clipboard.writeText(joinUrl());
+		copied.value = true;
+		setTimeout(() => (copied.value = false), 1500);
+	} catch {
+		error.value = `Copy failed. The link is ${joinUrl()}`;
+	}
 }
 
 async function renderQr(url) {

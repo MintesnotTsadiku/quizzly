@@ -43,6 +43,12 @@
 				</li>
 			</ol>
 			<p class="font-mono uppercase tracking-[0.3em] text-paper/35">Thanks for playing</p>
+			<div class="flex flex-wrap justify-center gap-3">
+				<RouterLink class="ctl ctl-go" :to="{ name: 'GpJoin' }"
+					>Join another game</RouterLink
+				>
+				<RouterLink class="ctl" :to="{ name: 'Catalog' }">Back to all games</RouterLink>
+			</div>
 		</div>
 
 		<!-- Lobby -->
@@ -50,14 +56,32 @@
 			v-else-if="status === 'Lobby'"
 			class="flex min-h-0 flex-1 flex-col items-center justify-center gap-10 p-8"
 		>
-			<p class="break-all text-center font-mono text-xl text-accent">
-				Join at {{ joinHost }}
-			</p>
-			<p
-				class="text-center font-mono text-[9rem] font-bold leading-none tracking-[0.06em] text-paper"
-			>
-				{{ pin }}
-			</p>
+			<div class="flex flex-wrap items-center justify-center gap-8">
+				<div class="text-center sm:text-left">
+					<p class="max-w-3xl break-all font-mono text-xl text-accent">
+						Join at {{ joinUrl }}
+						<button
+							class="ml-1 inline-flex translate-y-1 rounded-md p-1 text-paper/35 transition hover:bg-dusk hover:text-paper"
+							:title="copied ? 'Copied' : `Copy ${joinUrl}`"
+							:aria-label="`Copy ${joinUrl}`"
+							@click="copyJoinUrl"
+						>
+							<span v-if="copied">✓</span><span v-else>⧉</span>
+						</button>
+					</p>
+					<p
+						class="mt-4 text-center font-mono text-[9rem] font-bold leading-none tracking-[0.06em] text-paper sm:text-left"
+					>
+						{{ pin }}
+					</p>
+				</div>
+				<img
+					v-if="qrDataUrl"
+					:src="qrDataUrl"
+					alt="Join QR code"
+					class="size-48 rounded-2xl bg-card p-2"
+				/>
+			</div>
 			<div class="flex w-full max-w-3xl flex-wrap justify-center gap-2.5">
 				<span
 					v-for="p in publicParticipants"
@@ -127,6 +151,7 @@
 						</span>
 					</li>
 				</ol>
+				<RouterLink class="ctl" :to="{ name: 'Catalog' }">Back to all games</RouterLink>
 			</template>
 
 			<template v-else>
@@ -145,6 +170,7 @@
 <script setup>
 import { computed, inject, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import QRCode from "qrcode";
 import { useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 import DrainRing from "@/components/DrainRing.vue";
@@ -168,12 +194,14 @@ const gameKey = ref("cuecast");
 const view = ref({});
 const podium = ref(null);
 const publicParticipants = ref([]);
+const copied = ref(false);
+const qrDataUrl = ref("");
 let seqSeen = -1;
 let stopRoom = null;
 
 const live = computed(() => liveFor(gameKey.value));
 const gamePhases = computed(() => phasesFor(gameKey.value));
-const joinHost = `${window.location.host}/play/join`;
+const joinUrl = `${window.location.origin}/play/join?pin=${pin}`;
 const timerPercent = computed(() =>
 	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
 );
@@ -181,6 +209,16 @@ const solvedCount = computed(() => view.value.solved ?? 0);
 
 function rankedTeams(list) {
 	return [...list].sort((a, b) => (a.rank || 0) - (b.rank || 0) || b.score - a.score);
+}
+
+async function copyJoinUrl() {
+	try {
+		await navigator.clipboard.writeText(joinUrl);
+		copied.value = true;
+		setTimeout(() => (copied.value = false), 1500);
+	} catch {
+		copied.value = false;
+	}
 }
 
 function onEvent(message) {
@@ -246,6 +284,12 @@ function applyState(state) {
 
 onMounted(async () => {
 	initSound("host");
+	qrDataUrl.value = await QRCode.toDataURL(joinUrl, {
+		margin: 1,
+		width: 800,
+		errorCorrectionLevel: "H",
+		color: { dark: "#16111F", light: "#F4F0FA" },
+	});
 	await refresh();
 	stopRoom = useSessionRoom(socket, pin, onEvent, refresh, "gp");
 });

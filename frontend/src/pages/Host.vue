@@ -58,7 +58,7 @@
 						<p
 							class="break-all font-mono text-xs tracking-wide text-accent sm:text-sm"
 						>
-							Join at {{ joinHost }}
+							Join at {{ joinUrl }}
 							<button
 								class="ml-1 inline-block translate-y-1 rounded-md p-1 text-paper/30 transition hover:bg-dusk hover:text-paper"
 								:title="copied ? 'Copied' : `Copy ${joinUrl}`"
@@ -248,7 +248,11 @@
 						<span class="shrink-0 font-mono tabular-nums">{{ entry.score }}</span>
 					</li>
 				</ol>
-				<button v-if="!reviewing" class="ctl" @click="reset">New game</button>
+				<div v-if="!reviewing" class="flex flex-wrap justify-center gap-2">
+					<button class="ctl ctl-go" @click="reset">New game</button>
+					<RouterLink class="ctl" :to="{ name: 'HostDashboard' }">Dashboard</RouterLink>
+					<RouterLink class="ctl" :to="{ name: 'Catalog' }">All games</RouterLink>
+				</div>
 			</div>
 		</template>
 
@@ -578,8 +582,6 @@ const visibleParticipants = computed(() => participants.value.slice(-LOBBY_CHIP_
 const overflowCount = computed(() => Math.max(0, participants.value.length - LOBBY_CHIP_LIMIT));
 
 // The projector shows where to go, not the whole query string.
-const joinHost = computed(() => `${window.location.host}/play/quizzly/join`);
-
 const timerPercent = computed(() =>
 	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
 );
@@ -817,7 +819,9 @@ async function loadHostState() {
 onMounted(async () => {
 	initSound("host");
 	try {
-		const state = await loadHostState();
+		const state = route.query.session
+			? await call("quizzly.api.get_host_state", { session: route.query.session })
+			: await loadHostState();
 		if (state.session) {
 			await applyState(state);
 			useSessionRoom(socket, state.game_pin, onSessionEvent, refresh);

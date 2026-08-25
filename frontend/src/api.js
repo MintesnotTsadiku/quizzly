@@ -19,3 +19,21 @@ export function call(method, params = {}) {
 		},
 	});
 }
+
+export async function get(method) {
+	const response = await fetch(`/api/method/${method}`, {
+		credentials: "same-origin",
+		headers: {
+			Accept: "application/json",
+			"X-Frappe-Site-Name": getSiteName(),
+		},
+	});
+	const payload = await response.json();
+	if (!response.ok) {
+		throw Object.assign(
+			new Error(payload.message || `Request failed (${response.status})`),
+			payload
+		);
+	}
+	return payload.message;
+}

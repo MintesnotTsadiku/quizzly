@@ -1,5 +1,11 @@
 <template>
 	<div class="relative flex h-full flex-col overflow-y-auto bg-night px-5 py-10">
+		<RouterLink
+			class="absolute left-4 top-4 font-mono text-xs uppercase tracking-wider text-paper/40 transition hover:text-paper"
+			:to="{ name: 'Catalog' }"
+		>
+			← All games
+		</RouterLink>
 		<ThemeButton
 			class="absolute right-4 top-4 text-lg leading-none opacity-60 transition hover:opacity-100"
 		/>
