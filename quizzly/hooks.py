@@ -11,7 +11,7 @@ add_to_apps_screen = [
 		"name": "quizzly",
 		"logo": app_logo_url,
 		"title": "Quizzly",
-		"route": "/quizzly",
+		"route": "/play",
 	}
 ]
 
@@ -28,6 +28,15 @@ website_route_rules = [
 	{"from_route": "/play/<path:app_path>", "to_route": "quizzly"},
 	# the bare catalog home
 	{"from_route": "/play", "to_route": "quizzly"},
+]
+
+website_redirects = [
+	{"source": "/quizzly", "target": "/play"},
+	{
+		"source": r"/quizzly/(.*)",
+		"target": r"/play/quizzly/\1",
+		"forward_query_parameters": True,
+	},
 ]
 
 export_python_type_annotations = True

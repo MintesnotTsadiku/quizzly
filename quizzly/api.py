@@ -9,10 +9,27 @@ from frappe.rate_limiter import rate_limit
 from frappe.utils import now_datetime, strip_html_tags
 
 from quizzly import engine
+from quizzly.avatars import get_boot_pack
 from quizzly.engine import publish_session_event
+from quizzly.nicknames import get_boot_words
 from quizzly.profanity import is_profane
 
 NICKNAME_MAX_LENGTH = 20
+
+
+# Same-origin bootstrap for the Vite development index, which cannot render the
+# Jinja boot block used by the production page.
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
+@frappe.whitelist(allow_guest=True, methods=["GET"])
+def get_spa_boot() -> dict:
+	return {
+		"csrf_token": frappe.sessions.get_csrf_token(),
+		"site_name": frappe.local.site,
+		"socketio_port": frappe.conf.get("socketio_port"),
+		"session_user": frappe.session.user,
+		"avatar_pack": get_boot_pack(),
+		"nickname_words": get_boot_words(),
+	}
 
 
 @frappe.whitelist()

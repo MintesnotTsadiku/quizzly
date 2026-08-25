@@ -43,7 +43,7 @@
 				<p class="text-paper/50">You can join again with the PIN.</p>
 				<button
 					class="rounded-2xl bg-ember px-7 py-3 font-display text-lg font-extrabold text-sunk"
-					@click="router.replace('/play/join')"
+					@click="router.replace({ name: 'GpJoin' })"
 				>
 					Back to join
 				</button>
@@ -158,7 +158,7 @@
 				</ol>
 				<button
 					class="rounded-full border border-haze px-5 py-2 text-sm text-paper/60 transition hover:border-ember hover:text-alert"
-					@click="router.replace('/play/join')"
+					@click="router.replace({ name: 'GpJoin' })"
 				>
 					Back to join
 				</button>
@@ -312,7 +312,7 @@ function showKicked() {
 function clearPlayerAndGo() {
 	stopRoom();
 	clearGpPlayer();
-	router.replace("/play/join");
+	router.replace({ name: "GpJoin" });
 }
 
 async function safeRestore() {
@@ -327,7 +327,7 @@ async function safeRestore() {
 onMounted(() => {
 	initSound("player");
 	if (!player.value || String(player.value.pin) !== String(route.params.pin)) {
-		router.replace("/play/join");
+		router.replace({ name: "GpJoin" });
 		return;
 	}
 	stopRoom = useSessionRoom(socket, route.params.pin, onEvent, safeRestore, "gp");

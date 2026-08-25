@@ -1,22 +1,20 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-// One SPA serves two route families: the quiz lives under /quizzly, the
-// GatherPlay platform under /play. Both prefixes map to this app's www page,
-// so the router base is whichever one the browser arrived on.
-const BASE = window.location.pathname.startsWith("/play") ? "/play" : "/quizzly";
+// /play is the single product entry. The original quiz remains a first-class
+// game, namespaced below it so its established screens keep stable route names.
+const BASE = "/play";
 
 const quizRoutes = [
-	{ path: "/", redirect: () => (window.session_user === "Guest" ? "/join" : "/host") },
-	{ path: "/join", name: "Join", component: () => import("@/pages/Join.vue") },
-	{ path: "/play", name: "Play", component: () => import("@/pages/Play.vue") },
-	{ path: "/host", name: "Host", component: () => import("@/pages/Host.vue") },
+	{ path: "/quizzly/join", name: "Join", component: () => import("@/pages/Join.vue") },
+	{ path: "/quizzly/game", name: "Play", component: () => import("@/pages/Play.vue") },
+	{ path: "/quizzly/host", name: "Host", component: () => import("@/pages/Host.vue") },
 	{
-		path: "/host/quizzes",
+		path: "/quizzly/host/quizzes",
 		name: "Quizzes",
 		component: () => import("@/pages/QuizList.vue"),
 	},
 	{
-		path: "/host/quizzes/:name",
+		path: "/quizzly/host/quizzes/:name",
 		name: "QuizEditor",
 		component: () => import("@/pages/QuizEditor.vue"),
 	},
@@ -60,7 +58,7 @@ const platformRoutes = [
 	},
 ];
 
-const routes = BASE === "/play" ? [...platformRoutes, ...quizRoutes] : quizRoutes;
+const routes = [...platformRoutes, ...quizRoutes];
 
 const router = createRouter({
 	history: createWebHistory(BASE),
@@ -69,8 +67,11 @@ const router = createRouter({
 
 // Hosting needs a real user; guests would otherwise land on an empty host screen.
 router.beforeEach((to) => {
-	if (["GpHost", "CrowdPackEditor"].includes(to.name) && window.session_user === "Guest") {
-		window.location.href = `/login?redirect-to=${encodeURIComponent(to.fullPath)}`;
+	if (
+		["GpHost", "CrowdPackEditor", "Host", "Quizzes", "QuizEditor"].includes(to.name) &&
+		window.session_user === "Guest"
+	) {
+		window.location.href = `/login?redirect-to=${encodeURIComponent(`${BASE}${to.fullPath}`)}`;
 		return false;
 	}
 });

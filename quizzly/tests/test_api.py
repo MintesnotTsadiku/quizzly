@@ -3,12 +3,24 @@ from frappe.tests import IntegrationTestCase
 
 from quizzly.api import (
 	create_session,
+	get_spa_boot,
 	join_session,
 	kick_participant,
 	leave_session,
 	lock_lobby,
 	unlock_lobby,
 )
+
+
+class TestSpaBoot(IntegrationTestCase):
+	def test_boot_matches_the_current_frappe_session(self):
+		frappe.set_user("Administrator")
+		boot = get_spa_boot()
+		self.assertEqual(boot["session_user"], "Administrator")
+		self.assertEqual(boot["site_name"], frappe.local.site)
+		self.assertTrue(boot["csrf_token"])
+		self.assertTrue(boot["avatar_pack"]["avatars"])
+		self.assertTrue(boot["nickname_words"]["adjectives"])
 
 
 class TestLobbyFlow(IntegrationTestCase):

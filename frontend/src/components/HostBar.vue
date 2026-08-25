@@ -4,14 +4,16 @@
 	>
 		<RouterLink
 			class="flex items-center gap-2 font-display text-lg font-extrabold text-paper"
-			to="/host"
+			to="/"
 		>
 			<img alt="" class="size-7 rounded-md" :src="logoUrl" />
 			Quizzly
 		</RouterLink>
 		<nav class="flex items-center gap-2">
 			<RouterLink class="ctl" :data-on="isHosting" to="/host">Host</RouterLink>
-			<RouterLink class="ctl" :data-on="isAuthoring" to="/host/quizzes">Quizzes</RouterLink>
+			<RouterLink class="ctl" :data-on="isAuthoring" to="/quizzly/host/quizzes"
+				>Quizzes</RouterLink
+			>
 		</nav>
 		<span class="ml-auto flex items-center gap-4">
 			<ThemeButton class="ctl" />
@@ -37,10 +39,10 @@ const route = useRoute();
 const user = window.session_user;
 
 const isHosting = computed(() => route.path === "/host");
-const isAuthoring = computed(() => route.path.startsWith("/host/quizzes"));
+const isAuthoring = computed(() => route.path.startsWith("/quizzly/host/quizzes"));
 
 async function logout() {
 	await call("logout");
-	window.location.href = "/quizzly/join";
+	window.location.href = "/play/quizzly/join";
 }
 </script>

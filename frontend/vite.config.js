@@ -18,10 +18,17 @@ export default defineConfig({
 			"/socket.io": {
 				target: process.env.SOCKETIO_URL || "http://127.0.0.1:19031",
 				ws: true,
+				changeOrigin: false,
 				configure(proxy) {
 					const preserveBrowserHost = (proxyRequest, request) => {
-						if (request.headers.host)
+						if (request.headers.host) {
 							proxyRequest.setHeader("host", request.headers.host);
+							proxyRequest.setHeader("origin", `http://${request.headers.host}`);
+						}
+						proxyRequest.setHeader(
+							"x-frappe-site-name",
+							process.env.VITE_FRAPPE_SITE || "training.localhost"
+						);
 					};
 					proxy.on("proxyReq", preserveBrowserHost);
 					proxy.on("proxyReqWs", preserveBrowserHost);

@@ -121,7 +121,7 @@ const GUIDES = {
 		],
 	},
 	quiz: {
-		hostUrl: "/quizzly/host",
+		hostUrl: "/play/quizzly/host",
 		whyGame:
 			"Answer correctly before the clock runs out. Faster answers and winning streaks earn more points, turning every question into a race for the podium.",
 		howTo: [

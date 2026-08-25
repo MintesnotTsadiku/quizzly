@@ -191,7 +191,7 @@ async function join() {
 			avatar: avatar.value,
 		});
 		savePlayer(result);
-		router.push("/play");
+		router.push({ name: "Play" });
 	} catch (e) {
 		error.value = e.messages?.[0] || e.message;
 	} finally {

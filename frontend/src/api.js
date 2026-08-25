@@ -1,4 +1,5 @@
 import { frappeRequest } from "frappe-ui";
+import { getSiteName } from "./site";
 
 const HOST_ACCESS_ERROR = "Log in with a Quiz Host account to write and host quizzes.";
 
@@ -13,6 +14,8 @@ export function call(method, params = {}) {
 		url: `/api/method/${method}`,
 		method: "POST",
 		params,
-		headers: { "X-Frappe-Site-Name": window.site_name },
+		headers: {
+			"X-Frappe-Site-Name": getSiteName(),
+		},
 	});
 }

@@ -566,7 +566,7 @@ let liveFrame = null;
 watch(qrFullscreen, (open) => (open ? qrDialog.value.showModal() : qrDialog.value.close()));
 
 const joinUrl = computed(
-	() => `${window.location.origin}/quizzly/join?pin=${session.value.game_pin}`
+	() => `${window.location.origin}/play/quizzly/join?pin=${session.value.game_pin}`
 );
 
 const LOBBY_CHIP_LIMIT = 10;
@@ -576,7 +576,7 @@ const visibleParticipants = computed(() => participants.value.slice(-LOBBY_CHIP_
 const overflowCount = computed(() => Math.max(0, participants.value.length - LOBBY_CHIP_LIMIT));
 
 // The projector shows where to go, not the whole query string.
-const joinHost = computed(() => `${window.location.host}/quizzly/join`);
+const joinHost = computed(() => `${window.location.host}/play/quizzly/join`);
 
 const timerPercent = computed(() =>
 	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
