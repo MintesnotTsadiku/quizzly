@@ -33,7 +33,7 @@ const GUIDES = {
 		demos: [
 			{demo_key:"doodle-dash-church-bible",title:"Symbols and Stories Sketch-Off",blurb:"Familiar Bible symbols and story objects.",audience:"Church / Bible"},
 			{demo_key:"doodle-dash-family-general",title:"Family Doodle Box",blurb:"Friendly objects for children and grown-ups.",audience:"Child / Family"},
-			{demo_key:"doodle-dash-big-room",title:"Sketch the Room",blurb:"Big-screen prompts for a lively assembly.",audience:"General Assembly"},
+			{demo_key:"doodle-dash-big-room",title:"Sketch the Room",blurb:"Big-screen prompts for a lively assembly.",audience:"General Assembly",video:"/assets/quizzly/videos/gatherplay/doodle-dash-overview.mp4",poster:"/assets/quizzly/videos/gatherplay/doodle-dash-overview-poster.jpg"},
 		],
 	},
 	"crowd-compass": {
@@ -121,6 +121,8 @@ const GUIDES = {
 				title: "Big Room Charades",
 				blurb: "Airport chaos, coffee rushes and stadium waves for ~50 people.",
 				audience: "General Assembly",
+				video: "/assets/quizzly/videos/gatherplay/cuecast-overview.mp4",
+				poster: "/assets/quizzly/videos/gatherplay/cuecast-overview-poster.jpg",
 			},
 		],
 	},
@@ -163,6 +165,8 @@ const GUIDES = {
 				title: "The Big Room Challenge",
 				blurb: "Geography, science, inventions, and culture for a full hall.",
 				audience: "General Assembly",
+				video: "/assets/quizzly/videos/gatherplay/quiz-overview.mp4",
+				poster: "/assets/quizzly/videos/gatherplay/quiz-overview-poster.jpg",
 			},
 		],
 	},
@@ -185,9 +189,27 @@ const ROUND_GUIDES = {
 	"seek-and-show":["Service and Symbols Hunt","Home or Hall Treasure Hunt","Venue Team Quest"],
 	"one-word-chorus":["People, Places, and Symbols","Animals and Everyday Things","One Word, Big Room"],
 };
+const ROUND_COPY = {
+	bluffline:["Invent a believable false answer, then identify the truth while other players try to fool you.","Write one bluff, vote from an anonymous ballot that excludes your own answer, then score for finding truth and fooling the room."],
+	"sequence-sprint":["Ordering every card creates a collaborative race where exact positions, correct neighbours, and speed matter.","Tap the shuffled cards into order, lock the complete sequence, then compare it with the animated solution."],
+	"picture-peek":["A hidden image becomes easier to recognize over time, so every extra clue trades certainty for fewer points.","Study each reveal stage, submit one private guess, and earn the most by recognizing the image early."],
+	"sound-snap":["A short audio cue changes the room's rhythm and rewards careful listening with as few replays as possible.","Listen to the cue, choose what made the sound, and lock before the accessible answer reveal."],
+	"caption-clash":["Everyone writes for the same image, then the room anonymously decides which wholesome caption lands best.","Submit one caption, wait for the anonymous ballot, vote for someone else, and reveal the author and winner."],
+	"story-loom":["Each continuation changes a shared story, while constraints and room voting keep every branch surprising.","Write one constrained continuation, vote on the next branch, and watch the winning sentence join the story."],
+	"signal-spectrum":["A clue-giver knows a hidden point between two opposites; teammates must interpret the clue and place the marker nearby.","Read the two ends of the scale, discuss one clue, lock a 0–100 marker, then reveal the target and distance band."],
+	"memory-mosaic":["The room studies a scene before it disappears, turning shared attention—not specialist knowledge—into points.","Study every detail, wait for concealment, answer the memory question privately, and inspect the annotated reveal."],
+	"common-thread":["Clues arrive one at a time and the connection is worth more before the obvious final clue appears.","Read each new clue, submit the common link as soon as you see it, and recover after a wrong attempt on the next clue."],
+	"escape-together":["Teams solve a recoverable chain of puzzles, balancing speed against hint and incorrect-attempt penalties.","Solve the current stage together, request a hint only when needed, unlock the next node, and finish the final code."],
+	"bracket-bash":["Every two-choice vote advances one nominee through a visible knockout bracket until the room crowns a champion.","Vote in each matchup, watch ties resolve by the host policy, and follow the winner through the bracket."],
+	"closest-call":["Two estimates get a dramatic stage reveal: the smaller distance to the verified answer wins the duel.","Enter one numeric estimate, lock simultaneously, compare distance to truth, and win the best-of duel or bracket."],
+	"phrase-forge":["Shuffled phrase tiles turn recall and reasoning into a race, with partial ordering still visible as progress.","Tap every fragment into order, lock the complete phrase, then read its explanation and context."],
+	"seek-and-show":["Safe physical-world missions get teams moving, but nothing reaches the projector before host approval.","Complete the bounded venue mission, submit proof, wait for moderation, and earn completion, creativity, and speed points."],
+	"one-word-chorus":["Clue-givers must anticipate one another: duplicate clues cancel before the guesser receives one decisive attempt.","Submit one legal word, watch duplicates disappear, then let the designated guesser use the surviving clues once."],
+};
 for (const [key,titles] of Object.entries(ROUND_GUIDES)) {
 	const title=key.split("-").map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");
-	GUIDES[key]={contentKey:"pack",whyGame:`${title} turns one clear room challenge into timed rounds, private responses, shared reveals, and a live race up the scoreboard.`,howTo:["Join the room from your phone.","Read the shared prompt and submit privately before time runs out.","Watch the room reveal the result.","Score through the game's own challenge.","Repeat until the final podium."],hostDoes:"Chooses a themed pack and timing, starts the room, pauses or advances presentation beats, and keeps the room moving.",playerSees:"A private, accessible response control suited to this game, a locked confirmation, reveal, score, and rank.",roomSees:"The current challenge, response count, timer, reveal, standings, and final podium.",scoring:"The server validates every response and applies this game's correctness, proximity, ordering, or contribution scoring.",setup:"One shared screen plus a phone per player. Works in a family room or a large assembly.",accessibility:"Text labels accompany every control; keyboard input, numeric timers, reduced motion, and high contrast are supported.",demos:titles.map((demoTitle,index)=>({demo_key:`${key}-${["church-bible","family-general","big-room"][index]}`,title:demoTitle,blurb:`A ready-to-play ${demoTitle} experience.`,audience:["Church / Bible","Child / Family","General Assembly"][index]}))};
+	const [whyGame,how]=ROUND_COPY[key];
+	GUIDES[key]={contentKey:"pack",whyGame,howTo:["Join the room from your phone.",...how.split(", "),"Continue through the shared reveal and final podium."],hostDoes:"Chooses a themed pack and timing, starts the room, reviews participation, and uses Previous, Next, Pause, or Resume without reopening submissions.",playerSees:"A private response control tailored to this mechanic, a locked confirmation, reveal, score, and rank.",roomSees:`A presentation-safe ${title} stage with participation, timer, reveal, standings, and final podium.`,scoring:"All validation and scoring happen on the server from accepted, idempotent actions; reconnecting restores the same authoritative state.",setup:"One shared screen plus a phone per player. Works responsively in a family room or a large assembly.",accessibility:"Text labels accompany every control; keyboard input, numeric timers, reduced motion, and high contrast are supported.",demos:titles.map((demoTitle,index)=>({demo_key:`${key}-${["church-bible","family-general","big-room"][index]}`,title:demoTitle,blurb:`A ready-to-play ${demoTitle} experience.`,audience:["Church / Bible","Child / Family","General Assembly"][index],...(index===2?{video:`/assets/quizzly/videos/gatherplay/${key}-overview.mp4`,poster:`/assets/quizzly/videos/gatherplay/${key}-overview-poster.jpg`}:{})}))};
 }
 
 export function guideFor(key) {
