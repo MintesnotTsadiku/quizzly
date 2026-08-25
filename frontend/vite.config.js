@@ -18,6 +18,9 @@ export default defineConfig({
 		// Lucide modules are resolved by the plugin below (not esbuild's eager
 		// dependency scanner). Transform it on demand instead of pre-bundling it.
 		exclude: ["frappe-ui"],
+		// frappe-ui itself is transformed on demand, but this CommonJS dependency
+		// still needs Vite's interop wrapper for its default import.
+		include: ["feather-icons"],
 	},
 	plugins: [
 		frappeui({
