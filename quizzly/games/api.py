@@ -79,14 +79,28 @@ CONTENT_PREVIEWS = {
 }
 
 ROUND_GAME_KEYS = {
-	"bluffline", "sequence-sprint", "picture-peek", "sound-snap", "caption-clash",
-	"story-loom", "signal-spectrum", "memory-mosaic", "common-thread", "escape-together",
-	"bracket-bash", "closest-call", "phrase-forge", "seek-and-show", "one-word-chorus",
+	"bluffline",
+	"sequence-sprint",
+	"picture-peek",
+	"sound-snap",
+	"caption-clash",
+	"story-loom",
+	"signal-spectrum",
+	"memory-mosaic",
+	"common-thread",
+	"escape-together",
+	"bracket-bash",
+	"closest-call",
+	"phrase-forge",
+	"seek-and-show",
+	"one-word-chorus",
 }
 for _game_key in ROUND_GAME_KEYS:
 	CONTENT_PREVIEWS[_game_key] = {
-		"pack_doctype": "GP Game Pack", "prompt_doctype": "GP Game Item",
-		"metadata_field": "description", "choice_fields": (),
+		"pack_doctype": "GP Game Pack",
+		"prompt_doctype": "GP Game Item",
+		"metadata_field": "description",
+		"choice_fields": (),
 	}
 
 
@@ -222,7 +236,21 @@ def host_command(session: str, command: str, payload: dict | None = None) -> dic
 	"""Lobby commands mutate and republish; live commands ride the control flag."""
 	payload = payload or {}
 	session_doc = get_host_session(session)
-	if command not in {"previous", "next", "pause", "resume", "skip_turn", "end", "reassign_performer", "push_prompt", "void_prompt"} and session_doc.status != "Lobby":
+	if (
+		command
+		not in {
+			"previous",
+			"next",
+			"pause",
+			"resume",
+			"skip_turn",
+			"end",
+			"reassign_performer",
+			"push_prompt",
+			"void_prompt",
+		}
+		and session_doc.status != "Lobby"
+	):
 		frappe.throw(_("Unknown host command"))
 	if command == "end":
 		return end_session(session)
@@ -445,6 +473,17 @@ def submit_action(
 	replay_ttl = (state["deadline_ts"] - time.time()) + 300
 	if not gpe.mark_acted(session_doc.name, idempotency_key, ttl=max(replay_ttl, 60)):
 		return decision.result or {"ok": True}
+	if session_doc.game_key == "doodle-dash" and action_type in {"stroke_batch", "clear_canvas"}:
+		# High-frequency drawing data stays in Redis. Persisting every pointer batch
+		# would turn one sketch into hundreds of SQL writes and slow large rooms.
+		module.update_canvas(gpe.context_for(session_doc), state, action_type, payload or {})
+		gpe.publish_session_event(
+			session_doc,
+			state,
+			"doodle_dash.canvas_updated",
+			module.serialize_public_state(gpe.context_for(session_doc), state),
+		)
+		return decision.result or {"ok": True}
 	try:
 		gpe.record_action(
 			session_doc,
@@ -457,15 +496,6 @@ def submit_action(
 	except frappe.UniqueValidationError:
 		# the DB is the final word on replays that beat the Redis pre-check
 		return decision.result or {"ok": True}
-	if session_doc.game_key == "doodle-dash" and action_type in {"stroke_batch", "clear_canvas"}:
-		# Canvas actions are deliberately persisted in bounded batches, then fanned
-		# out as a complete public view so reconnecting and slow projectors converge.
-		gpe.publish_session_event(
-			session_doc,
-			state,
-			"doodle_dash.canvas_updated",
-			module.serialize_public_state(gpe.context_for(session_doc), state),
-		)
 	return decision.result or {"ok": True}
 
 
