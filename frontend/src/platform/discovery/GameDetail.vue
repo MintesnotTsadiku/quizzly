@@ -28,31 +28,99 @@
 					</p>
 				</div>
 				<div class="flex shrink-0 flex-col gap-3">
-					<button v-if="!hosting" class="ctl ctl-go" @click="hosting = true">
+					<button v-if="!hosting" class="ctl ctl-go" @click="beginHosting">
 						Host this game
 					</button>
 					<p v-if="error" class="max-w-56 text-sm text-alert">{{ error }}</p>
 				</div>
 			</header>
 
+			<section
+				class="mt-7 overflow-hidden rounded-3xl border border-lagoon/25 bg-lagoon/[0.06]"
+			>
+				<div class="flex gap-4 p-5 sm:items-center sm:p-6">
+					<div
+						class="grid size-11 shrink-0 place-items-center rounded-2xl bg-lagoon/15 text-ok"
+					>
+						<svg
+							class="size-5 fill-none stroke-current"
+							viewBox="0 0 24 24"
+							stroke-width="1.8"
+						>
+							<path d="M8 5v14l11-7Z" />
+							<path d="M4 5v14" />
+						</svg>
+					</div>
+					<div>
+						<p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ok">
+							What makes it a game
+						</p>
+						<p
+							class="mt-1.5 max-w-3xl text-sm leading-relaxed text-paper/70 sm:text-base"
+						>
+							{{ guide.whyGame }}
+						</p>
+					</div>
+				</div>
+			</section>
+
 			<!-- Host panel: deck + pacing, or demo shortcut -->
 			<section v-if="hosting" class="mt-8 rounded-3xl border border-haze bg-dusk p-6 sm:p-8">
-				<h2 class="font-display text-xl font-bold text-paper">Set up the room</h2>
+				<div class="flex flex-wrap items-end justify-between gap-3">
+					<div>
+						<h2 class="font-display text-xl font-bold text-paper">Set up the room</h2>
+						<p class="mt-1 text-sm text-paper/45">
+							Choose the content and pace. You can inspect every prompt first.
+						</p>
+					</div>
+					<span
+						class="rounded-full border border-haze px-3 py-1 font-mono text-[9px] uppercase tracking-wider text-paper/40"
+						>Takes less than a minute</span
+					>
+				</div>
 				<div class="mt-6 grid gap-6 lg:grid-cols-2">
-					<label class="flex flex-col gap-2">
+					<div class="flex flex-col gap-2">
 						<span
 							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-							>Deck</span
+							>Content pack</span
 						>
-						<select v-model="setup.deck" class="field">
-							<option value="" disabled>Pick a deck…</option>
-							<option v-for="deck in decks" :key="deck.name" :value="deck.name">
-								{{ deck.title }} · {{ deck.prompt_count }} prompts
-								{{ Number(deck.is_demo) ? "· demo" : "" }}
-							</option>
-						</select>
-					</label>
-					<div class="flex flex-col gap-2">
+						<PackPicker
+							v-model="setup.deck"
+							:packs="decks"
+							@preview="previewPack = $event"
+						/>
+						<button
+							v-if="selectedPack"
+							type="button"
+							class="flex items-center gap-2 self-start text-xs font-semibold text-ok transition hover:text-paper"
+							@click="previewPack = selectedPack"
+						>
+							<span class="grid size-6 place-items-center rounded-lg bg-lagoon/10"
+								>↗</span
+							>
+							Preview all {{ selectedPack.prompt_count }} prompts
+						</button>
+					</div>
+					<div v-if="guide.contentKey !== 'deck'" class="flex flex-col gap-2">
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
+							Vote time
+						</span>
+						<div class="flex gap-2">
+							<button
+								v-for="s in [10, 15, 20]"
+								:key="s"
+								type="button"
+								class="ctl flex-1"
+								:data-on="setup.vote_seconds === s"
+								@click="setup.vote_seconds = s"
+							>
+								{{ s }}s
+							</button>
+						</div>
+					</div>
+					<div v-else class="flex flex-col gap-2">
 						<span
 							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
 						>
@@ -71,7 +139,7 @@
 							</button>
 						</div>
 					</div>
-					<div class="flex flex-col gap-2">
+					<div v-if="guide.contentKey === 'deck'" class="flex flex-col gap-2">
 						<span
 							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
 							>Teams</span
@@ -89,15 +157,32 @@
 							</button>
 						</div>
 					</div>
+					<div v-else class="flex flex-col gap-2">
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
+							Prediction time
+						</span>
+						<div class="flex gap-2">
+							<button
+								v-for="s in [10, 15, 20]"
+								:key="s"
+								type="button"
+								class="ctl flex-1"
+								:data-on="setup.prediction_seconds === s"
+								@click="setup.prediction_seconds = s"
+							>
+								{{ s }}s
+							</button>
+						</div>
+					</div>
 					<div class="flex items-end justify-between gap-4">
-						<label class="flex items-center gap-3 text-paper/70">
-							<input
-								type="checkbox"
-								v-model="setup.sudden_death"
-								class="size-4 accent-[rgb(var(--accent))]"
-							/>
-							Sudden-death tiebreaker
-						</label>
+						<PremiumToggle
+							v-if="guide.contentKey === 'deck'"
+							v-model="setup.sudden_death"
+							label="Sudden-death tiebreaker"
+							hint="Keep playing until one winner remains"
+						/>
 						<button
 							class="ctl ctl-go"
 							:disabled="!setup.deck || creating"
@@ -108,6 +193,12 @@
 					</div>
 				</div>
 			</section>
+
+			<PackPreviewDrawer
+				:pack="previewPack"
+				@close="previewPack = null"
+				@choose="choosePreviewedPack"
+			/>
 
 			<section class="mt-12 grid gap-10 lg:grid-cols-2">
 				<div>
@@ -210,6 +301,7 @@
 							<button v-if="demo.video" class="ctl ctl-go" @click="watchDemo(demo)">
 								Watch demo
 							</button>
+							<button class="ctl" @click="previewPack = demo">View prompts</button>
 						</div>
 					</div>
 				</div>
@@ -246,10 +338,13 @@
 </template>
 
 <script setup>
-import { nextTick, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import HostBar from "@/components/HostBar.vue";
-import { gameIcon, guideFor } from "@/platform/discovery/games";
+import PackPicker from "@/platform/discovery/PackPicker.vue";
+import PackPreviewDrawer from "@/platform/discovery/PackPreviewDrawer.vue";
+import PremiumToggle from "@/platform/discovery/PremiumToggle.vue";
+import { guideFor } from "@/platform/discovery/games";
 import { gpCall, rememberHostedSession } from "@/platform/session/gp";
 
 const router = useRouter();
@@ -261,8 +356,17 @@ const creating = ref(false);
 const creatingDemo = ref(null);
 const selectedVideo = ref(null);
 const videoSection = ref(null);
+const previewPack = ref(null);
 const error = ref("");
-const setup = ref({ deck: "", seconds: 60, teams_count: 2, sudden_death: true });
+const setup = ref({
+	deck: "",
+	seconds: 60,
+	vote_seconds: 15,
+	prediction_seconds: 15,
+	teams_count: 2,
+	sudden_death: true,
+});
+const selectedPack = computed(() => decks.value.find((deck) => deck.name === setup.value.deck));
 
 onMounted(async () => {
 	try {
@@ -285,12 +389,10 @@ function routeGame() {
 
 function demoCards(demos) {
 	return demos
-		.map((demo) => ({
-			...demo,
-			name: decks.value.find((d) => d.demo_key === demo.demo_key)?.name,
-			prompt_count:
-				decks.value.find((d) => d.demo_key === demo.demo_key)?.prompt_count ?? "—",
-		}))
+		.map((demo) => {
+			const pack = decks.value.find((deck) => deck.demo_key === demo.demo_key);
+			return { ...pack, ...demo, name: pack?.name, prompt_count: pack?.prompt_count ?? "—" };
+		})
 		.filter((demo) => demo.name);
 }
 
@@ -304,13 +406,34 @@ async function watchDemo(demo) {
 	videoSection.value?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function choosePreviewedPack(pack) {
+	setup.value.deck = pack.name;
+	previewPack.value = null;
+}
+
+function beginHosting() {
+	if (guide.value.hostUrl) {
+		window.location.href = guide.value.hostUrl;
+		return;
+	}
+	hosting.value = true;
+}
+
 async function createSession() {
 	error.value = "";
 	creating.value = true;
 	try {
+		const configuration = { ...setup.value };
+		if (guide.value.contentKey !== "deck") {
+			configuration[guide.value.contentKey] = setup.value.deck;
+			delete configuration.deck;
+			delete configuration.seconds;
+			delete configuration.teams_count;
+			delete configuration.sudden_death;
+		}
 		const created = await gpCall("create_session", {
 			game_key: game.value.key,
-			configuration: setup.value,
+			configuration,
 		});
 		rememberHostedSession(created.session);
 		router.push({ name: "GpHost", query: { session: created.session } });
@@ -325,9 +448,10 @@ async function hostDemo(demo) {
 	error.value = "";
 	creatingDemo.value = demo.name;
 	try {
+		const contentKey = guide.value.contentKey;
 		const created = await gpCall("create_session", {
 			game_key: game.value.key,
-			configuration: { deck: demo.name, seconds: 60, teams_count: 2 },
+			configuration: { [contentKey]: demo.name, seconds: 60, teams_count: 2 },
 		});
 		rememberHostedSession(created.session);
 		router.push({ name: "GpHost", query: { session: created.session } });

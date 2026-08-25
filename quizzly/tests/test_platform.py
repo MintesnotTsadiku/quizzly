@@ -11,6 +11,7 @@ from quizzly.games.api import (
 	create_session,
 	get_public_state,
 	join_session,
+	list_public_decks,
 	submit_action,
 )
 
@@ -32,6 +33,34 @@ class TestRegistry(IntegrationTestCase):
 
 		with self.assertRaises((TypeError, AttributeError, ImportError)):
 			load_module("quizzly.games.engine.apply_transition")
+
+
+class TestPublicContentDiscovery(IntegrationTestCase):
+	def test_demo_pack_includes_safe_prompt_preview(self):
+		pack = frappe.get_doc(
+			{
+				"doctype": "GP Crowd Pack",
+				"title": "Previewable Compass",
+				"is_demo": 1,
+				"demo_key": "test-previewable-compass",
+				"prompts": [
+					{
+						"prompt_text": "Pick a gathering spot",
+						"choice_1": "Garden",
+						"choice_2": "Kitchen",
+					}
+				],
+			}
+		).insert()
+		try:
+			preview = next(row for row in list_public_decks("crowd-compass") if row.name == pack.name)
+			self.assertEqual(preview.prompt_count, 1)
+			self.assertEqual(
+				preview.prompts,
+				[{"text": "Pick a gathering spot", "choices": ["Garden", "Kitchen"]}],
+			)
+		finally:
+			frappe.delete_doc("GP Crowd Pack", pack.name, force=True, ignore_permissions=True)
 
 
 class PlatformTestCase(IntegrationTestCase):

@@ -49,9 +49,19 @@ def list_games() -> list[dict]:
 	]
 
 
-CONTENT_DOCTYPES = {
-	"cuecast": ("GP Cue Deck", "GP Cue Prompt"),
-	"crowd-compass": ("GP Crowd Pack", "GP Crowd Prompt"),
+CONTENT_PREVIEWS = {
+	"cuecast": {
+		"pack_doctype": "GP Cue Deck",
+		"prompt_doctype": "GP Cue Prompt",
+		"metadata_field": "mode",
+		"choice_fields": (),
+	},
+	"crowd-compass": {
+		"pack_doctype": "GP Crowd Pack",
+		"prompt_doctype": "GP Crowd Prompt",
+		"metadata_field": "ranked",
+		"choice_fields": ("choice_1", "choice_2", "choice_3", "choice_4"),
+	},
 }
 
 
@@ -59,18 +69,36 @@ CONTENT_DOCTYPES = {
 @frappe.whitelist(allow_guest=True)
 def list_public_decks(game_key: str | None = None) -> list[dict]:
 	"""Demo packs are marketing content: browsable by guests, playable by hosts."""
-	doctypes = CONTENT_DOCTYPES.get(game_key or "")
-	if not doctypes:
+	preview = CONTENT_PREVIEWS.get(game_key or "")
+	if not preview:
 		return []
-	pack_doctype, prompt_doctype = doctypes
+	pack_doctype = preview["pack_doctype"]
+	prompt_doctype = preview["prompt_doctype"]
+	choice_fields = preview["choice_fields"]
 	roster = frappe.get_all(
 		pack_doctype,
 		filters={"is_demo": 1},
-		fields=["name", "title", "demo_key", "ranked" if game_key == "crowd-compass" else "mode"],
+		fields=["name", "title", "demo_key", preview["metadata_field"]],
 		order_by="title asc",
 	)
 	for pack in roster:
-		pack.prompt_count = frappe.db.count(prompt_doctype, {"parent": pack.name, "parenttype": pack_doctype})
+		prompt_fields = ["prompt_text", *choice_fields]
+		rows = frappe.get_all(
+			prompt_doctype,
+			filters={"parent": pack.name, "parenttype": pack_doctype},
+			fields=prompt_fields,
+			order_by="idx asc",
+		)
+		pack.prompt_count = len(rows)
+		pack.prompts = [
+			{
+				"text": strip_html_tags(row.prompt_text or "").strip(),
+				"choices": [
+					strip_html_tags(row.get(field) or "").strip() for field in choice_fields if row.get(field)
+				],
+			}
+			for row in rows
+		]
 	return roster
 
 

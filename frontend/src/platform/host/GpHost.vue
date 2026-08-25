@@ -53,20 +53,17 @@
 
 				<!-- CueCast setup -->
 				<div v-if="setupGame === 'cuecast'" class="mt-8 flex flex-col gap-6">
-					<label class="flex flex-col gap-2">
+					<div class="flex flex-col gap-2">
 						<span
 							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
 							>Deck</span
 						>
-						<select v-model="setup.deck" class="field text-lg">
-							<option value="" disabled>Pick a deck…</option>
-							<option v-for="deck in packs" :key="deck.name" :value="deck.name">
-								{{ deck.title }} · {{ deck.prompt_count }} prompts{{
-									Number(deck.is_demo) ? " · demo" : ""
-								}}
-							</option>
-						</select>
-					</label>
+						<PackPicker
+							v-model="setup.deck"
+							:packs="packs"
+							@preview="previewPack = $event"
+						/>
+					</div>
 					<div class="grid grid-cols-2 gap-5 sm:grid-cols-3">
 						<div class="flex flex-col gap-2">
 							<span
@@ -104,35 +101,35 @@
 								</button>
 							</div>
 						</div>
-						<label
-							class="col-span-2 flex items-center gap-3 self-end text-paper/70 sm:col-span-1"
-						>
-							<input
-								type="checkbox"
-								v-model="setup.sudden_death"
-								class="size-4 accent-[rgb(var(--accent))]"
-							/>
-							Sudden death
-						</label>
+						<PremiumToggle
+							class="col-span-2 self-end sm:col-span-1"
+							v-model="setup.sudden_death"
+							label="Sudden death"
+							hint="Break a tied game"
+						/>
 					</div>
 				</div>
 
 				<!-- Crowd Compass setup -->
 				<div v-else class="mt-8 flex flex-col gap-6">
-					<label class="flex flex-col gap-2">
+					<div class="flex flex-col gap-2">
 						<span
 							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
 							>Pack</span
 						>
-						<select v-model="setup.pack" class="field text-lg">
-							<option value="">Blank room — compose live prompts</option>
-							<option v-for="pack in packs" :key="pack.name" :value="pack.name">
-								{{ pack.title }} · {{ pack.prompt_count }} prompts{{
-									Number(pack.is_demo) ? " · demo" : ""
-								}}{{ pack.ranked ? " · ranked" : "" }}
-							</option>
-						</select>
-					</label>
+						<PackPicker
+							v-model="setup.pack"
+							:packs="packs"
+							@preview="previewPack = $event"
+						/>
+						<button
+							class="ctl self-start"
+							:data-on="!setup.pack"
+							@click="setup.pack = ''"
+						>
+							Blank room · compose prompts live
+						</button>
+					</div>
 					<p v-if="selectedPackRanked" class="-mt-3 text-sm text-ok">
 						Ranked pack: players pick a first and second choice; the room tally is
 						weighted 2/1.
@@ -199,34 +196,23 @@
 							</div>
 						</div>
 					</div>
-					<div class="flex flex-wrap items-center gap-x-8 gap-y-3 text-paper/70">
-						<label class="flex items-center gap-3">
-							<input
-								type="checkbox"
-								v-model="setup.estimation"
-								class="size-4 accent-[rgb(var(--accent))]"
-							/>
-							Share-estimation bonus
-						</label>
-						<label class="flex items-center gap-3">
-							<input
-								type="checkbox"
-								v-model="setup.room_match"
-								class="size-4 accent-[rgb(var(--accent))]"
-							/>
-							Match-the-room +100
-						</label>
-						<label
+					<div class="grid gap-2 sm:grid-cols-2">
+						<PremiumToggle
+							v-model="setup.estimation"
+							label="Share-estimation bonus"
+							hint="Reward close percentage guesses"
+						/>
+						<PremiumToggle
+							v-model="setup.room_match"
+							label="Match-the-room +100"
+							hint="Reward voting with the majority"
+						/>
+						<PremiumToggle
 							v-if="setup.scoring_mode === 'Team average'"
-							class="flex items-center gap-3"
-						>
-							<input
-								type="checkbox"
-								v-model="setup.team_match"
-								class="size-4 accent-[rgb(var(--accent))]"
-							/>
-							Match-your-team +100
-						</label>
+							v-model="setup.team_match"
+							label="Match-your-team +100"
+							hint="Reward reading your own team"
+						/>
 					</div>
 					<div class="grid grid-cols-2 gap-5">
 						<label class="flex flex-col gap-2">
@@ -299,7 +285,6 @@
 				<p v-if="error" class="mt-4 text-alert">{{ error }}</p>
 			</template>
 		</div>
-
 		<!-- Lobby -->
 		<div
 			v-else-if="phase === 'lobby'"
@@ -567,6 +552,12 @@
 		</div>
 
 		<!-- Live prompt composer -->
+		<PackPreviewDrawer
+			:pack="previewPack"
+			@close="previewPack = null"
+			@choose="choosePreviewedPack"
+		/>
+
 		<dialog
 			ref="composerDialog"
 			class="qz-dialog w-[min(92vw,560px)] rounded-3xl border border-haze bg-night p-8"
@@ -655,6 +646,9 @@ import AvatarPic from "@/components/AvatarPic.vue";
 import DrainRing from "@/components/DrainRing.vue";
 import HostBar from "@/components/HostBar.vue";
 import ThemeButton from "@/components/ThemeButton.vue";
+import PackPicker from "@/platform/discovery/PackPicker.vue";
+import PackPreviewDrawer from "@/platform/discovery/PackPreviewDrawer.vue";
+import PremiumToggle from "@/platform/discovery/PremiumToggle.vue";
 import { initSound, muted, playCue, toggleMute } from "@/sound";
 import {
 	forgetHostedSession,
@@ -686,6 +680,7 @@ const phase = ref("lobby");
 const participants = ref([]);
 const teams = ref([]);
 const packs = ref([]);
+const previewPack = ref(null);
 const lobbyLocked = ref(false);
 const view = ref({});
 const podium = ref(null);
@@ -907,17 +902,38 @@ async function loadPacks(game) {
 			order_by: "is_demo desc, title asc",
 		});
 		for (const row of rows) {
+			const promptFields =
+				game === "crowd-compass"
+					? ["prompt_text", "choice_1", "choice_2", "choice_3", "choice_4"]
+					: ["prompt_text"];
 			const prompts = await call("frappe.client.get_list", {
 				doctype: meta.promptDoctype,
 				filters: { parenttype: meta.contentDoctype, parent: row.name },
+				fields: promptFields,
 				limit_page_length: 0,
+				order_by: "idx asc",
 			});
 			row.prompt_count = prompts.length;
+			row.prompts = prompts.map((prompt) => ({
+				text: prompt.prompt_text,
+				choices: [
+					prompt.choice_1,
+					prompt.choice_2,
+					prompt.choice_3,
+					prompt.choice_4,
+				].filter(Boolean),
+			}));
 		}
 		packs.value = rows;
 	} catch (e) {
 		error.value = readError(e);
 	}
+}
+
+function choosePreviewedPack(pack) {
+	if (setupGame.value === "crowd-compass") setup.value.pack = pack.name;
+	else setup.value.deck = pack.name;
+	previewPack.value = null;
 }
 
 onMounted(async () => {

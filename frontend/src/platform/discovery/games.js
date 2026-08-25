@@ -33,6 +33,9 @@ export function gameIcon(key) {
 // manifest so moving it later is mechanical.
 const GUIDES = {
 	"crowd-compass": {
+		contentKey: "pack",
+		whyGame:
+			"First answer for yourself. Then, before the results appear, predict what everyone else chose. The people who read the room most accurately climb the leaderboard.",
 		howTo: [
 			"Vote for the choice that fits you — the room cannot see the distribution yet.",
 			"Predict which choice the whole room picked most.",
@@ -75,6 +78,9 @@ const GUIDES = {
 		],
 	},
 	cuecast: {
+		contentKey: "deck",
+		whyGame:
+			"One player performs a secret prompt while their team races to guess it. Every correct answer beats the clock, earns a point, and moves the team closer to the podium.",
 		howTo: [
 			"Split into teams and pick who performs first.",
 			"The performer sees a secret prompt on their phone only.",
@@ -115,6 +121,9 @@ const GUIDES = {
 		],
 	},
 	quiz: {
+		hostUrl: "/quizzly/host",
+		whyGame:
+			"Answer correctly before the clock runs out. Faster answers and winning streaks earn more points, turning every question into a race for the podium.",
 		howTo: [
 			"Join with the PIN on the big screen and pick a face.",
 			"Read each question during the read-time countdown.",
@@ -141,7 +150,7 @@ export function guideFor(key) {
 export async function catalogGames() {
 	const available = await listGames();
 	const soon = COMING_SOON.filter(
-		(c) => !available.some((a) => a.title.toLowerCase() === c.title.toLowerCase()),
+		(c) => !available.some((a) => a.title.toLowerCase() === c.title.toLowerCase())
 	);
 	return [...available, ...soon];
 }
