@@ -199,38 +199,54 @@
 						<p class="mt-4 font-mono text-xs text-paper/40">
 							{{ demo.prompt_count }} prompts
 						</p>
-						<button
-							class="ctl mt-4 self-start"
-							:disabled="creatingDemo === demo.name"
-							@click="hostDemo(demo)"
-						>
-							{{ creatingDemo === demo.name ? "Opening…" : "Host demo" }}
-						</button>
+						<div class="mt-4 flex flex-wrap gap-2">
+							<button
+								class="ctl"
+								:disabled="creatingDemo === demo.name"
+								@click="hostDemo(demo)"
+							>
+								{{ creatingDemo === demo.name ? "Opening…" : "Host demo" }}
+							</button>
+							<button v-if="demo.video" class="ctl ctl-go" @click="watchDemo(demo)">
+								Watch demo
+							</button>
+						</div>
 					</div>
 				</div>
 			</section>
 
-			<!-- Reserved video slot: the data contract exists, the video may never be required -->
-			<section class="mt-14 rounded-3xl border border-dashed border-haze p-8 text-center">
-				<div class="mx-auto grid size-16 place-items-center rounded-2xl bg-dusk">
-					<svg class="size-8 fill-paper/30" viewBox="0 0 24 24">
-						<path d="M8 5v14l11-7z" />
-					</svg>
+			<section
+				v-if="selectedVideo || firstVideoDemo()"
+				ref="videoSection"
+				class="mt-14 overflow-hidden rounded-3xl border border-haze bg-dusk"
+			>
+				<div class="p-6 sm:p-8">
+					<p class="font-mono text-[11px] uppercase tracking-[0.22em] text-ok">
+						Game demo
+					</p>
+					<h2 class="mt-2 font-display text-2xl font-bold text-paper">
+						{{ (selectedVideo || firstVideoDemo()).title }}
+					</h2>
+					<p class="mt-2 text-sm text-paper/55">
+						See the host, shared screen, and players complete a real round.
+					</p>
 				</div>
-				<p class="mt-4 font-mono text-[11px] uppercase tracking-[0.22em] text-paper/35">
-					How-to video coming soon
-				</p>
-				<p class="mx-auto mt-2 max-w-md text-sm text-paper/45">
-					The full written guide above stays the source of truth — captions and a
-					transcript will ship with the video.
-				</p>
+				<video
+					class="aspect-video w-full bg-black"
+					controls
+					preload="metadata"
+					:poster="(selectedVideo || firstVideoDemo()).poster"
+				>
+					<source :src="(selectedVideo || firstVideoDemo()).video" type="video/mp4" />
+					Your browser does not support embedded video.
+				</video>
 			</section>
 		</div>
 	</div>
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import HostBar from "@/components/HostBar.vue";
 import { gameIcon, guideFor } from "@/platform/discovery/games";
@@ -243,6 +259,8 @@ const decks = ref([]);
 const hosting = ref(false);
 const creating = ref(false);
 const creatingDemo = ref(null);
+const selectedVideo = ref(null);
+const videoSection = ref(null);
 const error = ref("");
 const setup = ref({ deck: "", seconds: 60, teams_count: 2, sudden_death: true });
 
@@ -274,6 +292,16 @@ function demoCards(demos) {
 				decks.value.find((d) => d.demo_key === demo.demo_key)?.prompt_count ?? "—",
 		}))
 		.filter((demo) => demo.name);
+}
+
+function firstVideoDemo() {
+	return guide.value.demos?.find((demo) => demo.video);
+}
+
+async function watchDemo(demo) {
+	selectedVideo.value = demo;
+	await nextTick();
+	videoSection.value?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 async function createSession() {

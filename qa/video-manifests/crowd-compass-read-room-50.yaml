@@ -1,0 +1,69 @@
+id: crowd-compass-read-room-50
+game: crowd-compass
+demo_key: crowd-compass-big-room
+title: Read the Room 50
+tagline: How well can you read the room?
+locale: en
+
+cast:
+  host: Selam
+  players:
+    - name: Meron
+      avatar: notionists-12
+    - name: Dawit
+      avatar: notionists-24
+    - name: Hana
+      avatar: notionists-36
+
+capture:
+  base_url: http://localhost:18115
+  fps: 30
+  host_viewport: [1440, 900]
+  projector_viewport: [1920, 1080]
+  phone_viewport: [390, 844]
+  raw_dir: /tmp/gatherplay-video/read-room-50
+
+story:
+  - id: title
+    seconds: 4
+    caption: Crowd Compass · Read the Room 50
+  - id: host_setup
+    surface: host
+    caption: Pick a pack. Tune the room. Open the lobby.
+  - id: lobby
+    surface: projector
+    caption: One PIN brings everyone in.
+  - id: vote
+    surface: meron
+    caption: Vote for yourself.
+  - id: predict
+    layout: projector_and_three_phones
+    caption: Then predict the room.
+  - id: reveal
+    surface: projector
+    caption: The distribution stays sealed until reveal.
+  - id: scoreboard
+    surface: projector
+    caption: Accuracy becomes points.
+  - id: end_card
+    seconds: 4
+    caption: GatherPlay · Bring the room together.
+
+output:
+  master: quizzly/public/videos/gatherplay/crowd-compass-read-room-50.mp4
+  poster: quizzly/public/videos/gatherplay/crowd-compass-read-room-50-poster.jpg
+  width: 2560
+  height: 1440
+  fps: 30
+  video_codec: libx264
+  audio_codec: aac
+
+qa:
+  require_realtime: true
+  require_no_console_errors: true
+  forbidden_visible_text:
+    - Test User
+    - Demo Player
+    - Player 1
+    - Next
+

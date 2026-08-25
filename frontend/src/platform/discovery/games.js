@@ -69,6 +69,8 @@ const GUIDES = {
 				title: "Read the Room 50",
 				blurb: "Simple, surprising icebreakers tuned for a big assembly.",
 				audience: "General Assembly",
+				video: "/assets/quizzly/videos/gatherplay/crowd-compass-read-room-50.mp4",
+				poster: "/assets/quizzly/videos/gatherplay/crowd-compass-read-room-50-poster.jpg",
 			},
 		],
 	},
@@ -139,7 +141,7 @@ export function guideFor(key) {
 export async function catalogGames() {
 	const available = await listGames();
 	const soon = COMING_SOON.filter(
-		(c) => !available.some((a) => a.title.toLowerCase() === c.title.toLowerCase())
+		(c) => !available.some((a) => a.title.toLowerCase() === c.title.toLowerCase()),
 	);
 	return [...available, ...soon];
 }
