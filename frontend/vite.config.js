@@ -12,6 +12,22 @@ export default defineConfig({
 			usePolling: true,
 			interval: 300,
 		},
+		proxy: {
+			// Keep the browser on Vite's origin during development while forwarding
+			// Engine.IO polling and websocket upgrades to the bench realtime server.
+			"/socket.io": {
+				target: process.env.SOCKETIO_URL || "http://127.0.0.1:19031",
+				ws: true,
+				configure(proxy) {
+					const preserveBrowserHost = (proxyRequest, request) => {
+						if (request.headers.host)
+							proxyRequest.setHeader("host", request.headers.host);
+					};
+					proxy.on("proxyReq", preserveBrowserHost);
+					proxy.on("proxyReqWs", preserveBrowserHost);
+				},
+			},
+		},
 	},
 	optimizeDeps: {
 		// frappe-ui's source exports include its optional TextEditor, whose virtual
