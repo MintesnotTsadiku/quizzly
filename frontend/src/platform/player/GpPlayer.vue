@@ -424,7 +424,10 @@ async function guess(payload) {
 	const result = await gameAction("guess", { guess: payload.guess });
 	payload.done?.(result);
 }
-async function roundSubmit(payload) { await gameAction("submit", payload); }
+async function roundSubmit(payload) {
+	const { action_type = "submit", ...value } = payload || {};
+	await gameAction(action_type, value);
+}
 
 async function leave() {
 	try {

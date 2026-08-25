@@ -34,7 +34,7 @@ export const GAME_PHASES = {
 	"crowd-compass": ["intermission", "prompt_open", "prediction_open", "reveal"],
 	"doodle-dash": ["draw_ready", "draw_open", "draw_reveal"],
 };
-for (const key of ROUND_KEYS) GAME_PHASES[key] = ["round_open","round_reveal"];
+for (const key of ROUND_KEYS) GAME_PHASES[key] = ["round_open","vote_open","round_reveal"];
 
 export function liveFor(gameKey) {
 	return GAME_LIVE[gameKey] || GAME_LIVE.cuecast;

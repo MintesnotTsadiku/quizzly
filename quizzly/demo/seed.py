@@ -125,7 +125,7 @@ def verify_all() -> list[dict]:
 			key = f"{game_key}-{audience}"
 			name = frappe.db.exists("GP Game Pack", {"demo_key": key, "game_key": game_key})
 			count = frappe.db.count("GP Game Item", {"parent": name, "parenttype": "GP Game Pack"}) if name else 0
-			results.append({"demo_key": key, "ok": count == 10, "prompts": count})
+			results.append({"demo_key": key, "ok": count == ROUND_COUNTS.get(game_key, 10), "prompts": count})
 	return results
 
 
@@ -160,7 +160,13 @@ ROUND_MODES = {
 	"sequence-sprint":"order", "sound-snap":"choice", "memory-mosaic":"choice",
 	"escape-together":"choice", "bracket-bash":"choice", "signal-spectrum":"number",
 	"closest-call":"number", "picture-peek":"text", "common-thread":"text",
-	"one-word-chorus":"text",
+	"one-word-chorus":"text", "phrase-forge":"order",
+}
+ROUND_COUNTS = {"bluffline":12,"caption-clash":12,"picture-peek":12,"sound-snap":12,"memory-mosaic":12,"closest-call":12,"common-thread":24,"one-word-chorus":24,"escape-together":6,"bracket-bash":8}
+AUDIENCE_TOPICS = {
+	"church-bible":["welcome","lamp","journey","shepherd","scroll","boat","courage","service","wisdom","community","hope","celebration"],
+	"family-general":["rainbow","picnic","robot","garden","bicycle","puzzle","kindness","breakfast","library","playground","music","adventure"],
+	"big-room":["arrival","stage","workshop","coffee break","teamwork","travel","innovation","city","microphone","celebration","conference","connection"],
 }
 
 
@@ -171,21 +177,28 @@ def seed_round_game_demos() -> list[dict]:
 			key = f"{game_key}-{audience}"
 			name = frappe.db.exists("GP Game Pack", {"demo_key": key})
 			pack = frappe.get_doc("GP Game Pack", name) if name else frappe.new_doc("GP Game Pack")
-			pack.update({"title": title, "game_key": game_key, "description": f"A polished {title} starter experience.", "is_demo": 1, "demo_key": key, "items": round_demo_items(game_key, title)})
+			pack.update({"title": title, "game_key": game_key, "description": f"A ready-to-host {title} experience with clear, room-safe prompts and a five-minute preview path.", "is_demo": 1, "demo_key": key, "items": round_demo_items(game_key, title, audience)})
 			pack.flags.in_demo_seed = True; pack.save(ignore_permissions=True)
-			results.append({"demo_key": key, "pack": pack.name, "prompts": 10})
+			results.append({"demo_key": key, "pack": pack.name, "prompts": ROUND_COUNTS.get(game_key, 10)})
 	frappe.db.commit()
 	return results
 
 
-def round_demo_items(game_key: str, title: str) -> list[dict]:
+def round_demo_items(game_key: str, title: str, audience: str) -> list[dict]:
 	mode = ROUND_MODES.get(game_key, "creative")
 	rows = []
-	for number in range(1, 11):
-		prompt = f"{title} · Round {number}: "
-		if mode == "number": rows.append({"prompt_text": prompt + "Place your best estimate on the scale.", "target": number * 9})
-		elif mode == "order": rows.append({"prompt_text": prompt + "Put these moments in order.", "choices": json.dumps(["First", "Next", "Then", "Finally"]), "answer": "First, Next, Then, Finally"})
-		elif mode == "choice": rows.append({"prompt_text": prompt + "Choose the strongest answer.", "choices": json.dumps(["A", "B", "C", "D"]), "answer": "A"})
-		elif mode == "text": rows.append({"prompt_text": prompt + "Find the hidden connection.", "answer": title.split()[0]})
-		else: rows.append({"prompt_text": prompt + "Create a short, room-friendly response."})
+	topics = AUDIENCE_TOPICS[audience]
+	for number in range(1, ROUND_COUNTS.get(game_key, 10) + 1):
+		topic=topics[(number-1)%len(topics)];prompt=f"{title} · {number}. "
+		if mode=="number": rows.append({"prompt_text":prompt+f"Where should ‘{topic}’ land from 0 to 100? Lock one shared estimate.","target":8+((number*17)%85),"answer":"Reveal the target and compare the distance."})
+		elif mode=="order":
+			cards=[f"Notice {topic}","Choose the next step","Act together","Check the result"]
+			rows.append({"prompt_text":prompt+f"Rebuild the {topic} sequence.","choices":json.dumps(cards),"answer":" → ".join(cards)})
+		elif mode=="choice":
+			choices=[f"Observe {topic}","Ask for a clue","Work as a team","Check every detail"]
+			rows.append({"prompt_text":prompt+f"Which clue best completes this {topic} challenge?","choices":json.dumps(choices),"answer":choices[number%len(choices)]})
+		elif mode=="text": rows.append({"prompt_text":prompt+f"The clues point toward {topic}. Name the common thread as early as you can.","answer":topic})
+		else:
+			verb={"bluffline":"Write a believable false definition","caption-clash":"Write one warm, surprising caption","story-loom":"Continue the shared story in one vivid sentence","seek-and-show":"Describe the safe object or team creation you found"}.get(game_key,"Create one concise clue")
+			rows.append({"prompt_text":prompt+f"{verb} inspired by ‘{topic}’.","answer":topic})
 	return rows

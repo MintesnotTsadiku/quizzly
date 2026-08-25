@@ -19,10 +19,11 @@ PROFILES={
  "escape-together":("Escape Together","Solve each stage as a room and unlock the finale.","choice",("puzzle","cooperative"),2,100),
  "bracket-bash":("Bracket Bash","Vote through head-to-head matchups until one champion remains.","choice",("voting","tournament"),2,100),
  "closest-call":("Closest Call","Make the nearest estimate without going over—or missing by much.","number",("estimation","duel"),2,100),
- "phrase-forge":("Phrase Forge","Finish the phrase creatively and win the room.","creative",("creative","voting"),3,100),
+ "phrase-forge":("Phrase Forge","Rebuild the phrase from shuffled fragments.","order",("ordering","word"),1,40),
  "seek-and-show":("Seek & Show","Complete a safe room mission and share what your team found.","creative",("mission","teams"),2,100),
  "one-word-chorus":("One Word Chorus","Give one legal clue and help the guesser find the secret.","text",("word","teams"),3,100)
 }
+VOTE_GAMES={"bluffline","caption-clash","story-loom"}
 
 class RoundGame(GameModule):
 	key=""
@@ -49,12 +50,20 @@ class RoundGame(GameModule):
 		return Transition(phase="round_open",next_ts=time.time()+ctx.configuration["seconds"],ttl=ctx.configuration["seconds"]+60,module_state=state,publish={"type":f"{self.key.replace('-','_')}.round_opened","phase":"round_open",**self.public_item(state["item"]),"round":state["position"],"total":ctx.configuration["rounds"]})
 	def advance_state(self,ctx,state,trigger):
 		if trigger.get("command") not in ("deadline","skip_turn","next"): return None
-		if state["phase"]=="round_open": return self.reveal(ctx,state)
+		if state["phase"]=="round_open": return self.open_vote(ctx,state) if self.key in VOTE_GAMES else self.reveal(ctx,state)
+		if state["phase"]=="vote_open": return self.reveal(ctx,state)
 		if state["phase"]=="round_reveal": return Transition(phase="scoreboard",next_ts=time.time()+6,ttl=66,module_state=dict(state["module_state"]),publish={"type":"platform.scoreboard_updated","teams":self.standings(ctx)})
 		if state["phase"]=="scoreboard": return self.open_round(ctx,state["module_state"])
 	def submit_action(self,ctx,state,participant,action_type,payload):
+		actions=accepted_actions(ctx.session,state["module_state"]["round_index"])
+		if state["phase"]=="vote_open" and self.key in VOTE_GAMES and action_type=="vote":
+			if any(a.participant==participant["name"] and a.action_type=="vote" for a in actions): return ActionDecision(False,"You already voted")
+			candidate=str(payload.get("value") or "")
+			allowed={c["id"] for c in self.candidates(ctx,state["module_state"],participant["name"])}
+			if candidate not in allowed:return ActionDecision(False,"Choose an available response")
+			return ActionDecision(True,result={"ok":True,"locked":True})
 		if state["phase"]!="round_open" or action_type!="submit": return ActionDecision(False,"Submissions are closed")
-		if any(a.participant==participant["name"] and a.action_type=="submit" for a in accepted_actions(ctx.session,state["module_state"]["round_index"])): return ActionDecision(False,"You already submitted")
+		if any(a.participant==participant["name"] and a.action_type=="submit" for a in actions): return ActionDecision(False,"You already submitted")
 		mode=self.profile[2];value=payload.get("value")
 		if mode=="number":
 			try:value=float(value)
@@ -65,6 +74,15 @@ class RoundGame(GameModule):
 			value=str(value or "").strip()[:280]
 			if not value:return ActionDecision(False,"Enter a response")
 		return ActionDecision(True,result={"ok":True,"locked":True})
+	def open_vote(self,ctx,state):
+		ms=dict(state["module_state"]);candidates=self.candidates(ctx,ms)
+		return Transition(phase="vote_open",next_ts=time.time()+ctx.configuration["seconds"],ttl=ctx.configuration["seconds"]+60,module_state=ms,publish={"type":f"{self.key.replace('-','_')}.vote_opened","phase":"vote_open","prompt":self.item(ms["item"]).prompt_text,"choices":candidates,"responses":len(candidates)})
+	def candidates(self,ctx,ms,exclude_participant=None):
+		actions=[a for a in accepted_actions(ctx.session,ms["round_index"]) if a.action_type=="submit"]
+		rows=[{"id":a.name,"value":str(a.payload.get("value") or "")[:280]} for a in actions if a.participant!=exclude_participant]
+		if self.key=="bluffline":rows.append({"id":"truth","value":self.item(ms["item"]).answer})
+		random.Random(f"{ctx.session}:{ms['round_index']}").shuffle(rows)
+		return rows
 	def reveal(self,ctx,state):
 		ms=dict(state["module_state"]);item=self.item(ms["item"]);actions=[a for a in accepted_actions(ctx.session,ms["round_index"]) if a.action_type=="submit"];mode=self.profile[2];deltas=[];results=[]
 		if mode=="number":
@@ -72,7 +90,14 @@ class RoundGame(GameModule):
 			for rank,(distance,a) in enumerate(dist):
 				points=max(100,1000-rank*200);deltas.append(ScoreDelta("Participant",a.participant,points,"closest",f"{self.key}:{ms['round_index']}:{a.participant}",{"distance":distance}));results.append({"participant":a.participant,"distance":distance})
 		elif mode=="creative":
-			for a in actions:deltas.append(ScoreDelta("Participant",a.participant,250,"contribution",f"{self.key}:{ms['round_index']}:{a.participant}"));results.append({"participant":a.participant,"value":a.payload.get("value")})
+			votes=[a for a in accepted_actions(ctx.session,ms["round_index"]) if a.action_type=="vote"]
+			by_id={a.name:a for a in actions}
+			for a in actions:
+				points=250+500*sum(1 for vote in votes if vote.payload.get("value")==a.name)
+				deltas.append(ScoreDelta("Participant",a.participant,points,"creative_votes",f"{self.key}:{ms['round_index']}:{a.participant}"));results.append({"participant":a.participant,"value":a.payload.get("value"),"votes":(points-250)//500})
+			if self.key=="bluffline":
+				for vote in votes:
+					if vote.payload.get("value")=="truth":deltas.append(ScoreDelta("Participant",vote.participant,1000,"found_truth",f"{self.key}:{ms['round_index']}:truth:{vote.participant}"))
 		else:
 			answer=self.norm(item.answer);cards=frappe.parse_json(item.choices) or []
 			for a in actions:
@@ -83,9 +108,13 @@ class RoundGame(GameModule):
 	def serialize_public_state(self,ctx,state):
 		ms=state["module_state"];view={"phase":state["phase"],"round":ms.get("position"),"total":ctx.configuration["rounds"]}
 		if ms.get("item"):view.update(self.public_item(ms["item"]));view["responses"]=len([a for a in accepted_actions(ctx.session,ms.get("round_index")) if a.action_type=="submit"])
+		if state["phase"]=="vote_open":view["choices"]=self.candidates(ctx,ms)
 		if state["phase"]=="round_reveal":view["answer"]=self.item(ms["item"]).answer
 		return view
-	def serialize_player_state(self,ctx,state,participant):return self.serialize_public_state(ctx,state)
+	def serialize_player_state(self,ctx,state,participant):
+		view=self.serialize_public_state(ctx,state)
+		if state["phase"]=="vote_open":view["choices"]=self.candidates(ctx,state["module_state"],participant["name"])
+		return view
 	def serialize_host_state(self,ctx,state):return {**self.serialize_public_state(ctx,state),"configuration":ctx.configuration}
 	def progress_metric(self,ctx,state):return {"count":len([a for a in accepted_actions(ctx.session,state["module_state"].get("round_index")) if a.action_type=="submit"])} if state["phase"]=="round_open" else None
 	def is_presentation_phase(self,phase):return phase in {"round_reveal","scoreboard","podium"}
