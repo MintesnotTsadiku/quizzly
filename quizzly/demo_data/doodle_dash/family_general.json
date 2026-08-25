@@ -1,0 +1,9 @@
+{
+  "schema_version": 1, "game_key": "doodle-dash", "demo_key": "doodle-dash-family-general",
+  "title": "Family Doodle Box", "description": "Big, friendly objects children and grown-ups can sketch together.",
+  "prompts": [
+    {"prompt":"Cat","aliases":["kitten"]},{"prompt":"Ice cream","aliases":["ice cream cone"]},{"prompt":"Bicycle","aliases":["bike"]},{"prompt":"Rainbow","aliases":[]},
+    {"prompt":"Tree house","aliases":["treehouse"]},{"prompt":"Robot","aliases":[]},{"prompt":"Banana","aliases":[]},{"prompt":"Train","aliases":[]},
+    {"prompt":"Birthday cake","aliases":["cake"]},{"prompt":"Teddy bear","aliases":["bear"]},{"prompt":"Kite","aliases":[]},{"prompt":"Rocket","aliases":["spaceship"]}
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1, "game_key": "doodle-dash", "demo_key": "doodle-dash-big-room",
+  "title": "Sketch the Room", "description": "Clear big-screen prompts designed for a lively assembly.",
+  "prompts": [
+    {"prompt":"Microphone","aliases":["mic"]},{"prompt":"Bus","aliases":[]},{"prompt":"Handshake","aliases":[]},{"prompt":"Projector","aliases":[]},
+    {"prompt":"Coffee break","aliases":["coffee"]},{"prompt":"Traffic light","aliases":["stoplight"]},{"prompt":"Suitcase","aliases":["luggage"]},{"prompt":"Celebration","aliases":["party"]},
+    {"prompt":"Name badge","aliases":["badge"]},{"prompt":"Podium","aliases":["lectern"]},{"prompt":"Camera","aliases":[]},{"prompt":"World map","aliases":["map"]}
+  ]
+}

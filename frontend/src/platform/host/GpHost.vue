@@ -109,8 +109,20 @@
 						/>
 					</div>
 				</div>
+				<!-- Doodle Dash setup -->
+				<div v-else-if="setupGame === 'doodle-dash'" class="mt-8 flex flex-col gap-6">
+					<div class="flex flex-col gap-2">
+						<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Drawing pack</span>
+						<PackPicker v-model="setup.pack" :packs="packs" @preview="previewPack = $event" />
+					</div>
+					<div class="grid grid-cols-2 gap-5">
+						<div class="flex flex-col gap-2"><span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Draw time</span><div class="flex gap-2"><button v-for="s in [30,60,90]" :key="s" class="ctl flex-1" :data-on="setup.seconds===s" @click="setup.seconds=s">{{s}}s</button></div></div>
+						<label class="flex flex-col gap-2"><span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Rounds</span><input v-model.number="setup.rounds" type="number" min="1" max="30" class="field"/></label>
+					</div>
+				</div>
+
 				<!-- Crowd Compass setup -->
-				<div v-else class="mt-8 flex flex-col gap-6">
+				<div v-else-if="setupGame === 'crowd-compass'" class="mt-8 flex flex-col gap-6">
 					<div class="flex flex-col gap-2">
 						<span
 							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
@@ -272,6 +284,11 @@
 					>
 						Author packs →
 					</RouterLink>
+				</div>
+
+				<div v-else class="mt-8 flex flex-col gap-6">
+					<div class="flex flex-col gap-2"><span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Content pack</span><PackPicker v-model="setup.pack" :packs="packs" @preview="previewPack=$event" /></div>
+					<div class="grid grid-cols-2 gap-5"><div class="flex flex-col gap-2"><span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Round time</span><div class="flex gap-2"><button v-for="s in [15,30,45,60]" :key="s" class="ctl flex-1" :data-on="setup.seconds===s" @click="setup.seconds=s">{{s}}s</button></div></div><label class="flex flex-col gap-2"><span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Rounds</span><input v-model.number="setup.rounds" type="number" min="1" max="30" class="field"/></label></div>
 				</div>
 				<PremiumToggle
 					class="mt-6"
@@ -769,7 +786,15 @@ const hostableGames = [
 		title: "Crowd Compass",
 		summary: "Vote for yourself, predict the room, and see who reads the crowd best.",
 	},
+	{
+		key: "doodle-dash",
+		title: "Doodle Dash",
+		summary: "One artist draws a secret word while everyone else races to guess it.",
+	},
 ];
+hostableGames.push(
+	...["bluffline|Bluffline","sequence-sprint|Sequence Sprint","picture-peek|Picture Peek","sound-snap|Sound Snap","caption-clash|Caption Clash","story-loom|Story Loom","signal-spectrum|Signal Spectrum","memory-mosaic|Memory Mosaic","common-thread|Common Thread","escape-together|Escape Together","bracket-bash|Bracket Bash","closest-call|Closest Call","phrase-forge|Phrase Forge","seek-and-show|Seek & Show","one-word-chorus|One Word Chorus"].map((entry)=>{const[key,title]=entry.split("|");return{key,title,summary:"Live rounds, scoring, reconnects, and a final podium."};})
+);
 
 const inLiveSession = computed(() => Boolean(session.value));
 const copied = ref(false);
@@ -825,7 +850,7 @@ function onEvent(envelopeMessage) {
 		lobbyLocked.value = Boolean(payload.lobby_locked);
 	} else if (
 		type === "platform.state_changed" ||
-		type.split(".")[0] === gameKey.value.replace("-", "_")
+			type.split(".")[0] === gameKey.value.replace(/-/g, "_")
 	) {
 		if (payload.phase) {
 			view.value = payload;
@@ -837,8 +862,9 @@ function onEvent(envelopeMessage) {
 					: "tick"
 			);
 			stopCountdown();
-			if (["turn_ready", "prompt_open", "prediction_open"].includes(payload.phase))
+			if (["turn_ready", "prompt_open", "prediction_open", "draw_ready", "draw_open", "round_open"].includes(payload.phase))
 				startCountdown(5);
+			refresh();
 		}
 	} else if (type === "platform.action_progress") {
 		if (payload.phase === "prompt_open") view.value = { ...view.value, voted: payload.count };
@@ -904,7 +930,7 @@ async function applyState(state) {
 	view.value = state.view || {};
 	seqSeen = state.state_version ?? seqSeen;
 
-	if (["turn_ready", "turn_open", "prompt_open", "prediction_open"].includes(state.phase)) {
+	if (["turn_ready", "turn_open", "prompt_open", "prediction_open", "draw_ready", "draw_open", "round_open"].includes(state.phase)) {
 		startCountdown(Math.max(0.5, state.remaining_seconds));
 	} else {
 		stopCountdown();
@@ -942,12 +968,13 @@ async function loadPacks(game) {
 	try {
 		const rows = await call("frappe.client.get_list", {
 			doctype: meta.contentDoctype,
+			filters: meta.contentDoctype === "GP Game Pack" ? { game_key: game } : {},
 			fields: [
 				"name",
 				"title",
 				"is_demo",
 				"demo_key",
-				game === "crowd-compass" ? "ranked" : "mode",
+				game === "crowd-compass" ? "ranked" : game === "cuecast" ? "mode" : "description",
 			],
 			limit_page_length: 0,
 			order_by: "is_demo desc, title asc",
@@ -982,8 +1009,8 @@ async function loadPacks(game) {
 }
 
 function choosePreviewedPack(pack) {
-	if (setupGame.value === "crowd-compass") setup.value.pack = pack.name;
-	else setup.value.deck = pack.name;
+	if (setupGame.value === "cuecast") setup.value.deck = pack.name;
+	else setup.value.pack = pack.name;
 	previewPack.value = null;
 }
 
@@ -1006,7 +1033,12 @@ onMounted(async () => {
 				await applyState(created);
 				stopRoom = useSessionRoom(socket, pin.value, onEvent, refresh, "gp");
 			}
-		} else {
+		} else if (setupGame.value === "doodle-dash") {
+			configuration.pack = setup.value.pack;
+			configuration.seconds = setup.value.seconds;
+			delete configuration.deck;
+			delete configuration.scoring_mode;
+		} else if (setupGame.value === "crowd-compass") {
 			await loadPacks("cuecast");
 		}
 		loading.value = false;
@@ -1039,12 +1071,22 @@ async function createSession() {
 		if (setupGame.value === "cuecast") {
 			configuration.deck = setup.value.deck;
 			delete configuration.pack;
-		} else {
+		} else if (setupGame.value === "doodle-dash") {
+			configuration.pack = setup.value.pack;
+			configuration.seconds = setup.value.seconds;
+			delete configuration.deck;
+			delete configuration.scoring_mode;
+		} else if (setupGame.value === "crowd-compass") {
 			configuration.pack = setup.value.pack || null;
 			delete configuration.deck;
 			delete configuration.seconds;
 			delete configuration.sudden_death;
 			if (configuration.scoring_mode !== "Team average") configuration.teams_count = 2;
+		} else {
+			configuration.pack = setup.value.pack;
+			configuration.seconds = setup.value.seconds;
+			delete configuration.deck;
+			delete configuration.scoring_mode;
 		}
 		const created = await gpCall("create_session", {
 			game_key: setupGame.value,

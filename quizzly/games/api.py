@@ -63,6 +63,12 @@ CONTENT_PREVIEWS = {
 		"choice_fields": ("choice_1", "choice_2", "choice_3", "choice_4"),
 		"text_field": "prompt_text",
 	},
+	"doodle-dash": {
+		"pack_doctype": "GP Draw Pack",
+		"prompt_doctype": "GP Draw Prompt",
+		"metadata_field": "description",
+		"choice_fields": (),
+	},
 	"quiz": {
 		"pack_doctype": "QZ Quiz",
 		"prompt_doctype": "QZ Question",
@@ -71,6 +77,17 @@ CONTENT_PREVIEWS = {
 		"text_field": "question_text",
 	},
 }
+
+ROUND_GAME_KEYS = {
+	"bluffline", "sequence-sprint", "picture-peek", "sound-snap", "caption-clash",
+	"story-loom", "signal-spectrum", "memory-mosaic", "common-thread", "escape-together",
+	"bracket-bash", "closest-call", "phrase-forge", "seek-and-show", "one-word-chorus",
+}
+for _game_key in ROUND_GAME_KEYS:
+	CONTENT_PREVIEWS[_game_key] = {
+		"pack_doctype": "GP Game Pack", "prompt_doctype": "GP Game Item",
+		"metadata_field": "description", "choice_fields": (),
+	}
 
 
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
@@ -84,9 +101,12 @@ def list_public_decks(game_key: str | None = None) -> list[dict]:
 	prompt_doctype = preview["prompt_doctype"]
 	choice_fields = preview["choice_fields"]
 	text_field = preview.get("text_field", "prompt_text")
+	filters = {"is_demo": 1}
+	if pack_doctype == "GP Game Pack":
+		filters["game_key"] = game_key
 	roster = frappe.get_all(
 		pack_doctype,
-		filters={"is_demo": 1},
+		filters=filters,
 		fields=["name", "title", "demo_key", preview["metadata_field"]],
 		order_by="title asc",
 	)
@@ -437,6 +457,15 @@ def submit_action(
 	except frappe.UniqueValidationError:
 		# the DB is the final word on replays that beat the Redis pre-check
 		return decision.result or {"ok": True}
+	if session_doc.game_key == "doodle-dash" and action_type in {"stroke_batch", "clear_canvas"}:
+		# Canvas actions are deliberately persisted in bounded batches, then fanned
+		# out as a complete public view so reconnecting and slow projectors converge.
+		gpe.publish_session_event(
+			session_doc,
+			state,
+			"doodle_dash.canvas_updated",
+			module.serialize_public_state(gpe.context_for(session_doc), state),
+		)
 	return decision.result or {"ok": True}
 
 

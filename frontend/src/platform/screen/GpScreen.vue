@@ -231,7 +231,7 @@ function onEvent(message) {
 	const payload = message.payload || {};
 	if (
 		type === "platform.state_changed" ||
-		type.split(".")[0] === gameKey.value.replace("-", "_")
+		type.split(".")[0] === gameKey.value.replace(/-/g, "_")
 	) {
 		status.value = "Active";
 		if (payload.phase) {
@@ -242,6 +242,7 @@ function onEvent(message) {
 			if (payload.phase === "turn_ready") startCountdown(3);
 			else stopCountdown();
 		}
+		refresh();
 	} else if (type === "platform.action_progress") {
 		view.value = { ...view.value, solved: payload.count };
 	} else if (type === "platform.scoreboard_updated") {
@@ -274,7 +275,7 @@ function applyState(state) {
 	if (state.view) view.value = { ...view.value, ...state.view };
 	if (
 		status.value === "Active" &&
-		["turn_ready", "turn_open", "prompt_open", "prediction_open"].includes(state.phase)
+		["turn_ready", "turn_open", "prompt_open", "prediction_open", "draw_ready", "draw_open", "round_open"].includes(state.phase)
 	) {
 		startCountdown(Math.max(0.5, state.remaining_seconds));
 	} else {

@@ -326,7 +326,7 @@
 				<video
 					class="aspect-video w-full bg-black"
 					controls
-					preload="metadata"
+					preload="none"
 					:poster="(selectedVideo || firstVideoDemo()).poster"
 				>
 					<source :src="(selectedVideo || firstVideoDemo()).video" type="video/mp4" />

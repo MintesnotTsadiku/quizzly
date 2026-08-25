@@ -64,6 +64,28 @@ scenarios:
           - type: no_blank_page
           - type: screenshot_not_blank
 
+  - id: doodle_dash_game_detail
+    title: Doodle Dash guide and all three canonical demos render
+    viewport:
+      width: 1440
+      height: 960
+    checks:
+      - no_console_errors
+    routes:
+      - path: /play/games/doodle-dash
+        assertions:
+          - type: network_idle
+          - type: visible_text
+            value: Doodle Dash
+          - type: visible_text
+            value: Symbols and Stories Sketch-Off
+          - type: visible_text
+            value: Family Doodle Box
+          - type: visible_text
+            value: Sketch the Room
+          - type: no_blank_page
+          - type: screenshot_not_blank
+
   - id: gatherplay_join
     title: Guest join screen accepts a PIN
     viewport:
@@ -81,6 +103,39 @@ scenarios:
             value: GatherPlay
           - type: no_blank_page
           - type: screenshot_not_blank
+
+  - id: remaining_game_guides_creative
+    title: Creative GatherPlay game guides are live and playable
+    viewport: {width: 1440, height: 960}
+    checks: [no_console_errors]
+    routes:
+      - {path: /play/games/bluffline, assertions: [{type: visible_text, value: Bluffline}, {type: visible_text, value: Curious Bible Context}, {type: no_blank_page}]}
+      - {path: /play/games/sequence-sprint, assertions: [{type: visible_text, value: Sequence Sprint}, {type: visible_text, value: Bible Timeline Relay}, {type: no_blank_page}]}
+      - {path: /play/games/picture-peek, assertions: [{type: visible_text, value: Picture Peek}, {type: visible_text, value: "What Is Hiding?"}, {type: no_blank_page}]}
+      - {path: /play/games/sound-snap, assertions: [{type: visible_text, value: Sound Snap}, {type: visible_text, value: Soundscape Challenge}, {type: no_blank_page}]}
+      - {path: /play/games/caption-clash, assertions: [{type: visible_text, value: Caption Clash}, {type: visible_text, value: Caption Cup}, {type: no_blank_page}]}
+      - {path: /play/games/story-loom, assertions: [{type: visible_text, value: Story Loom}, {type: visible_text, value: Journey of Courage}, {type: no_blank_page}]}
+      - {path: /play/games/common-thread, assertions: [{type: visible_text, value: Common Thread}, {type: visible_text, value: Big Room Connections}, {type: no_blank_page}]}
+
+  - id: remaining_game_guides_puzzles
+    title: Puzzle GatherPlay game guides are live and playable
+    viewport: {width: 1440, height: 960}
+    checks: [no_console_errors]
+    routes:
+      - {path: /play/games/signal-spectrum, assertions: [{type: visible_text, value: Signal Spectrum}, {type: visible_text, value: Know Your Room}, {type: no_blank_page}]}
+      - {path: /play/games/memory-mosaic, assertions: [{type: visible_text, value: Memory Mosaic}, {type: visible_text, value: Toy Room Memory}, {type: no_blank_page}]}
+      - {path: /play/games/escape-together, assertions: [{type: visible_text, value: Escape Together}, {type: visible_text, value: Assembly Code}, {type: no_blank_page}]}
+      - {path: /play/games/phrase-forge, assertions: [{type: visible_text, value: Phrase Forge}, {type: visible_text, value: Silly Sentence Factory}, {type: no_blank_page}]}
+      - {path: /play/games/seek-and-show, assertions: [{type: visible_text, value: Seek & Show}, {type: visible_text, value: Venue Team Quest}, {type: no_blank_page}]}
+
+  - id: remaining_game_guides_room
+    title: Big-room GatherPlay game guides are live and playable
+    viewport: {width: 1440, height: 960}
+    checks: [no_console_errors]
+    routes:
+      - {path: /play/games/bracket-bash, assertions: [{type: visible_text, value: Bracket Bash}, {type: visible_text, value: Family Favorites Cup}, {type: no_blank_page}]}
+      - {path: /play/games/closest-call, assertions: [{type: visible_text, value: Closest Call}, {type: visible_text, value: Assembly Estimation Arena}, {type: no_blank_page}]}
+      - {path: /play/games/one-word-chorus, assertions: [{type: visible_text, value: One Word Chorus}, {type: visible_text, value: "One Word, Big Room"}, {type: no_blank_page}]}
 
   - id: gatherplay_projector_lobby_unknown_pin
     title: Projector screen with an unknown pin degrades gracefully

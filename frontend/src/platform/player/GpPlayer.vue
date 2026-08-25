@@ -86,6 +86,10 @@
 				@act="act"
 				@vote="vote"
 				@predict="predict"
+				@draw="draw"
+				@guess="guess"
+				@clear="clearCanvas"
+				@submit="roundSubmit"
 			/>
 
 			<!-- Scoreboard -->
@@ -299,7 +303,7 @@ function applyState(state) {
 	prompt.value = state.view?.prompt || "";
 	solvedCount.value = state.view?.solved ?? 0;
 	seqSeen = Math.max(seqSeen, state.state_version ?? 0);
-	if (["turn_ready", "turn_open", "prompt_open", "prediction_open"].includes(state.phase)) {
+	if (["turn_ready", "turn_open", "prompt_open", "prediction_open", "draw_ready", "draw_open", "round_open"].includes(state.phase)) {
 		startCountdown(Math.max(0.5, state.remaining_seconds));
 	} else {
 		stopCountdown();
@@ -400,6 +404,27 @@ async function predict(payload) {
 		await refreshPrivate().catch(() => {});
 	}
 }
+
+async function gameAction(actionType, payload = {}) {
+	submitting.value = true;
+	try {
+		return await call("quizzly.games.api.submit_action", {
+			pin: player.value.pin, token: player.value.token, action_type: actionType,
+			idempotency_key: crypto.randomUUID(), payload,
+		});
+	} finally {
+		submitting.value = false;
+		await refreshPrivate().catch(() => {});
+	}
+}
+
+async function draw(strokes) { await gameAction("stroke_batch", { strokes }); }
+async function clearCanvas() { await gameAction("clear_canvas"); }
+async function guess(payload) {
+	const result = await gameAction("guess", { guess: payload.guess });
+	payload.done?.(result);
+}
+async function roundSubmit(payload) { await gameAction("submit", payload); }
 
 async function leave() {
 	try {

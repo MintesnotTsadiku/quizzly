@@ -1,0 +1,9 @@
+{
+  "schema_version": 1, "game_key": "doodle-dash", "demo_key": "doodle-dash-church-bible",
+  "title": "Symbols and Stories Sketch-Off", "description": "Draw familiar Bible symbols and story objects with respectful, easy-to-recognize clues.",
+  "prompts": [
+    {"prompt":"Ark","aliases":["Noah's ark","boat"]},{"prompt":"Dove","aliases":["bird"]},{"prompt":"Sling","aliases":["slingshot"]},{"prompt":"Scroll","aliases":[]},
+    {"prompt":"Fish","aliases":[]},{"prompt":"Lamp","aliases":["oil lamp"]},{"prompt":"Crown","aliases":[]},{"prompt":"Burning bush","aliases":["bush"]},
+    {"prompt":"Shepherd staff","aliases":["staff","crook"]},{"prompt":"Empty tomb","aliases":["tomb"]},{"prompt":"Basket","aliases":[]},{"prompt":"Rainbow","aliases":[]}
+  ]
+}
