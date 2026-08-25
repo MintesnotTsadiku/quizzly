@@ -4,6 +4,21 @@ import frappeui from "frappe-ui/vite";
 import path from "path";
 
 export default defineConfig({
+	server: {
+		// WSL's inotify/file-descriptor budget is shared by every app in this
+		// multi-app bench. Polling keeps HMR reliable when other watchers have
+		// exhausted that budget and avoids Vite's EMFILE startup failure.
+		watch: {
+			usePolling: true,
+			interval: 300,
+		},
+	},
+	optimizeDeps: {
+		// frappe-ui's source exports include its optional TextEditor, whose virtual
+		// Lucide modules are resolved by the plugin below (not esbuild's eager
+		// dependency scanner). Transform it on demand instead of pre-bundling it.
+		exclude: ["frappe-ui"],
+	},
 	plugins: [
 		frappeui({
 			frappeProxy: true,
