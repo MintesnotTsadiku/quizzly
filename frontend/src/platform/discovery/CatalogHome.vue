@@ -31,7 +31,9 @@
 					class="group relative flex flex-col rounded-3xl border border-haze bg-dusk p-6 transition hover:border-ember"
 					:class="game.status !== 'Available' ? 'pointer-events-none opacity-55' : ''"
 					:to="
-						game.status === 'Available' ? { name: 'GameDetail', params: { game: game.key } } : {}
+						game.status === 'Available'
+							? { name: 'GameDetail', params: { game: game.key } }
+							: {}
 					"
 				>
 					<span class="flex items-start justify-between">
@@ -50,11 +52,15 @@
 							{{ game.status }}
 						</span>
 					</span>
-					<h2 class="mt-5 font-display text-2xl font-bold text-paper">{{ game.title }}</h2>
+					<h2 class="mt-5 font-display text-2xl font-bold text-paper">
+						{{ game.title }}
+					</h2>
 					<p class="mt-2 flex-1 text-sm leading-relaxed text-paper/60">
 						{{ game.summary }}
 					</p>
-					<p class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-wide text-paper/40">
+					<p
+						class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-wide text-paper/40"
+					>
 						<span>{{ playersLabel(game) }}</span>
 						<span v-if="game.typical_minutes">~{{ game.typical_minutes }} min</span>
 					</p>
@@ -96,6 +102,8 @@ onMounted(async () => {
 });
 
 function playersLabel(game) {
-	return game.max_players ? `${game.min_players}–${game.max_players} players` : `${game.min_players}+ players`;
+	return game.max_players
+		? `${game.min_players}–${game.max_players} players`
+		: `${game.min_players}+ players`;
 }
 </script>

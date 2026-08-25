@@ -49,6 +49,11 @@ const platformRoutes = [
 		component: () => import("@/platform/host/GpHost.vue"),
 	},
 	{
+		path: "/host/content/crowd-compass",
+		name: "CrowdPackEditor",
+		component: () => import("@/platform/host/PackEditor.vue"),
+	},
+	{
 		path: "/s/:pin/screen",
 		name: "GpScreen",
 		component: () => import("@/platform/screen/GpScreen.vue"),
@@ -64,8 +69,8 @@ const router = createRouter({
 
 // Hosting needs a real user; guests would otherwise land on an empty host screen.
 router.beforeEach((to) => {
-	if (to.name === "GpHost" && window.session_user === "Guest") {
-		window.location.href = `/login?redirect-to=${encodeURIComponent("/play/host")}`;
+	if (["GpHost", "CrowdPackEditor"].includes(to.name) && window.session_user === "Guest") {
+		window.location.href = `/login?redirect-to=${encodeURIComponent(to.fullPath)}`;
 		return false;
 	}
 });

@@ -37,4 +37,5 @@ require_type_annotated_api_methods = True
 quizzly_game_modules = [
 	"quizzly.games.quiz.game.QuizGame",
 	"quizzly.games.cuecast.game.CueCastGame",
+	"quizzly.games.crowd_compass.game.CrowdCompassGame",
 ]

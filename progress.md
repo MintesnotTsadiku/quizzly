@@ -1,5 +1,52 @@
 # Progress
 
+## GatherPlay Phase 3: Crowd Compass (2026-08-25)
+
+Spec: `specs/gatherplay/phase-3-crowd-compass.md`. Crowd Compass is the first
+simultaneous-input GatherPlay module: players vote for themselves, predict the
+room, estimate the winning share, and only see the aggregate after reveal.
+
+### Done
+
+- Content and demos: `GP Crowd Pack` + child prompts, ranked-pack support, and
+  three 12-prompt demo packs for church/Bible, child/family, and general assembly.
+  The shared seeder now dispatches by game key and keeps stable demo keys.
+- Full game module: vote → prediction → reveal → scoreboard, plurality ties,
+  weighted 2/1 ranked choices, quorum, individual and team-average standings,
+  room/team match bonuses, tiered percentage-estimation bonuses, live host prompts,
+  pack-free rooms, and voiding through immutable compensating ledger events.
+- Frontend: Crowd Compass host, projector, and phone phase views registered through
+  the shared game-view registry; full setup controls; live-prompt composer; void
+  controls; catalog availability; how-to guide and three demo cards.
+- Authoring: `/play/host/content/crowd-compass` supports pack create, update, delete,
+  prompt ordering, and ranked mode. Seeded demos are visible but read-only.
+- Recovery and secrecy: reconnect serializers restore each surface without exposing
+  votes, predictions, or distributions before reveal. Player-only selections and
+  round points remain token-gated.
+
+### Verified
+
+- Production frontend build succeeds with Node 24.
+- 13 Crowd Compass integration tests cover configuration, scoring, ties, quorum,
+  ranked votes, secrecy, dedupe, team averages, void reversal, live prompts, and
+  nonresponse. The complete app suite is 106/106 green.
+- `pre-commit run --all-files` is green.
+- Agent Plane run `BQA-2026-00323`: all five functional scenarios passed with zero
+  console/network errors, including the Crowd Compass guide and `Read the Room 50`.
+  The run record is marked failed only because its five screenshots are new,
+  unaccepted visual baselines in this environment.
+
+### Fixed while testing
+
+- Existing packs were incorrectly sent through `frappe.client.insert` before save;
+  create and update now use their correct framework methods, with delete added.
+- Absolute `/play/...` router links doubled the SPA base; named routes now keep the
+  authoring link under exactly one `/play` prefix.
+- Concurrent worker and deterministic ticks could both settle a reveal after the
+  optimistic ledger existence check. `GP Score Event`'s unique key is now the final
+  race-safe idempotency gate, and materialized score increments are atomic SQL
+  updates so simultaneous deltas cannot lose points.
+
 ## GatherPlay Phase 1+2: Platform kernel + CueCast (2026-08-25)
 
 Specs: `specs/gatherplay/phase-1-platform-kernel.md`, `specs/gatherplay/phase-2-cuecast.md`.

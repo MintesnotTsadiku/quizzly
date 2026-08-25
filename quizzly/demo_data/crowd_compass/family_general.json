@@ -1,0 +1,22 @@
+{
+	"demo_key": "crowd-compass-family-general",
+	"schema_version": 1,
+	"game_key": "crowd-compass",
+	"locale": "en",
+	"title": "This or That Together",
+	"description": "Classic this-or-that choices the whole family can argue about.",
+	"prompts": [
+		{"prompt": "Beach or mountains?", "choices": ["Beach", "Mountains"]},
+		{"prompt": "Pancakes or waffles?", "choices": ["Pancakes", "Waffles"]},
+		{"prompt": "Cats or dogs?", "choices": ["Cats", "Dogs"]},
+		{"prompt": "Story time or movie night?", "choices": ["Story time", "Movie night"]},
+		{"prompt": "Super speed or flight?", "choices": ["Super speed", "Flight"]},
+		{"prompt": "Ice cream or cake?", "choices": ["Ice cream", "Cake"]},
+		{"prompt": "Rainy day inside or snowy day outside?", "choices": ["Rainy inside", "Snowy outside"]},
+		{"prompt": "Board games or video games?", "choices": ["Board games", "Video games"]},
+		{"prompt": "Pizza night or taco night?", "choices": ["Pizza", "Tacos"]},
+		{"prompt": "Zoo or aquarium?", "choices": ["Zoo", "Aquarium"]},
+		{"prompt": "Early bird or night owl?", "choices": ["Early bird", "Night owl"]},
+		{"prompt": "Camping or hotel?", "choices": ["Camping", "Hotel"]}
+	]
+}

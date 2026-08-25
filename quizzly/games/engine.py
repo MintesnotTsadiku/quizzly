@@ -233,29 +233,37 @@ def settle_round(session: str, old_state: dict, resolution: Resolution) -> None:
 			},
 			modified=now_datetime(),
 		)
-	apply_deltas(session, resolution.deltas)
+	apply_deltas(session, resolution.deltas, round_index=module_state.get("round_index") or 0)
 
 
-def apply_deltas(session: str, deltas: list) -> None:
+def apply_deltas(session: str, deltas: list, round_index: int = 0) -> None:
 	"""Write immutable ledger rows, then materialize totals on teams and participants."""
 	for delta in deltas:
 		if frappe.db.exists("GP Score Event", {"session": session, "idempotency_key": delta.idempotency_key}):
 			continue
-		frappe.get_doc(
-			{
-				"doctype": "GP Score Event",
-				"session": session,
-				"subject_type": delta.subject_type,
-				"subject": delta.subject,
-				"points": delta.points,
-				"category": delta.category,
-				"raw_metric": delta.raw_metric,
-				"idempotency_key": delta.idempotency_key,
-			}
-		).insert(ignore_permissions=True)
+		try:
+			frappe.get_doc(
+				{
+					"doctype": "GP Score Event",
+					"session": session,
+					"round_index": round_index,
+					"subject_type": delta.subject_type,
+					"subject": delta.subject,
+					"points": delta.points,
+					"category": delta.category,
+					"raw_metric": delta.raw_metric,
+					"idempotency_key": delta.idempotency_key,
+				}
+			).insert(ignore_permissions=True)
+		except frappe.UniqueValidationError:
+			# A worker ticker and a deterministic test/browser tick may settle the
+			# same transition concurrently. The DB key is the final idempotency gate.
+			continue
 		doctype = "GP Team" if delta.subject_type == "Team" else "GP Participant"
-		current = frappe.db.get_value(doctype, delta.subject, "score") or 0
-		frappe.db.set_value(doctype, delta.subject, "score", current + delta.points)
+		frappe.db.sql(
+			f"update `tab{doctype}` set score = coalesce(score, 0) + %(points)s where name = %(name)s",
+			{"points": delta.points, "name": delta.subject},
+		)
 
 
 def finish_session(session_doc, result=None) -> None:
@@ -275,7 +283,9 @@ def finish_session(session_doc, result=None) -> None:
 def persist_leaderboard(leaderboard: list[dict]) -> None:
 	for rank, entry in enumerate(leaderboard, start=1):
 		doctype = "GP Team" if entry.get("subject_type", "Team") == "Team" else "GP Participant"
-		frappe.db.set_value(doctype, entry["name"], {"rank": rank})
+		# score rides along: computed standings (e.g. team averages) must land in the
+		# record too, or the Ended snapshot reads zeros
+		frappe.db.set_value(doctype, entry["name"], {"rank": rank, "score": entry.get("score", 0)})
 
 
 # --- hot state ---------------------------------------------------------------

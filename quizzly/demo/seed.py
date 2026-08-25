@@ -3,7 +3,7 @@
 Every implemented module ships three starter experiences (church/Bible, child/family,
 general assembly). Demos carry a stable ``demo_key`` so repeated seeds upsert instead
 of duplicating, hosts can duplicate a demo to customize it, and reseeding never touches
-host-created decks.
+host-created content.
 """
 
 import json
@@ -12,6 +12,19 @@ from pathlib import Path
 import frappe
 
 DEMO_DIR = Path(frappe.get_app_path("quizzly")) / "demo_data"
+
+# game_key -> (pack doctype, prompt doctype, prompt field mapper)
+CONTENT = {
+	"cuecast": ("GP Cue Deck", "GP Cue Prompt", lambda item: {"prompt_text": item}),
+	"crowd-compass": (
+		"GP Crowd Pack",
+		"GP Crowd Prompt",
+		lambda item: {
+			"prompt_text": item["prompt"],
+			**{f"choice_{i + 1}": choice for i, choice in enumerate(item["choices"])},
+		},
+	),
+}
 
 
 def demo_files(game_key: str | None = None) -> list[Path]:
@@ -25,28 +38,33 @@ def seed_all() -> list[dict]:
 
 def seed_file(path: Path) -> dict:
 	data = json.loads(path.read_text())
-	deck = upsert_deck(data)
-	return {"demo_key": data["demo_key"], "deck": deck.name, "prompts": len(deck.prompts or [])}
+	pack = upsert(data)
+	return {"demo_key": data["demo_key"], "pack": pack.name, "prompts": len(pack.prompts or [])}
 
 
-def upsert_deck(data: dict) -> object:
-	existing = data["demo_key"] and frappe.db.exists("GP Cue Deck", {"demo_key": data["demo_key"]})
+def upsert(data: dict):
+	game_key = data["game_key"]
+	pack_doctype, _prompt_doctype, to_row = CONTENT[game_key]
+	existing = data["demo_key"] and frappe.db.exists(pack_doctype, {"demo_key": data["demo_key"]})
 	if existing:
-		deck = frappe.get_doc("GP Cue Deck", existing)
+		pack = frappe.get_doc(pack_doctype, existing)
 	else:
-		deck = frappe.new_doc("GP Cue Deck")
-	deck.update(
+		pack = frappe.new_doc(pack_doctype)
+	pack.update(
 		{
 			"title": data["title"],
-			"mode": data.get("mode") or "Act",
 			"is_demo": 1,
 			"demo_key": data["demo_key"],
-			"prompts": [{"prompt_text": text} for text in data["prompts"]],
+			"prompts": [to_row(item) for item in data["prompts"]],
 		}
 	)
-	deck.save(ignore_permissions=True)
+	if game_key == "crowd-compass":
+		pack.ranked = int(data.get("ranked") or 0)
+	elif game_key == "cuecast":
+		pack.mode = data.get("mode") or "Act"
+	pack.save(ignore_permissions=True)
 	frappe.db.commit()
-	return deck
+	return pack
 
 
 def verify_all() -> list[dict]:
@@ -54,11 +72,14 @@ def verify_all() -> list[dict]:
 	results = []
 	for path in demo_files():
 		data = json.loads(path.read_text())
-		name = frappe.db.exists("GP Cue Deck", {"demo_key": data["demo_key"]})
+		pack_doctype = CONTENT[data["game_key"]][0]
+		name = frappe.db.exists(pack_doctype, {"demo_key": data["demo_key"]})
 		ok = bool(name)
 		count = 0
 		if ok:
-			count = frappe.db.count("GP Cue Prompt", {"parent": name, "parenttype": "GP Cue Deck"})
+			count = frappe.db.count(
+				CONTENT[data["game_key"]][1], {"parent": name, "parenttype": pack_doctype}
+			)
 			ok = count >= len(data["prompts"])
 		results.append({"demo_key": data["demo_key"], "ok": ok, "prompts": count})
 	return results
@@ -66,5 +87,6 @@ def verify_all() -> list[dict]:
 
 def hide_all() -> None:
 	"""Demos stay playable but disappear from the catalog when a site opts out."""
-	for name in frappe.get_all("GP Cue Deck", filters={"is_demo": 1}, pluck="name"):
-		frappe.db.set_value("GP Cue Deck", name, "is_demo", 0)
+	for pack_doctype, _ in {v[0]: v for v in CONTENT.values()}.values():
+		for name in frappe.get_all(pack_doctype, filters={"is_demo": 1}, pluck="name"):
+			frappe.db.set_value(pack_doctype, name, "is_demo", 0)

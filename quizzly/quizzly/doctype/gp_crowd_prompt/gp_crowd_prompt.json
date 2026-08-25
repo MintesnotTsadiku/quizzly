@@ -1,0 +1,51 @@
+{
+ "actions": [],
+ "creation": "2026-08-25 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["prompt_text", "choice_1", "choice_2", "choice_3", "choice_4"],
+ "fields": [
+  {
+   "fieldname": "prompt_text",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Prompt Text",
+   "reqd": 1
+  },
+  {
+   "fieldname": "choice_1",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Choice 1"
+  },
+  {
+   "fieldname": "choice_2",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Choice 2"
+  },
+  {
+   "fieldname": "choice_3",
+   "fieldtype": "Data",
+   "label": "Choice 3"
+  },
+  {
+   "fieldname": "choice_4",
+   "fieldtype": "Data",
+   "label": "Choice 4"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-25 12:00:00",
+ "modified_by": "Administrator",
+ "module": "Quizzly",
+ "name": "GP Crowd Prompt",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

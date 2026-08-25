@@ -1,0 +1,22 @@
+{
+	"demo_key": "crowd-compass-church-bible",
+	"schema_version": 1,
+	"game_key": "crowd-compass",
+	"locale": "en",
+	"title": "Our Community Compass",
+	"description": "Discussion-friendly preferences that get a room talking.",
+	"prompts": [
+		{"prompt": "Which service do you attend?", "choices": ["Morning", "Evening"]},
+		{"prompt": "Which Bible journey would you join for a year?", "choices": ["Exodus desert", "Paul's missionary roads"]},
+		{"prompt": "Your favourite way to serve?", "choices": ["Music", "Welcome team", "Teaching", "Behind the scenes"]},
+		{"prompt": "Indoor or outdoor fellowship?", "choices": ["Indoor", "Outdoor"]},
+		{"prompt": "Hymns or modern worship?", "choices": ["Hymns", "Modern worship"]},
+		{"prompt": "Small groups or large gatherings?", "choices": ["Small groups", "Large gatherings"]},
+		{"prompt": "When do you read?", "choices": ["Early morning", "Late night"]},
+		{"prompt": "The perfect church lunch?", "choices": ["Potluck", "Barbecue"]},
+		{"prompt": "Testimony night or teaching night?", "choices": ["Testimony", "Teaching"]},
+		{"prompt": "Quiet chapel or loud celebration?", "choices": ["Quiet chapel", "Loud celebration"]},
+		{"prompt": "Serve locally or abroad?", "choices": ["Locally", "Abroad"]},
+		{"prompt": "One book for a whole year?", "choices": ["Psalms", "Proverbs"]}
+	]
+}

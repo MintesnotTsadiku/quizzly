@@ -44,6 +44,26 @@ scenarios:
           - type: no_blank_page
           - type: screenshot_not_blank
 
+  - id: crowd_compass_game_detail
+    title: Crowd Compass how-to page shows its full guide and demo packs
+    viewport:
+      width: 1440
+      height: 960
+    checks:
+      - no_console_errors
+    routes:
+      - path: /play/games/crowd-compass
+        assertions:
+          - type: network_idle
+          - type: visible_text
+            value: How to play
+          - type: visible_text
+            value: Play a demo
+          - type: visible_text
+            value: Read the Room 50
+          - type: no_blank_page
+          - type: screenshot_not_blank
+
   - id: gatherplay_join
     title: Guest join screen accepts a PIN
     viewport:

@@ -1,0 +1,23 @@
+{
+	"demo_key": "crowd-compass-big-room",
+	"schema_version": 1,
+	"game_key": "crowd-compass",
+	"locale": "en",
+	"title": "Read the Room 50",
+	"description": "Icebreaker polls tuned for a big assembly — simple, surprising, shareable.",
+	"ranked": true,
+	"prompts": [
+		{"prompt": "Pick your travel seat (and your backup)", "choices": ["Window", "Aisle", "Whatever is left"]},
+		{"prompt": "The event drink?", "choices": ["Tea", "Coffee", "Something cold"]},
+		{"prompt": "How do you plan your week?", "choices": ["Every hour mapped", "Rough notes", "Improvise"]},
+		{"prompt": "Bad news arrives. How?", "choices": ["Email", "Voice call", "In person"]},
+		{"prompt": "What do you actually attend?", "choices": ["Workshops", "Keynotes", "The coffee queue"]},
+		{"prompt": "Best event time?", "choices": ["Early morning", "Afternoon", "Late evening"]},
+		{"prompt": "Name tags?", "choices": ["Love them", "Tolerate them", "Never"]},
+		{"prompt": "Slides on stage?", "choices": ["Essential", "Sometimes", "No slides"]},
+		{"prompt": "Lunch break length?", "choices": ["30 minutes", "One hour"]},
+		{"prompt": "Next year's venue?", "choices": ["Big city", "Retreat venue"]},
+		{"prompt": "Questions from the floor?", "choices": ["During", "After", "Written only"]},
+		{"prompt": "The swag that survives?", "choices": ["T-shirt", "Notebook", "Sticker pack"]}
+	]
+}

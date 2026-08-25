@@ -2,43 +2,272 @@
 	<div class="flex h-full flex-col overflow-y-auto bg-night">
 		<HostBar v-if="!inLiveSession" />
 
-		<!-- No session: setup -->
-		<div v-if="!session && !loading" class="mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-8">
-			<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">Host</p>
-			<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">Start a room</h1>
-			<p class="mt-3 text-paper/50">
-				Pick a deck, or start a demo from the
+		<!-- No session: pick a game, then set it up -->
+		<div
+			v-if="!session && !loading"
+			class="mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-8"
+		>
+			<template v-if="!setupGame">
+				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">Host</p>
+				<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">
+					Start a room
+				</h1>
+				<div class="mt-8 grid gap-5 sm:grid-cols-2">
+					<button
+						v-for="game in hostableGames"
+						:key="game.key"
+						class="group flex flex-col rounded-3xl border border-haze bg-dusk p-6 text-left transition hover:border-ember"
+						@click="setupGame = game.key"
+					>
+						<span class="font-display text-2xl font-bold text-paper">{{
+							game.title
+						}}</span>
+						<span class="mt-2 text-sm leading-relaxed text-paper/60">{{
+							game.summary
+						}}</span>
+						<span
+							class="mt-4 flex items-center gap-2 font-display text-sm font-bold text-accent transition group-hover:gap-3"
+						>
+							Set up <span aria-hidden="true">→</span>
+						</span>
+					</button>
+				</div>
 				<RouterLink
-					class="text-ok underline decoration-haze hover:decoration-lagoon"
-					to="/play/games/cuecast"
-				>game page</RouterLink>.
-			</p>
-			<div class="mt-8 flex flex-col gap-6">
-				<label class="flex flex-col gap-2">
-					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Deck</span>
-					<select v-model="setup.deck" class="field text-lg">
-						<option value="" disabled>Pick a deck…</option>
-						<option v-for="deck in decks" :key="deck.name" :value="deck.name">
-							{{ deck.title }} · {{ deck.prompt_count }} prompts{{ Number(deck.is_demo) ? " · demo" : "" }}
-						</option>
-					</select>
-				</label>
-				<div class="grid grid-cols-2 gap-5 sm:grid-cols-3">
-					<div class="flex flex-col gap-2">
-						<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Round</span>
-						<div class="flex gap-2">
-							<button
-								v-for="s in [30, 60, 90]"
-								:key="s"
-								type="button"
-								class="ctl flex-1"
-								:data-on="setup.seconds === s"
-								@click="setup.seconds = s"
-							>{{ s }}s</button>
+					class="mt-8 inline-block font-mono text-xs uppercase tracking-[0.22em] text-paper/40 transition hover:text-paper"
+					:to="{ name: 'CrowdPackEditor' }"
+				>
+					Author Crowd Compass packs →
+				</RouterLink>
+			</template>
+
+			<template v-else>
+				<button
+					class="font-mono text-xs uppercase tracking-[0.22em] text-paper/40 transition hover:text-paper"
+					@click="setupGame = null"
+				>
+					← Games
+				</button>
+				<h1 class="mt-6 font-display text-4xl font-extrabold text-paper">
+					{{ setupTitle }}
+				</h1>
+
+				<!-- CueCast setup -->
+				<div v-if="setupGame === 'cuecast'" class="mt-8 flex flex-col gap-6">
+					<label class="flex flex-col gap-2">
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+							>Deck</span
+						>
+						<select v-model="setup.deck" class="field text-lg">
+							<option value="" disabled>Pick a deck…</option>
+							<option v-for="deck in packs" :key="deck.name" :value="deck.name">
+								{{ deck.title }} · {{ deck.prompt_count }} prompts{{
+									Number(deck.is_demo) ? " · demo" : ""
+								}}
+							</option>
+						</select>
+					</label>
+					<div class="grid grid-cols-2 gap-5 sm:grid-cols-3">
+						<div class="flex flex-col gap-2">
+							<span
+								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+								>Round</span
+							>
+							<div class="flex gap-2">
+								<button
+									v-for="s in [30, 60, 90]"
+									:key="s"
+									type="button"
+									class="ctl flex-1"
+									:data-on="setup.seconds === s"
+									@click="setup.seconds = s"
+								>
+									{{ s }}s
+								</button>
+							</div>
+						</div>
+						<div class="flex flex-col gap-2">
+							<span
+								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+								>Teams</span
+							>
+							<div class="flex gap-2">
+								<button
+									v-for="n in [2, 3, 4]"
+									:key="n"
+									type="button"
+									class="ctl flex-1"
+									:data-on="setup.teams_count === n"
+									@click="setup.teams_count = n"
+								>
+									{{ n }}
+								</button>
+							</div>
+						</div>
+						<label
+							class="col-span-2 flex items-center gap-3 self-end text-paper/70 sm:col-span-1"
+						>
+							<input
+								type="checkbox"
+								v-model="setup.sudden_death"
+								class="size-4 accent-[rgb(var(--accent))]"
+							/>
+							Sudden death
+						</label>
+					</div>
+				</div>
+
+				<!-- Crowd Compass setup -->
+				<div v-else class="mt-8 flex flex-col gap-6">
+					<label class="flex flex-col gap-2">
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+							>Pack</span
+						>
+						<select v-model="setup.pack" class="field text-lg">
+							<option value="">Blank room — compose live prompts</option>
+							<option v-for="pack in packs" :key="pack.name" :value="pack.name">
+								{{ pack.title }} · {{ pack.prompt_count }} prompts{{
+									Number(pack.is_demo) ? " · demo" : ""
+								}}{{ pack.ranked ? " · ranked" : "" }}
+							</option>
+						</select>
+					</label>
+					<p v-if="selectedPackRanked" class="-mt-3 text-sm text-ok">
+						Ranked pack: players pick a first and second choice; the room tally is
+						weighted 2/1.
+					</p>
+					<div class="grid grid-cols-2 gap-5 sm:grid-cols-3">
+						<div class="flex flex-col gap-2">
+							<span
+								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+								>Vote time</span
+							>
+							<div class="flex gap-2">
+								<button
+									v-for="s in [10, 15, 20]"
+									:key="s"
+									type="button"
+									class="ctl flex-1"
+									:data-on="setup.vote_seconds === s"
+									@click="setup.vote_seconds = s"
+								>
+									{{ s }}s
+								</button>
+							</div>
+						</div>
+						<div class="flex flex-col gap-2">
+							<span
+								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+								>Predict time</span
+							>
+							<div class="flex gap-2">
+								<button
+									v-for="s in [10, 15, 20]"
+									:key="s"
+									type="button"
+									class="ctl flex-1"
+									:data-on="setup.prediction_seconds === s"
+									@click="setup.prediction_seconds = s"
+								>
+									{{ s }}s
+								</button>
+							</div>
+						</div>
+						<div class="flex flex-col gap-2">
+							<span
+								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+								>Scoring</span
+							>
+							<div class="flex gap-2">
+								<button
+									type="button"
+									class="ctl flex-1"
+									:data-on="setup.scoring_mode === 'Individual'"
+									@click="setup.scoring_mode = 'Individual'"
+								>
+									Solo
+								</button>
+								<button
+									type="button"
+									class="ctl flex-1"
+									:data-on="setup.scoring_mode === 'Team average'"
+									@click="setup.scoring_mode = 'Team average'"
+								>
+									Teams
+								</button>
+							</div>
 						</div>
 					</div>
-					<div class="flex flex-col gap-2">
-						<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Teams</span>
+					<div class="flex flex-wrap items-center gap-x-8 gap-y-3 text-paper/70">
+						<label class="flex items-center gap-3">
+							<input
+								type="checkbox"
+								v-model="setup.estimation"
+								class="size-4 accent-[rgb(var(--accent))]"
+							/>
+							Share-estimation bonus
+						</label>
+						<label class="flex items-center gap-3">
+							<input
+								type="checkbox"
+								v-model="setup.room_match"
+								class="size-4 accent-[rgb(var(--accent))]"
+							/>
+							Match-the-room +100
+						</label>
+						<label
+							v-if="setup.scoring_mode === 'Team average'"
+							class="flex items-center gap-3"
+						>
+							<input
+								type="checkbox"
+								v-model="setup.team_match"
+								class="size-4 accent-[rgb(var(--accent))]"
+							/>
+							Match-your-team +100
+						</label>
+					</div>
+					<div class="grid grid-cols-2 gap-5">
+						<label class="flex flex-col gap-2">
+							<span
+								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+							>
+								Rounds
+							</span>
+							<input
+								v-model.number="setup.rounds"
+								type="number"
+								min="0"
+								max="50"
+								class="field"
+								placeholder="All prompts"
+							/>
+							<span class="text-xs text-paper/35">0 plays the whole pack</span>
+						</label>
+						<label class="flex flex-col gap-2">
+							<span
+								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+							>
+								Vote quorum
+							</span>
+							<input
+								v-model.number="setup.quorum"
+								type="number"
+								min="1"
+								max="100"
+								class="field"
+							/>
+							<span class="text-xs text-paper/35"
+								>Below this, the prompt scores nothing</span
+							>
+						</label>
+					</div>
+					<div v-if="setup.scoring_mode === 'Team average'" class="flex flex-col gap-2">
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+							>Teams</span
+						>
 						<div class="flex gap-2">
 							<button
 								v-for="n in [2, 3, 4]"
@@ -47,19 +276,28 @@
 								class="ctl flex-1"
 								:data-on="setup.teams_count === n"
 								@click="setup.teams_count = n"
-							>{{ n }}</button>
+							>
+								{{ n }}
+							</button>
 						</div>
 					</div>
-					<label class="col-span-2 flex items-center gap-3 self-end text-paper/70 sm:col-span-1">
-						<input type="checkbox" v-model="setup.sudden_death" class="size-4 accent-[rgb(var(--accent))]" />
-						Sudden death
-					</label>
+					<RouterLink
+						class="w-fit font-mono text-xs uppercase tracking-[0.22em] text-paper/40 transition hover:text-paper"
+						:to="{ name: 'CrowdPackEditor' }"
+					>
+						Author packs →
+					</RouterLink>
 				</div>
-				<button class="ctl ctl-go self-start px-8" :disabled="!setup.deck || creating" @click="createSession">
+
+				<button
+					class="ctl ctl-go mt-8 self-start px-8"
+					:disabled="creating"
+					@click="createSession"
+				>
 					{{ creating ? "Opening…" : "Open the lobby" }}
 				</button>
-				<p v-if="error" class="text-alert">{{ error }}</p>
-			</div>
+				<p v-if="error" class="mt-4 text-alert">{{ error }}</p>
+			</template>
 		</div>
 
 		<!-- Lobby -->
@@ -70,7 +308,9 @@
 			<div class="flex flex-wrap items-center justify-center gap-10">
 				<div class="text-center sm:text-left">
 					<p class="break-all font-mono text-sm text-accent">Join at {{ joinHost }}</p>
-					<p class="mt-2 font-mono text-7xl font-bold tracking-[0.08em] text-paper sm:text-8xl">
+					<p
+						class="mt-2 font-mono text-7xl font-bold tracking-[0.08em] text-paper sm:text-8xl"
+					>
 						{{ pin }}
 					</p>
 					<button class="ctl mt-5" :data-on="lobbyLocked" @click="toggleLock">
@@ -78,16 +318,19 @@
 					</button>
 				</div>
 				<button v-if="qrDataUrl" @click="qrFullscreen = true">
-					<img :src="qrDataUrl" alt="Join QR code" class="size-44 rounded-2xl bg-card p-2 transition hover:scale-105" />
+					<img
+						:src="qrDataUrl"
+						alt="Join QR code"
+						class="size-44 rounded-2xl bg-card p-2 transition hover:scale-105"
+					/>
 				</button>
 			</div>
 
-			<!-- Joiners appear unassigned first; balancing is the host's one big pre-game call -->
-			<div
-				v-if="unassigned.length || teams.length"
-				class="flex flex-col gap-5"
-			>
-				<div v-if="unassigned.length" class="flex flex-wrap items-center justify-center gap-2">
+			<div v-if="unassigned.length || teams.length" class="flex flex-col gap-5">
+				<div
+					v-if="unassigned.length"
+					class="flex flex-wrap items-center justify-center gap-2"
+				>
 					<span
 						v-for="p in unassigned"
 						:key="p.name"
@@ -99,9 +342,14 @@
 							class="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-haze text-xs leading-none text-paper opacity-0 transition hover:bg-alert group-hover:opacity-100"
 							:aria-label="`Remove ${p.nickname}`"
 							@click="kick(p)"
-						>×</button>
+						>
+							×
+						</button>
 					</span>
-					<span class="font-mono text-xs uppercase tracking-wider text-paper/40">
+					<span
+						v-if="teamCapable"
+						class="font-mono text-xs uppercase tracking-wider text-paper/40"
+					>
 						pick teams below to sort them
 					</span>
 				</div>
@@ -123,6 +371,20 @@
 								{{ teamMembers(team.name).length }}
 							</span>
 						</div>
+						<div class="mt-3 flex gap-2" aria-label="Team color">
+							<button
+								v-for="color in teamColors"
+								:key="color"
+								type="button"
+								class="size-5 rounded-full border-2 transition"
+								:class="[
+									teamStyle(color).fill,
+									team.color === color ? 'border-paper' : 'border-transparent',
+								]"
+								:aria-label="`Use ${color} for ${team.editName}`"
+								@click="recolorTeam(team, color)"
+							/>
+						</div>
 						<div class="mt-4 flex min-h-9 flex-wrap gap-2">
 							<span
 								v-for="p in teamMembers(team.name)"
@@ -136,9 +398,15 @@
 									class="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-haze text-xs leading-none text-paper opacity-0 transition hover:bg-alert group-hover:opacity-100"
 									:aria-label="`Remove ${p.nickname}`"
 									@click="kick(p)"
-								>×</button>
+								>
+									×
+								</button>
 							</span>
-							<span v-if="!teamMembers(team.name).length" class="text-sm italic text-paper/35">waiting…</span>
+							<span
+								v-if="!teamMembers(team.name).length"
+								class="text-sm italic text-paper/35"
+								>waiting…</span
+							>
 						</div>
 					</div>
 				</div>
@@ -146,13 +414,24 @@
 			<p v-else class="text-center text-paper/35">Waiting for the first player…</p>
 
 			<div class="flex flex-wrap items-center justify-center gap-3">
-				<button v-for="n in [2, 3, 4]" :key="n" class="ctl" @click="balanceTeams(n)">
+				<button
+					v-for="n in teamCapable ? [2, 3, 4] : []"
+					:key="n"
+					class="ctl"
+					@click="balanceTeams(n)"
+				>
 					{{ n }} teams
 				</button>
-				<button class="ctl" @click="toggleMute">{{ muted ? "Sound off" : "Sound on" }}</button>
+				<button class="ctl" @click="toggleMute">
+					{{ muted ? "Sound off" : "Sound on" }}
+				</button>
 				<ThemeButton class="ctl" />
 				<button class="ctl" @click="end">Exit</button>
-				<button class="ctl ctl-go" :disabled="starting || !participants.length" @click="startGame">
+				<button
+					class="ctl ctl-go"
+					:disabled="starting || !participants.length"
+					@click="startGame"
+				>
 					{{ starting ? "Starting…" : `Start · ${participants.length} players` }}
 				</button>
 			</div>
@@ -164,66 +443,29 @@
 			v-else
 			class="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 p-6 text-center sm:p-10"
 		>
-			<template v-if="view.phase === 'turn_ready' && view.performer">
-				<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
-					Turn {{ (view.turn ?? 0) + 1 }} of {{ totalTurns || "?" }}
-				</p>
-				<div class="flex items-center gap-5">
-					<AvatarPic :id="view.performer.avatar" :nickname="view.performer.nickname" :size="72" />
-					<div class="text-left">
-						<p class="font-display text-3xl font-extrabold text-paper">{{ view.performer.nickname }}</p>
-						<p class="text-paper/50">{{ teamNameOf(view) }} takes the stage</p>
-					</div>
-				</div>
-				<DrainRing :percent="timerPercent" :seconds="Math.ceil(remaining)" :size="110" color="rgb(var(--accent))" />
-			</template>
-
-			<template v-else-if="view.phase === 'turn_open' && view.performer">
-				<div class="flex items-center justify-center gap-8">
-					<DrainRing
-						:percent="timerPercent"
-						:seconds="Math.ceil(remaining)"
-						:size="120"
-						:color="remaining <= 5 ? 'rgb(var(--alert))' : 'rgb(var(--ok))'"
-					/>
-					<div class="text-left">
-						<p class="font-display text-4xl font-extrabold text-paper">{{ view.performer.nickname }}</p>
-						<p class="mt-1 font-mono uppercase tracking-wider text-paper/50">
-							{{ teamNameOf(view) }} · {{ mode }} mode
-						</p>
-					</div>
-				</div>
-				<div class="flex w-full max-w-lg items-center justify-between rounded-3xl border border-haze bg-dusk px-8 py-6">
-					<span class="font-mono uppercase tracking-widest text-paper/50">Solved</span>
-					<span class="font-display text-5xl font-extrabold tabular-nums text-accent">{{ solvedCount }}</span>
-				</div>
-				<p class="max-w-md text-sm text-paper/40">
-					Only {{ view.performer.nickname }}'s phone knows the words. Watch them work.
-				</p>
-				<button class="ctl" @click="reassignPerformer">Reassign performer</button>
-			</template>
-
-			<template v-else-if="view.phase === 'turn_review'">
-				<h2 class="font-display text-3xl font-extrabold text-paper sm:text-4xl">
-					{{ solvedCount }} solved for {{ teamNameOf(view) }}
-				</h2>
-				<div class="flex max-w-2xl flex-wrap justify-center gap-2">
-					<span
-						v-for="(word, index) in view.played || []"
-						:key="index"
-						class="rounded-xl px-4 py-2 font-medium"
-						:class="isSolved(word, index) ? 'bg-lagoon/20 text-ok' : 'bg-dusk text-paper/40 line-through'"
-					>
-						{{ word }}
-					</span>
-				</div>
-				<p class="text-sm text-paper/40">
-					{{ view.passed_count || 0 }} passed · ask the room if any call looked wrong
-				</p>
-			</template>
+			<component
+				:is="live.HostLive"
+				v-if="gamePhases.includes(view.phase)"
+				:view="view"
+				:remaining="remaining"
+				:timer-percent="timerPercent"
+				:total-turns="totalTurns"
+				:mode="mode"
+				:solved-count="solvedCount"
+				@reassign="reassignPerformer"
+				@compose="composer = true"
+			/>
 
 			<template v-else-if="view.phase === 'scoreboard'">
-				<h2 class="font-display text-3xl font-extrabold text-paper">Scoreboard</h2>
+				<h2 class="font-display text-3xl font-extrabold text-paper">
+					Scoreboard
+					<span
+						v-if="view.last_voided"
+						class="ml-3 font-mono text-sm font-normal uppercase tracking-widest text-alert"
+					>
+						last prompt voided
+					</span>
+				</h2>
 				<ol class="flex w-full max-w-xl flex-col gap-3">
 					<li
 						v-for="team in rankedTeams(view.teams || [])"
@@ -231,15 +473,30 @@
 						class="flex items-center gap-4 rounded-2xl border bg-dusk px-5 py-4"
 						:class="team.rank === 1 ? 'border-accent' : 'border-haze'"
 					>
-						<span class="w-6 font-mono text-lg tabular-nums text-paper/40">{{ team.rank }}</span>
-						<span class="flex-1 text-left font-display text-xl font-bold text-paper">{{ team.team_name }}</span>
-						<span class="font-display text-2xl font-extrabold tabular-nums text-accent">{{ team.score }}</span>
+						<span class="w-6 font-mono text-lg tabular-nums text-paper/40">{{
+							team.rank
+						}}</span>
+						<AvatarPic
+							v-if="team.avatar"
+							:id="team.avatar"
+							:nickname="team.team_name"
+							:size="36"
+						/>
+						<span class="flex-1 text-left font-display text-xl font-bold text-paper">{{
+							team.team_name
+						}}</span>
+						<span
+							class="font-display text-2xl font-extrabold tabular-nums text-accent"
+							>{{ team.score }}</span
+						>
 					</li>
 				</ol>
 			</template>
 
 			<template v-else-if="podium">
-				<h1 class="font-display text-5xl font-extrabold text-paper sm:text-6xl">Final results</h1>
+				<h1 class="font-display text-5xl font-extrabold text-paper sm:text-6xl">
+					Final results
+				</h1>
 				<ol class="flex w-full max-w-xl flex-col gap-3">
 					<li
 						v-for="team in podium"
@@ -247,9 +504,22 @@
 						class="flex items-center gap-4 rounded-2xl border bg-dusk px-5 py-4"
 						:class="team.rank === 1 ? 'border-accent' : 'border-haze'"
 					>
-						<span class="w-6 font-mono text-lg tabular-nums text-paper/40">{{ team.rank }}</span>
-						<span class="flex-1 text-left font-display text-xl font-bold text-paper">{{ team.team_name }}</span>
-						<span class="font-display text-2xl font-extrabold tabular-nums text-accent">{{ team.score }}</span>
+						<span class="w-6 font-mono text-lg tabular-nums text-paper/40">{{
+							team.rank
+						}}</span>
+						<AvatarPic
+							v-if="team.avatar"
+							:id="team.avatar"
+							:nickname="team.team_name"
+							:size="36"
+						/>
+						<span class="flex-1 text-left font-display text-xl font-bold text-paper">{{
+							team.team_name
+						}}</span>
+						<span
+							class="font-display text-2xl font-extrabold tabular-nums text-accent"
+							>{{ team.score }}</span
+						>
 					</li>
 				</ol>
 				<button class="ctl ctl-go mt-2" @click="newRoom">New room</button>
@@ -259,12 +529,101 @@
 				<p class="font-mono uppercase tracking-[0.28em] text-paper/40">Get ready…</p>
 			</template>
 
-			<div v-if="!podium && phase !== 'lobby'" class="flex flex-wrap items-center justify-center gap-3">
-				<button v-if="view.phase !== 'scoreboard'" class="ctl" @click="skipTurn">Skip turn</button>
+			<div
+				v-if="!podium && phase !== 'lobby'"
+				class="flex flex-wrap items-center justify-center gap-3"
+			>
+				<button v-if="view.phase !== 'scoreboard'" class="ctl" @click="skipTurn">
+					Skip stage
+				</button>
+				<button
+					v-if="gameKey === 'cuecast' && view.phase === 'turn_open'"
+					class="ctl"
+					@click="reassignPerformer"
+				>
+					Reassign performer
+				</button>
+				<button
+					v-if="
+						gameKey === 'crowd-compass' &&
+						['reveal', 'scoreboard'].includes(view.phase) &&
+						!view.last_voided
+					"
+					class="ctl ctl-danger"
+					@click="voidPrompt"
+				>
+					Void prompt
+				</button>
+				<button
+					v-if="gameKey === 'crowd-compass'"
+					class="ctl ctl-go"
+					@click="composer = true"
+				>
+					+ Live prompt
+				</button>
 				<button class="ctl ctl-danger" @click="end">End game</button>
+				<p v-if="error" class="text-alert">{{ error }}</p>
 			</div>
-			<p v-if="error" class="text-alert">{{ error }}</p>
 		</div>
+
+		<!-- Live prompt composer -->
+		<dialog
+			ref="composerDialog"
+			class="qz-dialog w-[min(92vw,560px)] rounded-3xl border border-haze bg-night p-8"
+			@cancel.prevent="composer = false"
+			@click.self="composer = false"
+		>
+			<h2 class="font-display text-2xl font-extrabold text-paper">Compose a live prompt</h2>
+			<div class="mt-5 flex flex-col gap-4">
+				<label class="flex flex-col gap-2">
+					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>Prompt</span
+					>
+					<input
+						v-model="draft.prompt"
+						class="field"
+						placeholder="Ask the room anything…"
+						maxlength="140"
+					/>
+				</label>
+				<div class="grid grid-cols-2 gap-3">
+					<input
+						v-model="draft.choice_1"
+						class="field"
+						placeholder="Choice 1 *"
+						maxlength="60"
+					/>
+					<input
+						v-model="draft.choice_2"
+						class="field"
+						placeholder="Choice 2 *"
+						maxlength="60"
+					/>
+					<input
+						v-model="draft.choice_3"
+						class="field"
+						placeholder="Choice 3"
+						maxlength="60"
+					/>
+					<input
+						v-model="draft.choice_4"
+						class="field"
+						placeholder="Choice 4"
+						maxlength="60"
+					/>
+				</div>
+				<p class="text-sm text-paper/50">
+					It joins the queue after the current prompt. Blank rooms start with these.
+				</p>
+				<p v-if="error" class="text-alert">{{ error }}</p>
+				<div class="mt-2 flex justify-end gap-3">
+					<button class="ctl" @click="composer = false">Cancel</button>
+					<button class="ctl ctl-go" :disabled="pushing" @click="pushPrompt">
+						{{ pushing ? "Pushing…" : "Push to the room" }}
+					</button>
+				</div>
+			</div>
+		</dialog>
 
 		<dialog
 			ref="qrDialog"
@@ -278,7 +637,9 @@
 				alt="Join QR code"
 				class="size-[min(78vh,88vw)] rounded-3xl bg-card p-4"
 			/>
-			<p class="mt-4 text-center font-mono text-2xl tracking-[0.08em] text-paper">{{ pin }}</p>
+			<p class="mt-4 text-center font-mono text-2xl tracking-[0.08em] text-paper">
+				{{ pin }}
+			</p>
 		</dialog>
 	</div>
 </template>
@@ -301,7 +662,9 @@ import {
 	loadHostedSession,
 	rememberHostedSession,
 	teamStyle,
+	TEAM_STYLE,
 } from "@/platform/session/gp";
+import { GAME_SETUP, liveFor, phasesFor } from "@/games/registry";
 
 const socket = inject("$socket");
 const route = useRoute();
@@ -314,28 +677,73 @@ const {
 } = useCountdown();
 
 const loading = ref(true);
+const setupGame = ref(null);
 const session = ref(null);
+const gameKey = ref("cuecast");
 const pin = ref("");
 const configuration = ref({});
 const phase = ref("lobby");
 const participants = ref([]);
 const teams = ref([]);
-const decks = ref([]);
+const packs = ref([]);
 const lobbyLocked = ref(false);
 const view = ref({});
 const podium = ref(null);
 const starting = ref(false);
+const creating = ref(false);
 const qrDataUrl = ref("");
 const qrFullscreen = ref(false);
 const qrDialog = ref(null);
+const composer = ref(false);
+const composerDialog = ref(null);
+const pushing = ref(false);
+const draft = ref({ prompt: "", choice_1: "", choice_2: "", choice_3: "", choice_4: "" });
 const error = ref("");
 let stopRoom = null;
 let seqSeen = -1;
 
-watch(qrFullscreen, (open) => (open ? qrDialog.value.showModal() : qrDialog.value.close()));
+watch(composer, (open) =>
+	open ? composerDialog.value?.showModal() : composerDialog.value?.close()
+);
+
+const setup = ref({
+	deck: "",
+	pack: "",
+	seconds: 60,
+	vote_seconds: 15,
+	prediction_seconds: 15,
+	teams_count: 2,
+	sudden_death: true,
+	estimation: true,
+	room_match: true,
+	team_match: true,
+	scoring_mode: "Individual",
+	rounds: 0,
+	quorum: 1,
+});
+
+const teamColors = Object.keys(TEAM_STYLE);
+
+const hostableGames = [
+	{
+		key: "cuecast",
+		title: "CueCast",
+		summary: "Act it or describe it: race through team prompts before the buzzer.",
+	},
+	{
+		key: "crowd-compass",
+		title: "Crowd Compass",
+		summary: "Vote for yourself, predict the room, and see who reads the crowd best.",
+	},
+];
 
 const inLiveSession = computed(() => Boolean(session.value));
 const joinHost = computed(() => `${window.location.host}/play/join`);
+const setupTitle = computed(
+	() => hostableGames.find((g) => g.key === setupGame.value)?.title || ""
+);
+const live = computed(() => liveFor(gameKey.value));
+const gamePhases = computed(() => phasesFor(gameKey.value));
 const mode = computed(() => configuration.value.mode || "Act");
 const totalTurns = computed(() => {
 	const t = teams.value.length || configuration.value.teams_count || 2;
@@ -349,32 +757,28 @@ const teamCols = computed(() => {
 	const count = Math.max(1, teams.value.length);
 	return count >= 4 ? "sm:grid-cols-4" : count === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2";
 });
+const teamCapable = computed(
+	() =>
+		gameKey.value === "cuecast" ||
+		(gameKey.value === "crowd-compass" && configuration.value.scoring_mode === "Team average")
+);
+const selectedPackRanked = computed(() =>
+	Boolean(packs.value.find((p) => p.name === setup.value.pack)?.ranked)
+);
+const unassigned = computed(() => participants.value.filter((p) => !p.team));
 
 function teamMembers(teamName) {
 	return participants.value.filter((p) => p.team === teamName);
-}
-
-const unassigned = computed(() => participants.value.filter((p) => !p.team));
-
-function teamNameOf(v) {
-	const team = (v.teams || []).find((t) => t.name === (v.performer?.team || null));
-	return team?.team_name || "";
 }
 
 function rankedTeams(list) {
 	return [...list].sort((a, b) => (a.rank || 0) - (b.rank || 0) || b.score - a.score);
 }
 
-function isSolved(word, index) {
-	const played = view.value.played || [];
-	const passedStart = played.length - (view.value.passed_count || 0);
-	return index < passedStart;
-}
-
 function onEvent(envelopeMessage) {
 	if (!envelopeMessage || typeof envelopeMessage !== "object") return;
 	if (typeof envelopeMessage.seq === "number") {
-		if (envelopeMessage.seq < seqSeen) return; // stale delivery
+		if (envelopeMessage.seq < seqSeen) return;
 		seqSeen = envelopeMessage.seq;
 	}
 	const type = envelopeMessage.type;
@@ -383,27 +787,48 @@ function onEvent(envelopeMessage) {
 		participants.value = payload.participants || [];
 		teams.value = (payload.teams || []).map((t) => ({ ...t, editName: t.team_name }));
 		lobbyLocked.value = Boolean(payload.lobby_locked);
-	} else if (type === "platform.state_changed" || type.startsWith("cuecast.")) {
+	} else if (
+		type === "platform.state_changed" ||
+		type.split(".")[0] === gameKey.value.replace("-", "_")
+	) {
 		if (payload.phase) {
 			view.value = payload;
 			podium.value = null;
 			phase.value = payload.phase;
-			playCue(payload.phase === "turn_open" ? "submit" : "tick");
+			playCue(
+				payload.phase === "turn_open" || payload.phase === "prompt_open"
+					? "submit"
+					: "tick"
+			);
+			stopCountdown();
+			if (["turn_ready", "prompt_open", "prediction_open"].includes(payload.phase))
+				startCountdown(5);
 		}
 	} else if (type === "platform.action_progress") {
-		view.value = { ...view.value, solved: payload.count };
+		if (payload.phase === "prompt_open") view.value = { ...view.value, voted: payload.count };
+		else if (payload.phase === "prediction_open")
+			view.value = { ...view.value, predicted: payload.count };
+		else view.value = { ...view.value, solved: payload.count };
 	} else if (type === "platform.scoreboard_updated") {
-		view.value = { ...view.value, phase: "scoreboard", teams: payload.teams };
+		view.value = {
+			...view.value,
+			phase: "scoreboard",
+			teams: payload.teams,
+			last_voided: payload.last_voided,
+		};
 		phase.value = "scoreboard";
 		stopCountdown();
-	} else if (type === "platform.participant_removed") {
-		// lobby refresh arrives separately; nothing to do here for hosts
+	} else if (type === "crowd_compass.prompt_queued") {
+		composer.value = false;
+		draft.value = { prompt: "", choice_1: "", choice_2: "", choice_3: "", choice_4: "" };
 	}
 }
 
 async function refresh() {
 	try {
-		await applyState(await gpCall("get_host_state", session.value ? { session: session.value } : {}));
+		await applyState(
+			await gpCall("get_host_state", session.value ? { session: session.value } : {})
+		);
 	} catch (e) {
 		error.value = readError(e);
 	}
@@ -416,6 +841,7 @@ async function applyState(state) {
 		return;
 	}
 	session.value = state.session;
+	gameKey.value = state.game_key || "cuecast";
 	pin.value = state.game_pin;
 	configuration.value = state.configuration || {};
 	participants.value = state.participants || [];
@@ -442,7 +868,7 @@ async function applyState(state) {
 	view.value = state.view || {};
 	seqSeen = state.state_version ?? seqSeen;
 
-	if (["turn_ready", "turn_open"].includes(state.phase)) {
+	if (["turn_ready", "turn_open", "prompt_open", "prediction_open"].includes(state.phase)) {
 		startCountdown(Math.max(0.5, state.remaining_seconds));
 	} else {
 		stopCountdown();
@@ -464,25 +890,39 @@ async function renderQr(url) {
 	return canvas.toDataURL();
 }
 
-onMounted(async () => {
-	initSound("host");
+async function loadPacks(game) {
+	const meta = GAME_SETUP[game];
+	if (!meta) return;
 	try {
-		const decks = await call("frappe.client.get_list", {
-			doctype: "GP Cue Deck",
-			fields: ["name", "title", "mode", "is_demo", "demo_key"],
+		const rows = await call("frappe.client.get_list", {
+			doctype: meta.contentDoctype,
+			fields: [
+				"name",
+				"title",
+				"is_demo",
+				"demo_key",
+				game === "crowd-compass" ? "ranked" : "mode",
+			],
 			limit_page_length: 0,
 			order_by: "is_demo desc, title asc",
 		});
-		for (const deck of decks) {
-			const rows = await call("frappe.client.get_list", {
-				doctype: "GP Cue Prompt",
-				filters: { parenttype: "GP Cue Deck", parent: deck.name },
+		for (const row of rows) {
+			const prompts = await call("frappe.client.get_list", {
+				doctype: meta.promptDoctype,
+				filters: { parenttype: meta.contentDoctype, parent: row.name },
 				limit_page_length: 0,
 			});
-			deck.prompt_count = rows.length;
+			row.prompt_count = prompts.length;
 		}
-		decks.value = decks;
+		packs.value = rows;
+	} catch (e) {
+		error.value = readError(e);
+	}
+}
 
+onMounted(async () => {
+	initSound("host");
+	try {
 		const remembered = loadHostedSession();
 		let state = null;
 		if (remembered) {
@@ -499,12 +939,18 @@ onMounted(async () => {
 				await applyState(created);
 				stopRoom = useSessionRoom(socket, pin.value, onEvent, refresh, "gp");
 			}
+		} else {
+			await loadPacks("cuecast");
 		}
 		loading.value = false;
 	} catch (e) {
 		loading.value = false;
 		error.value = readError(e);
 	}
+});
+
+watch(setupGame, (game) => {
+	if (game) loadPacks(game);
 });
 
 async function hostAction(method, params = {}) {
@@ -521,9 +967,21 @@ async function createSession() {
 	error.value = "";
 	creating.value = true;
 	try {
+		const configuration = { ...setup.value };
+		delete configuration.deck;
+		if (setupGame.value === "cuecast") {
+			configuration.deck = setup.value.deck;
+			delete configuration.pack;
+		} else {
+			configuration.pack = setup.value.pack || null;
+			delete configuration.deck;
+			delete configuration.seconds;
+			delete configuration.sudden_death;
+			if (configuration.scoring_mode !== "Team average") configuration.teams_count = 2;
+		}
 		const created = await gpCall("create_session", {
-			game_key: "cuecast",
-			configuration: setup.value,
+			game_key: setupGame.value,
+			configuration,
 		});
 		await applyState(await gpCall("get_host_state", { session: created.session }));
 		stopRoom?.();
@@ -550,14 +1008,20 @@ async function toggleLock() {
 }
 
 async function balanceTeams(count) {
-	const lobbyState = await hostAction("host_command", { command: "balance_teams", payload: { count } });
-	if (lobbyState) await refresh();
+	await hostAction("host_command", { command: "balance_teams", payload: { count } });
 }
 
 async function renameTeam(team) {
 	await hostAction("host_command", {
 		command: "rename_team",
 		payload: { team: team.name, team_name: team.editName },
+	});
+}
+
+async function recolorTeam(team, color) {
+	await hostAction("host_command", {
+		command: "recolor_team",
+		payload: { team: team.name, color },
 	});
 }
 
@@ -575,26 +1039,45 @@ async function skipTurn() {
 }
 
 async function reassignPerformer() {
-	const members = participants.value.filter(
-		(p) => !podium.value && p.team && p.nickname !== view.value.performer?.nickname
+	const stageTeam = (view.value.teams || []).find(
+		(t) => t.team_name === view.value.actor_team_name
 	);
-	const stageTeamParticipants = participants.value.filter(
-		(p) => p.team === (view.value.teams || []).find((t) => t.team_name === teamNameOf(view.value))?.name
-	);
-	const roster = (stageTeamParticipants.length ? stageTeamParticipants : members).filter(
-		(p) => p.nickname !== view.value.performer?.nickname
+	const roster = participants.value.filter(
+		(p) =>
+			stageTeam && p.team === stageTeam.name && p.nickname !== view.value.performer?.nickname
 	);
 	if (!roster.length) return;
-	const pick = roster[roster.length - 1];
 	await hostAction("host_command", {
 		command: "reassign_performer",
-		payload: { participant: pick.name },
+		payload: { participant: roster[roster.length - 1].name },
 	});
+}
+
+async function voidPrompt() {
+	const ok = await confirm(
+		"Void the last prompt? Its points are returned and it counts for nothing.",
+		{ action: "Void it", danger: true }
+	);
+	if (!ok) return;
+	await hostAction("host_command", { command: "void_prompt" });
+}
+
+async function pushPrompt() {
+	error.value = "";
+	pushing.value = true;
+	try {
+		await hostAction("host_command", { command: "push_prompt", payload: { ...draft.value } });
+	} finally {
+		pushing.value = false;
+	}
 }
 
 async function end() {
 	const prompt = phase.value === "lobby" ? "Close this lobby?" : "End the game for everyone?";
-	const ok = await confirm(prompt, { action: phase.value === "lobby" ? "Close lobby" : "End game", danger: true });
+	const ok = await confirm(prompt, {
+		action: phase.value === "lobby" ? "Close lobby" : "End game",
+		danger: true,
+	});
 	if (!ok) return;
 	await hostAction("end_session");
 	if (phase.value === "lobby") newRoom();

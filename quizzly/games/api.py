@@ -49,22 +49,28 @@ def list_games() -> list[dict]:
 	]
 
 
+CONTENT_DOCTYPES = {
+	"cuecast": ("GP Cue Deck", "GP Cue Prompt"),
+	"crowd-compass": ("GP Crowd Pack", "GP Crowd Prompt"),
+}
+
+
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @frappe.whitelist(allow_guest=True)
 def list_public_decks(game_key: str | None = None) -> list[dict]:
-	"""Demo decks are marketing content: browsable by guests, playable by hosts."""
-	if game_key and game_key != "cuecast":
+	"""Demo packs are marketing content: browsable by guests, playable by hosts."""
+	doctypes = CONTENT_DOCTYPES.get(game_key or "")
+	if not doctypes:
 		return []
+	pack_doctype, prompt_doctype = doctypes
 	roster = frappe.get_all(
-		"GP Cue Deck",
+		pack_doctype,
 		filters={"is_demo": 1},
-		fields=["name", "title", "mode", "demo_key"],
+		fields=["name", "title", "demo_key", "ranked" if game_key == "crowd-compass" else "mode"],
 		order_by="title asc",
 	)
-	for deck in roster:
-		deck.prompt_count = frappe.db.count(
-			"GP Cue Prompt", {"parent": deck.name, "parenttype": "GP Cue Deck"}
-		)
+	for pack in roster:
+		pack.prompt_count = frappe.db.count(prompt_doctype, {"parent": pack.name, "parenttype": pack_doctype})
 	return roster
 
 
@@ -545,7 +551,21 @@ def final_leaderboard(session: str) -> list[dict]:
 		fields=["name", "nickname", "avatar", "score", "rank"],
 		order_by="rank asc",
 	)
-	return [{"subject_type": "Participant", **p} for p in participants]
+	# participant rows wear the platform's team-row shape so shells render one way
+	from quizzly.games.engine import TEAM_COLORS
+
+	return [
+		{
+			"subject_type": "Participant",
+			"name": p.name,
+			"team_name": p.nickname,
+			"color": TEAM_COLORS[(p.rank or 1) % len(TEAM_COLORS) - 1],
+			"avatar": p.avatar,
+			"score": p.score,
+			"rank": p.rank,
+		}
+		for p in participants
+	]
 
 
 def set_lobby_locked(session: str, locked: bool) -> dict:

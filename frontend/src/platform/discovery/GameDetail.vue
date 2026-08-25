@@ -11,22 +11,24 @@
 
 			<header class="mt-8 flex flex-wrap items-start justify-between gap-6">
 				<div class="min-w-0 max-w-2xl">
-					<h1 class="font-display text-5xl font-extrabold leading-none text-paper sm:text-6xl">
+					<h1
+						class="font-display text-5xl font-extrabold leading-none text-paper sm:text-6xl"
+					>
 						{{ game.title }}
 					</h1>
 					<p class="mt-4 text-lg text-paper/60">{{ game.summary }}</p>
-					<p class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-xs uppercase tracking-wide text-paper/45">
+					<p
+						class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-xs uppercase tracking-wide text-paper/45"
+					>
 						<span>{{ playersLabel(game) }}</span>
-						<span v-if="game.recommended_players">best {{ game.recommended_players }}</span>
+						<span v-if="game.recommended_players"
+							>best {{ game.recommended_players }}</span
+						>
 						<span v-if="game.typical_minutes">~{{ game.typical_minutes }} min</span>
 					</p>
 				</div>
 				<div class="flex shrink-0 flex-col gap-3">
-					<button
-						v-if="!hosting"
-						class="ctl ctl-go"
-						@click="hosting = true"
-					>
+					<button v-if="!hosting" class="ctl ctl-go" @click="hosting = true">
 						Host this game
 					</button>
 					<p v-if="error" class="max-w-56 text-sm text-alert">{{ error }}</p>
@@ -34,14 +36,14 @@
 			</header>
 
 			<!-- Host panel: deck + pacing, or demo shortcut -->
-			<section
-				v-if="hosting"
-				class="mt-8 rounded-3xl border border-haze bg-dusk p-6 sm:p-8"
-			>
+			<section v-if="hosting" class="mt-8 rounded-3xl border border-haze bg-dusk p-6 sm:p-8">
 				<h2 class="font-display text-xl font-bold text-paper">Set up the room</h2>
 				<div class="mt-6 grid gap-6 lg:grid-cols-2">
 					<label class="flex flex-col gap-2">
-						<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Deck</span>
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+							>Deck</span
+						>
 						<select v-model="setup.deck" class="field">
 							<option value="" disabled>Pick a deck…</option>
 							<option v-for="deck in decks" :key="deck.name" :value="deck.name">
@@ -51,7 +53,9 @@
 						</select>
 					</label>
 					<div class="flex flex-col gap-2">
-						<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
 							Round length
 						</span>
 						<div class="flex gap-2">
@@ -68,7 +72,10 @@
 						</div>
 					</div>
 					<div class="flex flex-col gap-2">
-						<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Teams</span>
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+							>Teams</span
+						>
 						<div class="flex gap-2">
 							<button
 								v-for="n in [2, 3, 4]"
@@ -124,20 +131,44 @@
 				</div>
 				<div class="flex flex-col gap-6">
 					<div class="rounded-2xl border border-haze bg-dusk p-5">
-						<h3 class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">The host does</h3>
-						<p class="mt-2 text-sm leading-relaxed text-paper/70">{{ guide.hostDoes }}</p>
+						<h3
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
+							The host does
+						</h3>
+						<p class="mt-2 text-sm leading-relaxed text-paper/70">
+							{{ guide.hostDoes }}
+						</p>
 					</div>
 					<div class="rounded-2xl border border-haze bg-dusk p-5">
-						<h3 class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Players see</h3>
-						<p class="mt-2 text-sm leading-relaxed text-paper/70">{{ guide.playerSees }}</p>
+						<h3
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
+							Players see
+						</h3>
+						<p class="mt-2 text-sm leading-relaxed text-paper/70">
+							{{ guide.playerSees }}
+						</p>
 					</div>
 					<div class="rounded-2xl border border-haze bg-dusk p-5">
-						<h3 class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">The room sees</h3>
-						<p class="mt-2 text-sm leading-relaxed text-paper/70">{{ guide.roomSees }}</p>
+						<h3
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
+							The room sees
+						</h3>
+						<p class="mt-2 text-sm leading-relaxed text-paper/70">
+							{{ guide.roomSees }}
+						</p>
 					</div>
 					<div class="rounded-2xl border border-haze bg-dusk p-5">
-						<h3 class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Accessibility</h3>
-						<p class="mt-2 text-sm leading-relaxed text-paper/70">{{ guide.accessibility }}</p>
+						<h3
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
+							Accessibility
+						</h3>
+						<p class="mt-2 text-sm leading-relaxed text-paper/70">
+							{{ guide.accessibility }}
+						</p>
 					</div>
 				</div>
 			</section>
@@ -159,9 +190,15 @@
 						>
 							{{ demo.audience }}
 						</span>
-						<h3 class="mt-4 font-display text-xl font-bold text-paper">{{ demo.title }}</h3>
-						<p class="mt-2 flex-1 text-sm leading-relaxed text-paper/60">{{ demo.blurb }}</p>
-						<p class="mt-4 font-mono text-xs text-paper/40">{{ demo.prompt_count }} prompts</p>
+						<h3 class="mt-4 font-display text-xl font-bold text-paper">
+							{{ demo.title }}
+						</h3>
+						<p class="mt-2 flex-1 text-sm leading-relaxed text-paper/60">
+							{{ demo.blurb }}
+						</p>
+						<p class="mt-4 font-mono text-xs text-paper/40">
+							{{ demo.prompt_count }} prompts
+						</p>
 						<button
 							class="ctl mt-4 self-start"
 							:disabled="creatingDemo === demo.name"
@@ -243,7 +280,10 @@ async function createSession() {
 	error.value = "";
 	creating.value = true;
 	try {
-		const created = await gpCall("create_session", { game_key: game.value.key, configuration: setup.value });
+		const created = await gpCall("create_session", {
+			game_key: game.value.key,
+			configuration: setup.value,
+		});
 		rememberHostedSession(created.session);
 		router.push({ name: "GpHost", query: { session: created.session } });
 	} catch (e) {
@@ -271,6 +311,8 @@ async function hostDemo(demo) {
 }
 
 function playersLabel(game) {
-	return game.max_players ? `${game.min_players}–${game.max_players} players` : `${game.min_players}+ players`;
+	return game.max_players
+		? `${game.min_players}–${game.max_players} players`
+		: `${game.min_players}+ players`;
 }
 </script>
