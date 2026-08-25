@@ -109,7 +109,6 @@
 						/>
 					</div>
 				</div>
-
 				<!-- Crowd Compass setup -->
 				<div v-else class="mt-8 flex flex-col gap-6">
 					<div class="flex flex-col gap-2">
@@ -274,6 +273,12 @@
 						Author packs →
 					</RouterLink>
 				</div>
+				<PremiumToggle
+					class="mt-6"
+					v-model="setup.auto_progress"
+					label="Automatic presentation"
+					hint="Advance settled results automatically; turn this off to hold them until Next."
+				/>
 
 				<button
 					class="ctl ctl-go mt-8 self-start px-8"
@@ -549,6 +554,11 @@
 				<button v-if="view.phase !== 'scoreboard'" class="ctl" @click="skipTurn">
 					Skip stage
 				</button>
+				<button class="ctl" :disabled="!canPrevious" @click="previousPresentation">Previous</button>
+				<button class="ctl ctl-go" @click="nextPresentation">Next</button>
+				<button class="ctl" @click="togglePause">
+					{{ paused ? "Resume" : "Pause" }}
+				</button>
 				<button
 					v-if="gameKey === 'cuecast' && view.phase === 'turn_open'"
 					class="ctl"
@@ -743,6 +753,7 @@ const setup = ref({
 	scoring_mode: "Individual",
 	rounds: 0,
 	quorum: 1,
+	auto_progress: true,
 });
 
 const teamColors = Object.keys(TEAM_STYLE);
@@ -789,6 +800,8 @@ const selectedPackRanked = computed(() =>
 	Boolean(packs.value.find((p) => p.name === setup.value.pack)?.ranked)
 );
 const unassigned = computed(() => participants.value.filter((p) => !p.team));
+const paused = computed(() => Boolean(view.value.paused));
+const canPrevious = computed(() => Boolean(view.value.can_previous));
 
 function teamMembers(teamName) {
 	return participants.value.filter((p) => p.team === teamName);
@@ -1090,6 +1103,21 @@ async function kick(participant) {
 
 async function skipTurn() {
 	await hostAction("host_command", { command: "skip_turn" });
+}
+
+async function previousPresentation() {
+	await hostAction("host_command", { command: "previous" });
+	await refresh();
+}
+
+async function nextPresentation() {
+	await hostAction("host_command", { command: "next" });
+	await refresh();
+}
+
+async function togglePause() {
+	await hostAction("host_command", { command: paused.value ? "resume" : "pause" });
+	await refresh();
 }
 
 async function reassignPerformer() {

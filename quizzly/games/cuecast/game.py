@@ -105,7 +105,7 @@ class CueCastGame(GameModule):
 
 	def advance_state(self, ctx, state, trigger) -> Transition | None:
 		command = trigger.get("command")
-		if command in ("deadline", "skip_turn"):
+		if command in ("deadline", "skip_turn", "next"):
 			return self.on_deadline(ctx, state)
 		if command == "reassign_performer":
 			return self.reassign_performer(ctx, state, trigger.get("participant"))
@@ -369,6 +369,9 @@ class CueCastGame(GameModule):
 		if state["phase"] != "turn_open":
 			return None
 		return {"count": self.solved_count(ctx, state)}
+
+	def is_presentation_phase(self, phase: str) -> bool:
+		return phase in {"turn_review", "scoreboard", "podium"}
 
 	def finish_game(self, ctx, state) -> GameResult:
 		ranked = self.ranked_teams(ctx)

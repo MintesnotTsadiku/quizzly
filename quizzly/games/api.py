@@ -120,6 +120,7 @@ def create_session(game_key: str, configuration: dict | None = None) -> dict:
 	module = get_game_module(game_key)
 	ctx = GameContext(session="", pin="", game_key=game_key, configuration=configuration)
 	normalized = module.validate_configuration(ctx, configuration)
+	normalized["auto_progress"] = bool(int(configuration.get("auto_progress", 1)))
 	session_doc = frappe.get_doc(
 		{
 			"doctype": "GP Session",
@@ -165,7 +166,12 @@ def get_host_state(session: str | None = None) -> dict:
 			"phase": state["phase"],
 			"state_version": state["version"],
 			"remaining_seconds": max(0.0, state["deadline_ts"] - time.time()),
-			"view": module.serialize_host_state(gpe.context_for(session_doc), state),
+			"view": {
+				**module.serialize_host_state(gpe.context_for(session_doc), state),
+				"paused": bool(state.get("paused")),
+				"can_previous": bool(state.get("presentation_history")),
+				"presentation_replay": bool(state.get("presentation_replay")),
+			},
 		}
 	)
 	return result
@@ -196,6 +202,8 @@ def host_command(session: str, command: str, payload: dict | None = None) -> dic
 	"""Lobby commands mutate and republish; live commands ride the control flag."""
 	payload = payload or {}
 	session_doc = get_host_session(session)
+	if command not in {"previous", "next", "pause", "resume", "skip_turn", "end", "reassign_performer", "push_prompt", "void_prompt"} and session_doc.status != "Lobby":
+		frappe.throw(_("Unknown host command"))
 	if command == "end":
 		return end_session(session)
 	if session_doc.status == "Lobby":
@@ -405,6 +413,8 @@ def submit_action(
 	state = gpe.get_state(session_doc.name)
 	if not state:
 		frappe.throw(_("Game is not active"))
+	if state.get("paused"):
+		frappe.throw(_("The host has paused this game"))
 	module = get_game_module(session_doc.game_key)
 	decision = module.submit_action(
 		gpe.context_for(session_doc), state, participant_view(participant), action_type, payload or {}

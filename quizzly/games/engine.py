@@ -72,11 +72,47 @@ def tick_once() -> bool:
 				frappe.cache.srem(ACTIVE_SESSIONS_KEY, session)
 				continue
 			control = pop_control(session)
+			if control and control["command"] == "pause":
+				pause_session(session, state)
+				frappe.db.commit()
+				continue
+			if control and control["command"] == "resume":
+				resume_session(session, state)
+				frappe.db.commit()
+				continue
+			if state.get("paused"):
+				# A paused room deliberately ignores all progression commands except
+				# resume/end. Inputs are rejected at the API gate while it is paused.
+				frappe.db.commit()
+				continue
 			if control and control["command"] == "end":
 				finish_session(frappe.get_doc("GP Session", session))
 				frappe.db.commit()
 				continue
+			if control and control["command"] == "previous":
+				show_previous(session, state)
+				frappe.db.commit()
+				continue
+			if state.get("presentation_replay") and control and control["command"] == "next":
+				restore_replay(session, state)
+				frappe.db.commit()
+				continue
 			due = time.time() >= state["next_ts"]
+			module = None
+			if due and not control:
+				doc_for_policy = frappe.get_doc("GP Session", session)
+				module = get_game_module(doc_for_policy.game_key)
+				if (
+					not (frappe.parse_json(doc_for_policy.configuration) or {}).get("auto_progress", True)
+					and module.is_presentation_phase(state["phase"])
+				):
+					# Hold settled results indefinitely in manual mode. The host's Next
+					# command still takes the normal module transition.
+					state["next_ts"] = time.time() + ADVANCE_WAIT_CAP
+					state["deadline_ts"] = state["next_ts"]
+					set_state(session, state, ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN)
+					frappe.db.commit()
+					continue
 			if control or due:
 				try:
 					doc = frappe.get_doc("GP Session", session)
@@ -85,7 +121,7 @@ def tick_once() -> bool:
 					frappe.cache.srem(ACTIVE_SESSIONS_KEY, session)
 					clear_state(session)
 					continue
-				module = get_game_module(doc.game_key)
+				module = module or get_game_module(doc.game_key)
 				trigger = control or {"command": "deadline"}
 				transition = module.advance_state(context_for(doc), state, trigger)
 				if transition:
@@ -174,6 +210,13 @@ def apply_transition(session_doc, old_state: dict, transition: Transition) -> No
 		"next_ts": next_ts,
 		"module_state": module_state,
 	}
+	if old_state and get_game_module(session_doc.game_key).is_presentation_phase(old_state.get("phase", "")):
+		history = list(old_state.get("presentation_history") or [])
+		# Keep only settled snapshots; no live state, tokens, answers, or secrets.
+		history.append({k: v for k, v in old_state.items() if k not in {"presentation_history", "presentation_replay", "return_state"}})
+		new_state["presentation_history"] = history[-8:]
+	elif old_state.get("presentation_history"):
+		new_state["presentation_history"] = old_state["presentation_history"]
 	set_state(session_doc.name, new_state, ttl=ttl)
 
 	round_index = module_state.get("round_index")
@@ -316,6 +359,65 @@ def get_state(session: str) -> dict | None:
 def clear_state(session: str) -> None:
 	frappe.cache.delete_value(state_key(session))
 	frappe.cache.delete_value(control_key(session))
+
+
+def pause_session(session: str, state: dict) -> None:
+	if state.get("paused"):
+		return
+	now = time.time()
+	state = dict(state)
+	state.update({"paused": True, "paused_remaining": max(0.0, state["next_ts"] - now), "paused_at": now})
+	set_state(session, state, ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN)
+	publish_control_state(session, state)
+
+
+def resume_session(session: str, state: dict) -> None:
+	if not state.get("paused"):
+		return
+	state = dict(state)
+	deadline = time.time() + max(0.0, state.get("paused_remaining", 0.0))
+	state.update({"paused": False, "next_ts": deadline, "deadline_ts": deadline})
+	state.pop("paused_remaining", None)
+	state.pop("paused_at", None)
+	set_state(session, state, ttl=max(60, deadline - time.time() + STATE_TTL_MARGIN))
+	publish_control_state(session, state)
+
+
+def show_previous(session: str, state: dict) -> None:
+	"""Replay a settled snapshot without mutating its original game state."""
+	history = list(state.get("presentation_history") or [])
+	if not history:
+		return
+	snapshot = history.pop()
+	replay = dict(snapshot)
+	replay.update({
+		"presentation_replay": True,
+		"return_state": {k: v for k, v in state.items() if k not in {"presentation_history", "presentation_replay", "return_state"}},
+		"presentation_history": history,
+		"next_ts": time.time() + ADVANCE_WAIT_CAP,
+		"deadline_ts": time.time() + ADVANCE_WAIT_CAP,
+	})
+	set_state(session, replay, ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN)
+	publish_control_state(session, replay)
+
+
+def restore_replay(session: str, state: dict) -> None:
+	returned = dict(state.get("return_state") or {})
+	if not returned:
+		return
+	returned["presentation_history"] = state.get("presentation_history") or []
+	set_state(session, returned, ttl=max(60, returned["next_ts"] - time.time() + STATE_TTL_MARGIN))
+	publish_control_state(session, returned)
+
+
+def publish_control_state(session: str, state: dict) -> None:
+	"""Wake every surface after a host-only presentation control.
+
+	Surfaces then fetch their role-scoped snapshot, so this event never turns a
+	private prompt or a player answer into a public payload.
+	"""
+	doc = frappe.get_doc("GP Session", session)
+	publish_session_event(doc, state, "platform.state_changed", {"phase": state["phase"]})
 
 
 def set_control(session: str, control: dict) -> None:

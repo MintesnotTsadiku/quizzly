@@ -133,6 +133,14 @@ class GameModule:
 		"""Live counter for the projector, or None when this phase has none."""
 		return None
 
+	def is_presentation_phase(self, phase: str) -> bool:
+		"""Whether a phase is safe to hold or replay from the host console.
+
+		Only settled, non-interactive beats belong here.  The platform uses this
+		to guarantee that Previous can never reopen a submission window.
+		"""
+		return phase in {"scoreboard", "podium"}
+
 	def finish_game(self, ctx: GameContext, state: dict) -> GameResult:
 		"""Forced ending (host end command, abandoned session). The default ranks
 		teams by their materialized score; participant games override it."""

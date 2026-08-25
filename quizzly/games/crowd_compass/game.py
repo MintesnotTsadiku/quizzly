@@ -151,7 +151,7 @@ class CrowdCompassGame(GameModule):
 
 	def advance_state(self, ctx, state, trigger) -> Transition | None:
 		command = trigger.get("command")
-		if command in ("deadline", "skip_turn"):
+		if command in ("deadline", "skip_turn", "next"):
 			return self.on_deadline(ctx, state)
 		if command == "push_prompt":
 			return self.push_prompt(ctx, state, trigger)
@@ -557,6 +557,9 @@ class CrowdCompassGame(GameModule):
 		if state["phase"] == "prediction_open":
 			return {"phase": "prediction_open", "count": self.action_count(ctx, state, "make_prediction")}
 		return None
+
+	def is_presentation_phase(self, phase: str) -> bool:
+		return phase in {"reveal", "scoreboard", "podium"}
 
 	def finish_game(self, ctx, state) -> GameResult:
 		module_state = state.get("module_state") or {}

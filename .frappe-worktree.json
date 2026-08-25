@@ -1,0 +1,30 @@
+{
+  "app_name": "quizzly",
+  "credentials": {},
+  "dependency_apps": [],
+  "frontend": {
+    "command": [
+      "yarn",
+      "dev"
+    ],
+    "directory": "frontend",
+    "environment": {},
+    "health_path": "/",
+    "install_command": [
+      "env",
+      "TMPDIR=/tmp",
+      "YARN_CACHE_FOLDER=/tmp/quizzly-worktree-yarn-cache",
+      "yarn",
+      "install",
+      "--frozen-lockfile"
+    ]
+  },
+  "site_config": {
+    "mute_emails": 1
+  },
+  "site_prefix": "quizzly",
+  "template": {
+    "enabled": true
+  },
+  "version": 1
+}
