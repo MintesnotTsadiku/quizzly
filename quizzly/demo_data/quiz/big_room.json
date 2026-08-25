@@ -1,0 +1,23 @@
+{
+  "demo_key": "quiz-big-room",
+  "schema_version": 1,
+  "game_key": "quiz",
+  "locale": "en",
+  "title": "The Big Room Challenge",
+  "description": "A fast, room-friendly challenge spanning geography, science, inventions, and world culture.",
+  "default_time_limit": 20,
+  "show_explanation": true,
+  "explanation_time_limit": 10,
+  "questions": [
+    {"question_text":"What is the capital of Ethiopia?","option_1":"Addis Ababa","option_2":"Nairobi","option_3":"Kampala","option_4":"Kigali","correct_option":"1","explanation":"Addis Ababa is Ethiopia’s capital and the seat of the African Union.","points_multiplier":"1"},
+    {"question_text":"Which ocean is the largest?","option_1":"Atlantic","option_2":"Indian","option_3":"Arctic","option_4":"Pacific","correct_option":"4","explanation":"The Pacific is Earth’s largest and deepest ocean.","points_multiplier":"1"},
+    {"question_text":"Which element has the chemical symbol Au?","option_1":"Silver","option_2":"Gold","option_3":"Argon","option_4":"Copper","correct_option":"2","explanation":"Au comes from the Latin word for gold, aurum.","points_multiplier":"1"},
+    {"question_text":"Who painted The Starry Night?","option_1":"Claude Monet","option_2":"Pablo Picasso","option_3":"Vincent van Gogh","option_4":"Frida Kahlo","correct_option":"3","explanation":"Vincent van Gogh painted it in 1889.","points_multiplier":"1"},
+    {"question_text":"Which invention is associated with Johannes Gutenberg?","option_1":"Telephone","option_2":"Printing press","option_3":"Steam engine","option_4":"Radio","correct_option":"2","explanation":"Gutenberg developed movable-type printing in Europe.","points_multiplier":"1"},
+    {"question_text":"What is the hardest natural substance?","option_1":"Quartz","option_2":"Iron","option_3":"Diamond","option_4":"Granite","correct_option":"3","explanation":"Diamond ranks highest on the Mohs hardness scale.","points_multiplier":"1"},
+    {"question_text":"Which country is home to Machu Picchu?","option_1":"Peru","option_2":"Mexico","option_3":"Chile","option_4":"Brazil","correct_option":"1","explanation":"The Inca citadel stands high in the Andes of Peru.","points_multiplier":"1"},
+    {"question_text":"How many strings does a standard violin have?","option_1":"Three","option_2":"Four","option_3":"Five","option_4":"Six","correct_option":"2","explanation":"A standard violin has four strings: G, D, A, and E.","points_multiplier":"1"},
+    {"question_text":"Which gas do plants absorb during photosynthesis?","option_1":"Oxygen","option_2":"Hydrogen","option_3":"Carbon dioxide","option_4":"Helium","correct_option":"3","explanation":"Plants use carbon dioxide, water, and light to make sugars.","points_multiplier":"1"},
+    {"question_text":"Which language has the most native speakers worldwide?","option_1":"English","option_2":"Spanish","option_3":"Hindi","option_4":"Mandarin Chinese","correct_option":"4","explanation":"Mandarin Chinese has the largest native-speaker population.","points_multiplier":"2"}
+  ]
+}

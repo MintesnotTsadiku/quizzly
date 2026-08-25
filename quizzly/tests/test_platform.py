@@ -62,6 +62,37 @@ class TestPublicContentDiscovery(IntegrationTestCase):
 		finally:
 			frappe.delete_doc("GP Crowd Pack", pack.name, force=True, ignore_permissions=True)
 
+	def test_demo_quiz_includes_safe_question_preview(self):
+		quiz = frappe.get_doc(
+			{
+				"doctype": "QZ Quiz",
+				"title": "Previewable Quiz",
+				"is_demo": 1,
+				"demo_key": "test-previewable-quiz",
+				"questions": [
+					{
+						"question_text": "Which answer is safe to show?",
+						"option_1": "One",
+						"option_2": "Two",
+						"option_3": "Three",
+						"option_4": "Four",
+						"correct_option": "2",
+					}
+				],
+			}
+		).insert()
+		try:
+			preview = next(row for row in list_public_decks("quiz") if row.name == quiz.name)
+			self.assertEqual(preview.prompt_count, 1)
+			self.assertEqual(
+				preview.prompts,
+				[{"text": "Which answer is safe to show?", "choices": ["One", "Two", "Three", "Four"]}],
+			)
+			self.assertNotIn("correct_option", preview.prompts[0])
+		finally:
+			frappe.db.set_value("QZ Quiz", quiz.name, "is_demo", 0)
+			frappe.delete_doc("QZ Quiz", quiz.name, force=True, ignore_permissions=True)
+
 
 class PlatformTestCase(IntegrationTestCase):
 	"""Deck + lobby + two joined players, torn down completely."""

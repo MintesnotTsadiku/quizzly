@@ -122,6 +122,7 @@ const GUIDES = {
 	},
 	quiz: {
 		hostUrl: "/play/quizzly/host",
+		contentKey: "quiz",
 		whyGame:
 			"Answer correctly before the clock runs out. Faster answers and winning streaks earn more points, turning every question into a race for the podium.",
 		howTo: [
@@ -140,6 +141,26 @@ const GUIDES = {
 		setup: "Projector plus phones. Works from four people to a full hall.",
 		accessibility:
 			"Shapes carry meaning beyond colour, and every screen respects reduced motion.",
+		demos: [
+			{
+				demo_key: "quiz-church-bible",
+				title: "Bible Foundations Live",
+				blurb: "Creation, Exodus, Jesus’ ministry, Acts, and Bible foundations.",
+				audience: "Church / Bible",
+			},
+			{
+				demo_key: "quiz-family-general",
+				title: "Family Fun Mix",
+				blurb: "Animals, colours, numbers, riddles, and everyday science.",
+				audience: "Child / Family",
+			},
+			{
+				demo_key: "quiz-big-room",
+				title: "The Big Room Challenge",
+				blurb: "Geography, science, inventions, and culture for a full hall.",
+				audience: "General Assembly",
+			},
+		],
 	},
 };
 

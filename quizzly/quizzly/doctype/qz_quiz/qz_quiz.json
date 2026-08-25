@@ -13,6 +13,8 @@
   "explanation_position",
   "explanation_time_limit",
   "show_host_controls",
+  "is_demo",
+  "demo_key",
   "questions"
  ],
  "fields": [
@@ -65,6 +67,20 @@
    "fieldname": "show_host_controls",
    "fieldtype": "Check",
    "label": "In-Game Host Controls"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_demo",
+   "fieldtype": "Check",
+   "label": "Is Demo",
+   "read_only": 1
+  },
+  {
+   "fieldname": "demo_key",
+   "fieldtype": "Data",
+   "label": "Demo Key",
+   "read_only": 1,
+   "unique": 1
   },
   {
    "fieldname": "questions",

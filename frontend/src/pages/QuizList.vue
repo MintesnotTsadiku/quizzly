@@ -33,8 +33,18 @@
 							{{ quiz.question_count === 1 ? "question" : "questions" }}
 						</p>
 					</div>
-					<RouterLink class="ctl" :to="`/host/quizzes/${quiz.name}`">Edit</RouterLink>
-					<button class="ctl" @click="remove(quiz)">Delete</button>
+					<span v-if="Number(quiz.is_demo)" class="font-mono text-xs uppercase text-ok"
+						>Demo</span
+					>
+					<button v-if="Number(quiz.is_demo)" class="ctl" @click="duplicate(quiz)">
+						Duplicate
+					</button>
+					<template v-else>
+						<RouterLink class="ctl" :to="`/host/quizzes/${quiz.name}`"
+							>Edit</RouterLink
+						>
+						<button class="ctl" @click="remove(quiz)">Delete</button>
+					</template>
 				</div>
 			</div>
 			<p v-else-if="loaded" class="text-paper/50">No quizzes yet. Make your first one.</p>
@@ -77,6 +87,16 @@ async function remove(quiz) {
 			e.exc_type === "LinkExistsError"
 				? `"${quiz.title}" has been played, so it cannot be deleted.`
 				: readError(e);
+	}
+}
+
+async function duplicate(quiz) {
+	error.value = "";
+	try {
+		const copied = await call("quizzly.api.duplicate_quiz", { quiz: quiz.name });
+		window.location.href = `/play/host/quizzes/${copied.name}`;
+	} catch (e) {
+		error.value = readError(e);
 	}
 }
 </script>

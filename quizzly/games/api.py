@@ -61,6 +61,14 @@ CONTENT_PREVIEWS = {
 		"prompt_doctype": "GP Crowd Prompt",
 		"metadata_field": "ranked",
 		"choice_fields": ("choice_1", "choice_2", "choice_3", "choice_4"),
+		"text_field": "prompt_text",
+	},
+	"quiz": {
+		"pack_doctype": "QZ Quiz",
+		"prompt_doctype": "QZ Question",
+		"metadata_field": "default_time_limit",
+		"choice_fields": ("option_1", "option_2", "option_3", "option_4"),
+		"text_field": "question_text",
 	},
 }
 
@@ -75,6 +83,7 @@ def list_public_decks(game_key: str | None = None) -> list[dict]:
 	pack_doctype = preview["pack_doctype"]
 	prompt_doctype = preview["prompt_doctype"]
 	choice_fields = preview["choice_fields"]
+	text_field = preview.get("text_field", "prompt_text")
 	roster = frappe.get_all(
 		pack_doctype,
 		filters={"is_demo": 1},
@@ -82,7 +91,7 @@ def list_public_decks(game_key: str | None = None) -> list[dict]:
 		order_by="title asc",
 	)
 	for pack in roster:
-		prompt_fields = ["prompt_text", *choice_fields]
+		prompt_fields = [text_field, *choice_fields]
 		rows = frappe.get_all(
 			prompt_doctype,
 			filters={"parent": pack.name, "parenttype": pack_doctype},
@@ -92,7 +101,7 @@ def list_public_decks(game_key: str | None = None) -> list[dict]:
 		pack.prompt_count = len(rows)
 		pack.prompts = [
 			{
-				"text": strip_html_tags(row.prompt_text or "").strip(),
+				"text": strip_html_tags(row.get(text_field) or "").strip(),
 				"choices": [
 					strip_html_tags(row.get(field) or "").strip() for field in choice_fields if row.get(field)
 				],

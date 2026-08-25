@@ -35,7 +35,8 @@ def get_spa_boot() -> dict:
 @frappe.whitelist()
 def create_session(quiz: str) -> dict:
 	quiz_doc = frappe.get_doc("QZ Quiz", quiz)
-	quiz_doc.check_permission("read")
+	if not quiz_doc.is_demo:
+		quiz_doc.check_permission("read")
 	session = frappe.get_doc(
 		{
 			"doctype": "QZ Session",
@@ -184,11 +185,31 @@ def end_session(session: str) -> dict:
 
 @frappe.whitelist()
 def list_quizzes() -> list[dict]:
-	quizzes = frappe.get_list("QZ Quiz", fields=["name", "title"], order_by="modified desc")
+	fields = ["name", "title", "is_demo", "demo_key"]
+	quizzes = frappe.get_list("QZ Quiz", fields=fields, order_by="modified desc")
+	visible_names = {quiz.name for quiz in quizzes}
+	quizzes.extend(
+		quiz
+		for quiz in frappe.get_all("QZ Quiz", filters={"is_demo": 1}, fields=fields, order_by="title asc")
+		if quiz.name not in visible_names
+	)
 	for quiz in quizzes:
 		# ponytail: one count per quiz; group them if a host ever owns hundreds
 		quiz["question_count"] = frappe.db.count("QZ Question", {"parent": quiz.name})
 	return quizzes
+
+
+@frappe.whitelist()
+def duplicate_quiz(quiz: str) -> dict:
+	source = frappe.get_doc("QZ Quiz", quiz)
+	if not source.is_demo:
+		source.check_permission("read")
+	copy = frappe.copy_doc(source)
+	copy.title = _("{0} — Custom").format(source.title)
+	copy.is_demo = 0
+	copy.demo_key = None
+	copy.insert()
+	return {"name": copy.name}
 
 
 # Guests join by design (no login); rate-limited, PIN-gated, and input is sanitized below.

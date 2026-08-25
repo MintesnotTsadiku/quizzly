@@ -448,6 +448,10 @@ async function hostDemo(demo) {
 	error.value = "";
 	creatingDemo.value = demo.name;
 	try {
+		if (game.value.key === "quiz") {
+			window.location.href = `/play/quizzly/host?quiz=${encodeURIComponent(demo.name)}`;
+			return;
+		}
 		const contentKey = guide.value.contentKey;
 		const created = await gpCall("create_session", {
 			game_key: game.value.key,

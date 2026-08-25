@@ -9,12 +9,14 @@ const quizRoutes = [
 	{ path: "/quizzly/game", name: "Play", component: () => import("@/pages/Play.vue") },
 	{ path: "/quizzly/host", name: "Host", component: () => import("@/pages/Host.vue") },
 	{
-		path: "/quizzly/host/quizzes",
+		path: "/host/quizzes",
+		alias: "/quizzly/host/quizzes",
 		name: "Quizzes",
 		component: () => import("@/pages/QuizList.vue"),
 	},
 	{
-		path: "/quizzly/host/quizzes/:name",
+		path: "/host/quizzes/:name",
+		alias: "/quizzly/host/quizzes/:name",
 		name: "QuizEditor",
 		component: () => import("@/pages/QuizEditor.vue"),
 	},

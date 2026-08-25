@@ -505,6 +505,7 @@
 
 <script setup>
 import { computed, inject, onMounted, onUnmounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import QRCode from "qrcode";
 import { call, readError } from "@/api";
 import { confirm } from "@/confirm";
@@ -522,6 +523,7 @@ const HOSTED_SESSION_KEY = "qz_hosted_session";
 // long enough to read the old order before it moves, and to watch the points climb
 const CLIMB_DELAY_MS = 700;
 const TALLY_MS = 900;
+const route = useRoute();
 
 const socket = inject("$socket");
 let climbTimer = null;
@@ -823,6 +825,9 @@ onMounted(async () => {
 		}
 		quizzes.value = await call("quizzly.api.list_quizzes");
 		loaded.value = true;
+		if (route.query.quiz && quizzes.value.some((quiz) => quiz.name === route.query.quiz)) {
+			await createSession(route.query.quiz);
+		}
 	} catch (e) {
 		error.value = readError(e);
 	}

@@ -1,0 +1,23 @@
+{
+  "demo_key": "quiz-family-general",
+  "schema_version": 1,
+  "game_key": "quiz",
+  "locale": "en",
+  "title": "Family Fun Mix",
+  "description": "A cheerful, child-friendly mix of animals, numbers, food, riddles, and everyday science.",
+  "default_time_limit": 30,
+  "show_explanation": true,
+  "explanation_time_limit": 10,
+  "questions": [
+    {"question_text":"Which animal is the tallest?","option_1":"Elephant","option_2":"Giraffe","option_3":"Horse","option_4":"Lion","correct_option":"2","explanation":"Adult giraffes can grow more than five metres tall.","points_multiplier":"1"},
+    {"question_text":"What is 7 + 5?","option_1":"10","option_2":"11","option_3":"12","option_4":"13","correct_option":"3","explanation":"Seven plus five equals twelve.","points_multiplier":"1"},
+    {"question_text":"Which colour do blue and yellow make together?","option_1":"Green","option_2":"Orange","option_3":"Purple","option_4":"Pink","correct_option":"1","explanation":"Mixing blue and yellow paint makes green.","points_multiplier":"1"},
+    {"question_text":"Which food grows underground?","option_1":"Apple","option_2":"Carrot","option_3":"Grape","option_4":"Orange","correct_option":"2","explanation":"The carrot root grows beneath the soil.","points_multiplier":"1"},
+    {"question_text":"How many legs does a spider have?","option_1":"Four","option_2":"Six","option_3":"Eight","option_4":"Ten","correct_option":"3","explanation":"Spiders are arachnids and have eight legs.","points_multiplier":"1"},
+    {"question_text":"What do bees collect from flowers?","option_1":"Sand","option_2":"Nectar","option_3":"Snow","option_4":"Salt","correct_option":"2","explanation":"Bees collect nectar and use it to make honey.","points_multiplier":"1"},
+    {"question_text":"Which planet do we live on?","option_1":"Mars","option_2":"Venus","option_3":"Earth","option_4":"Jupiter","correct_option":"3","explanation":"Earth is our home planet.","points_multiplier":"1"},
+    {"question_text":"What has hands but cannot clap?","option_1":"A clock","option_2":"A chair","option_3":"A book","option_4":"A shoe","correct_option":"1","explanation":"A clock has hour and minute hands.","points_multiplier":"1"},
+    {"question_text":"Which season usually comes after summer?","option_1":"Spring","option_2":"Autumn","option_3":"Winter","option_4":"Summer","correct_option":"2","explanation":"Autumn follows summer in the four-season cycle.","points_multiplier":"1"},
+    {"question_text":"Which object is attracted to a magnet?","option_1":"Wooden spoon","option_2":"Paper cup","option_3":"Iron nail","option_4":"Rubber ball","correct_option":"3","explanation":"Iron is a magnetic metal.","points_multiplier":"2"}
+  ]
+}

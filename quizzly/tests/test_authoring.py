@@ -3,7 +3,7 @@ from frappe.client import delete, save
 from frappe.tests import IntegrationTestCase
 
 from quizzly import engine
-from quizzly.api import create_session, list_quizzes
+from quizzly.api import create_session, duplicate_quiz, list_quizzes
 
 
 def question(text="2 + 2?", **overrides) -> dict:
@@ -76,3 +76,39 @@ class TestQuizAuthoring(IntegrationTestCase):
 
 		self.assertEqual(payloads[0]["image_url"], "/files/cat.png")
 		self.assertIsNone(payloads[1]["image_url"])
+
+	def test_demo_quiz_is_visible_but_read_only_and_can_be_duplicated(self):
+		host = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "quiz-host-demo@example.com",
+				"first_name": "Quiz Host",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Quiz Host"}],
+			}
+		).insert(ignore_permissions=True)
+		demo = save(
+			quiz_doc(
+				[question()],
+				base={"is_demo": 1, "demo_key": "test-authoring-demo"},
+			)
+		)
+		try:
+			frappe.set_user(host.name)
+			listed = next(quiz for quiz in list_quizzes() if quiz["name"] == demo["name"])
+			self.assertEqual(listed["is_demo"], 1)
+
+			frappe.set_user("Administrator")
+			with self.assertRaises(frappe.ValidationError):
+				save(quiz_doc([question("Changed")], base=demo))
+
+			copied_name = duplicate_quiz(demo["name"])["name"]
+			copied = frappe.get_doc("QZ Quiz", copied_name)
+			self.assertEqual(copied.is_demo, 0)
+			self.assertIsNone(copied.demo_key)
+			frappe.delete_doc("QZ Quiz", copied.name, force=True, ignore_permissions=True)
+		finally:
+			frappe.set_user("Administrator")
+			frappe.db.set_value("QZ Quiz", demo["name"], "is_demo", 0)
+			frappe.delete_doc("QZ Quiz", demo["name"], force=True, ignore_permissions=True)
+			frappe.delete_doc("User", host.name, force=True, ignore_permissions=True)

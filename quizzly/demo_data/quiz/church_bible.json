@@ -1,0 +1,23 @@
+{
+  "demo_key": "quiz-church-bible",
+  "schema_version": 1,
+  "game_key": "quiz",
+  "locale": "en",
+  "title": "Bible Foundations Live",
+  "description": "Ten welcoming questions tracing foundational people, places, and teachings across the Bible.",
+  "default_time_limit": 25,
+  "show_explanation": true,
+  "explanation_time_limit": 12,
+  "questions": [
+    {"question_text":"Who built the ark?","option_1":"Noah","option_2":"Moses","option_3":"David","option_4":"Peter","correct_option":"1","explanation":"Genesis 6–9 tells how Noah built the ark.","points_multiplier":"1"},
+    {"question_text":"What did God create on the first day?","option_1":"Animals","option_2":"Light","option_3":"People","option_4":"Stars","correct_option":"2","explanation":"Genesis 1:3 records, ‘Let there be light.’","points_multiplier":"1"},
+    {"question_text":"Who led Israel out of Egypt?","option_1":"Joshua","option_2":"Samuel","option_3":"Moses","option_4":"Solomon","correct_option":"3","explanation":"God called Moses to lead the Exodus.","points_multiplier":"1"},
+    {"question_text":"Which young shepherd defeated Goliath?","option_1":"David","option_2":"Saul","option_3":"Jonathan","option_4":"Elijah","correct_option":"1","explanation":"David trusted God and faced Goliath in 1 Samuel 17.","points_multiplier":"1"},
+    {"question_text":"Who was swallowed by a great fish?","option_1":"Amos","option_2":"Jonah","option_3":"Isaiah","option_4":"Daniel","correct_option":"2","explanation":"Jonah 1 describes Jonah and the great fish.","points_multiplier":"1"},
+    {"question_text":"Where was Jesus born?","option_1":"Nazareth","option_2":"Jerusalem","option_3":"Bethlehem","option_4":"Capernaum","correct_option":"3","explanation":"Matthew 2 and Luke 2 place Jesus’ birth in Bethlehem.","points_multiplier":"1"},
+    {"question_text":"How many disciples did Jesus appoint?","option_1":"Seven","option_2":"Ten","option_3":"Twelve","option_4":"Forty","correct_option":"3","explanation":"Jesus appointed twelve apostles.","points_multiplier":"1"},
+    {"question_text":"In Jesus’ parable, who helped the injured traveller?","option_1":"A king","option_2":"A Samaritan","option_3":"A fisherman","option_4":"A soldier","correct_option":"2","explanation":"The Good Samaritan showed mercy in Luke 10.","points_multiplier":"1"},
+    {"question_text":"Who wrote many letters in the New Testament?","option_1":"Paul","option_2":"Abraham","option_3":"Nehemiah","option_4":"Joseph","correct_option":"1","explanation":"Paul’s letters encouraged early Christian communities.","points_multiplier":"1"},
+    {"question_text":"Which book tells about the early church after Jesus’ ascension?","option_1":"Psalms","option_2":"Acts","option_3":"Proverbs","option_4":"Revelation","correct_option":"2","explanation":"Acts records the Spirit’s work through the early church.","points_multiplier":"2"}
+  ]
+}

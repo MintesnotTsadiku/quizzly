@@ -39,11 +39,14 @@ def seed_all() -> list[dict]:
 def seed_file(path: Path) -> dict:
 	data = json.loads(path.read_text())
 	pack = upsert(data)
-	return {"demo_key": data["demo_key"], "pack": pack.name, "prompts": len(pack.prompts or [])}
+	items = pack.questions if data["game_key"] == "quiz" else pack.prompts
+	return {"demo_key": data["demo_key"], "pack": pack.name, "prompts": len(items or [])}
 
 
 def upsert(data: dict):
 	game_key = data["game_key"]
+	if game_key == "quiz":
+		return upsert_quiz(data)
 	pack_doctype, _prompt_doctype, to_row = CONTENT[game_key]
 	existing = data["demo_key"] and frappe.db.exists(pack_doctype, {"demo_key": data["demo_key"]})
 	if existing:
@@ -67,26 +70,52 @@ def upsert(data: dict):
 	return pack
 
 
+def upsert_quiz(data: dict):
+	name = frappe.db.exists("QZ Quiz", {"demo_key": data["demo_key"]})
+	quiz = frappe.get_doc("QZ Quiz", name) if name else frappe.new_doc("QZ Quiz")
+	quiz.update(
+		{
+			"title": data["title"],
+			"description": data.get("description"),
+			"default_time_limit": data.get("default_time_limit") or 20,
+			"show_explanation": int(data.get("show_explanation", 1)),
+			"explanation_position": data.get("explanation_position") or "Before Stats",
+			"explanation_time_limit": data.get("explanation_time_limit") or 10,
+			"is_demo": 1,
+			"demo_key": data["demo_key"],
+			"questions": data["questions"],
+		}
+	)
+	quiz.flags.in_demo_seed = True
+	quiz.save(ignore_permissions=True)
+	frappe.db.commit()
+	return quiz
+
+
 def verify_all() -> list[dict]:
 	"""Confirm every shipped demo exists with its expected prompt count."""
 	results = []
 	for path in demo_files():
 		data = json.loads(path.read_text())
-		pack_doctype = CONTENT[data["game_key"]][0]
+		if data["game_key"] == "quiz":
+			pack_doctype, prompt_doctype = "QZ Quiz", "QZ Question"
+		else:
+			pack_doctype, prompt_doctype = CONTENT[data["game_key"]][:2]
 		name = frappe.db.exists(pack_doctype, {"demo_key": data["demo_key"]})
 		ok = bool(name)
 		count = 0
 		if ok:
-			count = frappe.db.count(
-				CONTENT[data["game_key"]][1], {"parent": name, "parenttype": pack_doctype}
-			)
-			ok = count >= len(data["prompts"])
+			count = frappe.db.count(prompt_doctype, {"parent": name, "parenttype": pack_doctype})
+			expected = data.get("questions") or data.get("prompts") or []
+			ok = count >= len(expected)
 		results.append({"demo_key": data["demo_key"], "ok": ok, "prompts": count})
 	return results
 
 
 def hide_all() -> None:
 	"""Demos stay playable but disappear from the catalog when a site opts out."""
-	for pack_doctype, _ in {v[0]: v for v in CONTENT.values()}.values():
+	for pack_doctype in {definition[0] for definition in CONTENT.values()}:
 		for name in frappe.get_all(pack_doctype, filters={"is_demo": 1}, pluck="name"):
 			frappe.db.set_value(pack_doctype, name, "is_demo", 0)
+	for name in frappe.get_all("QZ Quiz", filters={"is_demo": 1}, pluck="name"):
+		frappe.db.set_value("QZ Quiz", name, "is_demo", 0)

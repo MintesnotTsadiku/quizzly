@@ -16,16 +16,24 @@ class QZQuiz(Document):
 		from quizzly.quizzly.doctype.qz_question.qz_question import QZQuestion
 
 		default_time_limit: DF.Int
+		demo_key: DF.Data | None
 		description: DF.SmallText | None
+		is_demo: DF.Check
 		questions: DF.Table[QZQuestion]
 		title: DF.Data
 	# end: auto-generated types
 
 	def validate(self):
+		if self.is_demo and not self.is_new() and not self.flags.in_demo_seed:
+			frappe.throw(_("Demo quizzes are read-only. Duplicate one to customize it."))
 		if not self.questions:
 			frappe.throw(_("A quiz needs at least one question"))
 		for question in self.questions:
 			validate_question(question)
+
+	def on_trash(self):
+		if self.is_demo:
+			frappe.throw(_("Demo quizzes cannot be deleted."))
 
 
 def validate_question(question) -> None:
