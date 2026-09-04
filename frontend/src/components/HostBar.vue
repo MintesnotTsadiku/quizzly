@@ -1,22 +1,23 @@
 <template>
 	<header
+        :class="{ 'quizzly-embedded-nav': embedded }"
 		class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-haze px-4 py-3 sm:gap-x-5 sm:px-6"
 	>
-		<RouterLink
+		<RouterLink v-if="!embedded"
 			class="flex items-center gap-2 font-display text-lg font-extrabold text-paper"
 			to="/"
 		>
 			<img alt="" class="size-7 rounded-md" :src="logoUrl" />
-			Quizzly
+			{{ brand.short_name }}
 		</RouterLink>
-		<nav class="flex items-center gap-2">
+		<nav class="flex items-center gap-2" aria-label="Quizzly navigation"><RouterLink v-if="embedded" class="ctl" :data-on="route.path === '/'" to="/">Games</RouterLink><RouterLink v-if="embedded" class="ctl" :data-on="route.path === '/join'" to="/join">Join</RouterLink>
 			<RouterLink class="ctl" :data-on="isHosting" to="/host">Host</RouterLink>
 			<RouterLink class="ctl" :data-on="route.name === 'HostDashboard'" to="/host/dashboard"
 				>Dashboard</RouterLink
 			>
 			<RouterLink class="ctl" :data-on="isAuthoring" to="/host/quizzes">Quizzes</RouterLink>
 		</nav>
-		<span class="ml-auto flex items-center gap-4">
+		<span v-if="!embedded" class="ml-auto flex items-center gap-4">
 			<ThemeButton class="ctl" />
 			<span class="hidden truncate font-mono text-xs text-paper/40 sm:inline">{{
 				user
@@ -34,7 +35,8 @@ import { useRoute } from "vue-router";
 import { call } from "@/api";
 import ThemeButton from "@/components/ThemeButton.vue";
 
-const logoUrl = "/assets/quizzly/images/quizzly-logo.svg";
+import { brand, embedded, resolvedTheme } from "@/theme";
+const logoUrl = computed(() => (resolvedTheme.value === "dark" ? brand.value.logo_dark || brand.value.logo_light : brand.value.logo_light) || "/assets/quizzly/images/quizzly-logo.svg");
 
 const route = useRoute();
 const user = window.session_user;

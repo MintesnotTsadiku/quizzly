@@ -1,5 +1,5 @@
 <template>
-	<div class="flex h-full flex-col overflow-y-auto bg-night">
+	<div class="quizzly-catalog flex h-full flex-col overflow-y-auto bg-night">
 		<HostBar />
 		<div class="mx-auto w-full max-w-5xl flex-1 px-5 py-10 sm:px-8">
 			<header class="mb-10">

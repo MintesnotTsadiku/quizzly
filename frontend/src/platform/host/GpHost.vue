@@ -5,7 +5,7 @@
 		<!-- No session: pick a game, then set it up -->
 		<div
 			v-if="!session && !loading"
-			class="mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-8"
+			class="quizzly-host-setup mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-8"
 		>
 			<template v-if="!setupGame">
 				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">Host</p>

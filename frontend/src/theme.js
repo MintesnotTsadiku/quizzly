@@ -1,26 +1,63 @@
-import { ref, watch } from "vue";
+import { ref, watch } from 'vue'
+import { acceptsAppearance, channels, configurationTokens, TOKEN_MAP } from './appearance'
 
-const STORAGE_KEY = "quizzly-theme";
-const NEXT = { auto: "light", light: "dark", dark: "auto" };
+const STORAGE_KEY = 'church_management_system-theme'
+const NEXT = { auto: 'light', light: 'dark', dark: 'auto' }
+const root = document.documentElement
+export const embedded = window.parent !== window && new URLSearchParams(window.location.search).get('embed') === 'cms'
+export const resolvedTheme = ref('light')
+export const brand = ref({ short_name: 'Quizzly', logo_light: '/assets/quizzly/images/quizzly-logo.svg' })
+export const theme = ref(localStorage.getItem(STORAGE_KEY) === 'system' ? 'auto' : localStorage.getItem(STORAGE_KEY) || localStorage.getItem('quizzly-theme') || 'auto')
+let configuration = null
+let inherited = false
+const media = matchMedia('(prefers-color-scheme: dark)')
+if (embedded) root.dataset.embedded = 'cms'
 
-// "auto" leaves the attribute off entirely, so index.css falls through to
-// prefers-color-scheme. The other two pin it against the OS.
-export const theme = ref(localStorage.getItem(STORAGE_KEY) || "auto");
-
-export function cycleTheme() {
-	theme.value = NEXT[theme.value] || "auto";
+function apply(tokens, mode, branding) {
+  resolvedTheme.value = mode
+  root.dataset.theme = mode
+  root.style.colorScheme = mode
+  for (const [source,target] of Object.entries(TOKEN_MAP)) {
+    const color = channels(tokens?.[source])
+    if (color) root.style.setProperty(target, color)
+  }
+  root.dataset.sharedBranding = 'true'
+  if (branding?.short_name && typeof branding.short_name === 'string') brand.value = { ...branding, logo_light: branding.logo_light || '/assets/church_management_system/images/cms-member-icon.svg' }
 }
-
-watch(
-	theme,
-	(value) => {
-		if (value === "auto") {
-			localStorage.removeItem(STORAGE_KEY);
-			delete document.documentElement.dataset.theme;
-		} else {
-			localStorage.setItem(STORAGE_KEY, value);
-			document.documentElement.dataset.theme = value;
-		}
-	},
-	{ immediate: true }
-);
+function applyLocal() {
+  if (inherited) return
+  const mode = theme.value === 'auto' ? (media.matches ? 'dark' : 'light') : theme.value
+  resolvedTheme.value = mode
+  root.dataset.theme = mode
+  root.style.colorScheme = mode
+  if (configuration) apply(configurationTokens(configuration, mode), mode, configuration.branding)
+}
+export function cycleTheme() { if (!embedded) theme.value = NEXT[theme.value] || 'auto' }
+watch(theme, value => {
+  if (!embedded) localStorage.setItem(STORAGE_KEY, value === 'auto' ? 'system' : value)
+  applyLocal()
+}, { immediate: true })
+media.addEventListener('change', applyLocal)
+window.addEventListener('storage', event => {
+  if (!embedded && event.key === STORAGE_KEY) theme.value = event.newValue === 'system' ? 'auto' : event.newValue || 'auto'
+})
+if (embedded) {
+  window.addEventListener('message', event => {
+    if (!acceptsAppearance(event, window.parent, location.origin)) return
+    inherited = true
+    theme.value = event.data.mode
+    apply(event.data.tokens, event.data.mode, event.data.branding)
+    // Game copy currently remains English; do not mislabel it for screen readers.
+    root.lang = 'en'
+  })
+  window.parent.postMessage({ type: 'quizzly:ready', version: 1 }, location.origin)
+}
+// Standalone pages read the same backend-owned identity/theme if the provider exists.
+fetch('/api/method/quizzly.branding.get_application_branding')
+  .then(response => response.ok ? response.json() : null)
+  .then(payload => {
+    const config = payload?.message?.configuration
+    if (config?.theme?.brand && config?.theme?.surface && config?.theme?.semantic) {
+      configuration = config; applyLocal()
+    }
+  }).catch(() => { /* The independent Quizzly palette remains available. */ })
