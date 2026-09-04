@@ -14,7 +14,7 @@ import RoundHostLive from "./round_games/HostLive.vue";
 import RoundScreenLive from "./round_games/ScreenLive.vue";
 import RoundPlayerLive from "./round_games/PlayerLive.vue";
 
-const ROUND_KEYS = ["bluffline","sequence-sprint","picture-peek","sound-snap","caption-clash","story-loom","signal-spectrum","memory-mosaic","common-thread","escape-together","bracket-bash","closest-call","phrase-forge","seek-and-show","one-word-chorus"];
+const ROUND_KEYS = ["bluffline","sequence-sprint","picture-peek","sound-snap","caption-clash","story-loom","signal-spectrum","memory-mosaic","common-thread","escape-together","bracket-bash","closest-call","phrase-forge","seek-and-show","one-word-chorus","grid-conquest","dots-and-boxes","hidden-picture","path-weaver","quilt-puzzle","group-sudoku"];
 
 export const GAME_LIVE = {
 	cuecast: { HostLive: CueCastHostLive, ScreenLive: CueCastScreenLive, PlayerLive: CueCastPlayerLive },

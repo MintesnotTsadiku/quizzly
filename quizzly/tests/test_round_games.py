@@ -8,6 +8,7 @@ from quizzly.demo.seed import ROUND_DEMO_TITLES
 from quizzly.games import engine as gpe
 from quizzly.games import manifests
 from quizzly.games.api import (
+	ROUND_GAME_KEYS,
 	create_session,
 	get_host_state,
 	get_player_state,
@@ -16,6 +17,7 @@ from quizzly.games.api import (
 	start_session,
 	submit_action,
 )
+from quizzly.games.round_games.game import PROFILES
 
 
 class TestRoundGameCatalog(IntegrationTestCase):
@@ -43,6 +45,9 @@ class TestRoundGameCatalog(IntegrationTestCase):
 		self.assertTrue(set(ROUND_DEMO_TITLES).issubset(available))
 		for key in ROUND_DEMO_TITLES:
 			self.assertEqual(frappe.db.count("GP Game Pack", {"game_key": key, "is_demo": 1}), 3, key)
+
+	def test_every_round_profile_has_content_preview_metadata(self):
+		self.assertEqual(ROUND_GAME_KEYS, set(PROFILES))
 
 	def test_numeric_round_is_secret_scored_and_reconnectable(self):
 		pack = frappe.db.get_value("GP Game Pack", {"game_key": "closest-call", "is_demo": 1})

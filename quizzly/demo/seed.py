@@ -157,6 +157,12 @@ ROUND_DEMO_TITLES = {
 	"phrase-forge": ("Words of Encouragement", "Silly Sentence Factory", "Conference Phrase Forge"),
 	"seek-and-show": ("Service and Symbols Hunt", "Home or Hall Treasure Hunt", "Venue Team Quest"),
 	"one-word-chorus": ("People, Places, and Symbols", "Animals and Everyday Things", "One Word, Big Room"),
+	"grid-conquest": ("Connect the Story", "Family Grid Conquest", "Big Room Grid Battle"),
+	"dots-and-boxes": ("Community Squares", "Family Box Builders", "Assembly Territory"),
+	"hidden-picture": ("Symbols Revealed", "Family Hidden Pictures", "Big Screen Pixel Reveal"),
+	"path-weaver": ("Journey Paths", "Family Path Weaver", "Assembly Route Challenge"),
+	"quilt-puzzle": ("Patterns and Places", "Family Quilt Puzzle", "Big Room Pattern Lab"),
+	"group-sudoku": ("Symbol Sudoku", "Family Mini Sudoku", "Assembly Logic Grid"),
 }
 ROUND_MODES = {
 	"sequence-sprint": "order",
@@ -170,6 +176,12 @@ ROUND_MODES = {
 	"common-thread": "text",
 	"one-word-chorus": "text",
 	"phrase-forge": "order",
+	"grid-conquest": "choice",
+	"dots-and-boxes": "choice",
+	"hidden-picture": "choice",
+	"path-weaver": "choice",
+	"quilt-puzzle": "choice",
+	"group-sudoku": "choice",
 }
 ROUND_COUNTS = {
 	"bluffline": 12,
@@ -182,6 +194,12 @@ ROUND_COUNTS = {
 	"one-word-chorus": 24,
 	"escape-together": 6,
 	"bracket-bash": 8,
+	"grid-conquest": 4,
+	"dots-and-boxes": 4,
+	"hidden-picture": 4,
+	"path-weaver": 4,
+	"quilt-puzzle": 4,
+	"group-sudoku": 4,
 }
 AUDIENCE_TOPICS = {
 	"church-bible": [
@@ -279,6 +297,10 @@ def round_demo_items(game_key: str, title: str, audience: str) -> list[dict]:
 				}
 			)
 		elif mode == "choice":
+			puzzle = _puzzle_choice(game_key, number)
+			if puzzle:
+				rows.append({"prompt_text": prompt + puzzle[0], "choices": json.dumps(puzzle[1]), "answer": puzzle[2]})
+				continue
 			choices = [f"Observe {topic}", "Ask for a clue", "Work as a team", "Check every detail"]
 			rows.append(
 				{
@@ -304,3 +326,51 @@ def round_demo_items(game_key: str, title: str, audience: str) -> list[dict]:
 			}.get(game_key, "Create one concise clue")
 			rows.append({"prompt_text": prompt + f"{verb} inspired by '{topic}'.", "answer": topic})
 	return rows
+
+
+def _puzzle_choice(game_key: str, number: int):
+	"""Small simultaneous puzzles keep every person active in rooms of 4–100."""
+	variants = {
+		"grid-conquest": [
+			("X X · / O O · / · · · — where should X play to complete the top row?", ["Top right", "Middle right", "Bottom left", "Centre"], "Top right"),
+			("X O · / X O · / · · · — where should X play to complete the left column?", ["Bottom left", "Top right", "Bottom right", "Centre"], "Bottom left"),
+			("X O · / O X · / · · · — where should X play to complete the diagonal?", ["Bottom right", "Top right", "Bottom left", "Middle right"], "Bottom right"),
+			("O O · / X · · / X · · — where must X play to block O's top row?", ["Top right", "Centre", "Bottom right", "Middle right"], "Top right"),
+		],
+		"dots-and-boxes": [
+			("The highlighted box already has TOP, LEFT, and BOTTOM. Which missing edge claims it?", ["Top edge", "Right edge", "Bottom edge", "Left edge"], "Right edge"),
+			("The highlighted box already has TOP, RIGHT, and BOTTOM. Which missing edge claims it?", ["Left edge", "Right edge", "Bottom edge", "Top edge"], "Left edge"),
+			("The highlighted box already has LEFT, RIGHT, and BOTTOM. Which missing edge claims it?", ["Top edge", "Right edge", "Bottom edge", "Left edge"], "Top edge"),
+			("The highlighted box already has TOP, LEFT, and RIGHT. Which missing edge claims it?", ["Bottom edge", "Right edge", "Top edge", "Left edge"], "Bottom edge"),
+		],
+		"hidden-picture": [
+			("Row clue 3: which candidate has exactly one uninterrupted group of three filled cells?", ["■■■··", "■·■■·", "■■·■■", "·■·■·"], "■■■··"),
+			("Row clue 1,1: which candidate has two single filled cells separated by a gap?", ["■·■··", "■■···", "·■■··", "■■■··"], "■·■··"),
+			("Row clue 2: which candidate has exactly one uninterrupted group of two filled cells?", ["·■■··", "■·■··", "■■■··", "■·■■·"], "·■■··"),
+			("Row clue 2,1: which candidate has a pair followed later by one single filled cell?", ["■■·■·", "■■■··", "■·■■·", "·■■■·"], "■■·■·"),
+		],
+		"path-weaver": [
+			("Ahead is blocked, LEFT revisits a cell, RIGHT is open, and STOP misses the exit. Which move stays legal?", ["Turn left", "Turn right", "Continue straight", "Stop"], "Turn right"),
+			("RIGHT is blocked, STRAIGHT revisits a cell, LEFT is open toward the exit, and STOP is early. Choose the legal move.", ["Turn left", "Turn right", "Continue straight", "Stop"], "Turn left"),
+			("LEFT and RIGHT are blocked, STRAIGHT is open toward the checkpoint, and STOP is early. Choose the legal move.", ["Continue straight", "Turn right", "Turn left", "Stop"], "Continue straight"),
+			("The route has reached the exit; every movement option leaves the board. What is the valid action?", ["Stop", "Turn right", "Continue straight", "Turn left"], "Stop"),
+		],
+		"quilt-puzzle": [
+			("Complete the repeating pattern: circle, square, circle, square, ___.", ["Circle", "Square", "Triangle", "Diamond"], "Circle"),
+			("Complete the repeating pattern: triangle, triangle, diamond, triangle, triangle, ___.", ["Diamond", "Triangle", "Circle", "Square"], "Diamond"),
+			("Complete the repeating pattern: red, blue, green, red, blue, ___.", ["Green", "Red", "Blue", "Yellow"], "Green"),
+			("Complete the growing pattern: one dot, two dots, three dots, ___.", ["Four dots", "Two dots", "Five dots", "One dot"], "Four dots"),
+		],
+		"group-sudoku": [
+			("4×4 Sudoku: target row is 1, 2, _, 4; its column has 1, 2, 4. Which value fits?", ["1", "2", "3", "4"], "3"),
+			("4×4 Sudoku: target row is 4, _, 2, 1; its column has 1, 2, 4. Which value fits?", ["3", "1", "2", "4"], "3"),
+			("4×4 Sudoku: target row is _, 1, 4, 3; its column has 1, 3, 4. Which value fits?", ["2", "1", "3", "4"], "2"),
+			("4×4 Sudoku: target row is 3, 4, 1, _; its column has 1, 3, 4. Which value fits?", ["2", "4", "1", "3"], "2"),
+		],
+	}
+	game_variants = variants.get(game_key)
+	if not game_variants:
+		return None
+	base = game_variants[(number - 1) % len(game_variants)]
+	prompt, choices, answer = base
+	return prompt, choices, answer

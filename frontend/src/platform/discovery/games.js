@@ -188,6 +188,12 @@ const ROUND_GUIDES = {
 	"phrase-forge":["Words of Encouragement","Silly Sentence Factory","Conference Phrase Forge"],
 	"seek-and-show":["Service and Symbols Hunt","Home or Hall Treasure Hunt","Venue Team Quest"],
 	"one-word-chorus":["People, Places, and Symbols","Animals and Everyday Things","One Word, Big Room"],
+	"grid-conquest":["Connect the Story","Family Grid Conquest","Big Room Grid Battle"],
+	"dots-and-boxes":["Community Squares","Family Box Builders","Assembly Territory"],
+	"hidden-picture":["Symbols Revealed","Family Hidden Pictures","Big Screen Pixel Reveal"],
+	"path-weaver":["Journey Paths","Family Path Weaver","Assembly Route Challenge"],
+	"quilt-puzzle":["Patterns and Places","Family Quilt Puzzle","Big Room Pattern Lab"],
+	"group-sudoku":["Symbol Sudoku","Family Mini Sudoku","Assembly Logic Grid"],
 };
 const ROUND_COPY = {
 	bluffline:["Invent a believable false answer, then identify the truth while other players try to fool you.","Write one bluff, vote from an anonymous ballot that excludes your own answer, then score for finding truth and fooling the room."],
@@ -205,6 +211,12 @@ const ROUND_COPY = {
 	"phrase-forge":["Shuffled phrase tiles reward exact positions, correct neighbours, and a fully perfect order.","Tap every fragment into order, lock the complete phrase, then reveal its position, adjacency, and perfection score."],
 	"seek-and-show":["A safe creative mission invites each player to find something nearby and describe it concisely.","Read the mission, submit one text description, then share it at reveal and earn 250 points for a valid response."],
 	"one-word-chorus":["The current round asks every player to identify one word from the same complete clue prompt.","Read the clue, lock one private word, then earn 1,000 points for an exact normalized match."],
+	"grid-conquest":["A scalable connection puzzle turns classic line-making strategy into a simultaneous room challenge.","Read the board, choose the strongest move privately, then reveal the move that completes or protects the line."],
+	"dots-and-boxes":["Territory strategy becomes fast enough for a full room when everyone evaluates the same position at once.","Inspect the highlighted box, lock the best line, then reveal which edge claims or protects it."],
+	"hidden-picture":["Compact nonogram-style clues turn cell-pattern deduction into a simultaneous room challenge.","Read the row clue, choose the only matching cell pattern, then reveal the correct pattern."],
+	"path-weaver":["Constrained next-move puzzles reward spatial reasoning without making a large room wait through individual turns.","Read the stated route constraints, choose the next valid action, then reveal whether the move stays legal."],
+	"quilt-puzzle":["Repeating visual sequences turn pattern recognition into a shared-screen challenge.","Study the sequence, choose the patch that completes it, then compare it with the revealed answer."],
+	"group-sudoku":["Short missing-cell Sudoku decisions keep everyone solving simultaneously.","Check the row, column, and region, lock the missing symbol, then reveal the valid choice."],
 };
 for (const [key,titles] of Object.entries(ROUND_GUIDES)) {
 	const title=key.split("-").map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");

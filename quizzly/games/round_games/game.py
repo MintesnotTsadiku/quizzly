@@ -142,6 +142,54 @@ PROFILES = {
 		3,
 		100,
 	),
+	"grid-conquest": (
+		"Grid Conquest",
+		"Read the board and choose the strongest move to complete or protect the winning line.",
+		"choice",
+		("grid", "strategy", "connection"),
+		4,
+		100,
+	),
+	"dots-and-boxes": (
+		"Dots and Boxes",
+		"Find the line that completes or protects the most valuable box.",
+		"choice",
+		("grid", "territory", "strategy"),
+		4,
+		100,
+	),
+	"hidden-picture": (
+		"Hidden Picture",
+		"Use a row clue to identify the one cell pattern that satisfies it.",
+		"choice",
+		("nonogram", "image", "deduction"),
+		4,
+		100,
+	),
+	"path-weaver": (
+		"Path Weaver",
+		"Use the stated route constraints to choose the next valid move.",
+		"choice",
+		("path", "logic", "strategy"),
+		4,
+		100,
+	),
+	"quilt-puzzle": (
+		"Quilt Puzzle",
+		"Inspect a visual sequence and choose the patch that completes its pattern.",
+		"choice",
+		("spatial", "pattern", "deduction"),
+		4,
+		100,
+	),
+	"group-sudoku": (
+		"Group Sudoku",
+		"Find the missing symbol that keeps every row, column, and region valid.",
+		"choice",
+		("sudoku", "logic", "group"),
+		4,
+		100,
+	),
 }
 VOTE_GAMES = {"bluffline", "caption-clash", "story-loom"}
 
@@ -528,3 +576,9 @@ ClosestCallGame = _class("ClosestCallGame", "closest-call")
 PhraseForgeGame = _class("PhraseForgeGame", "phrase-forge")
 SeekAndShowGame = _class("SeekAndShowGame", "seek-and-show")
 OneWordChorusGame = _class("OneWordChorusGame", "one-word-chorus")
+GridConquestGame = _class("GridConquestGame", "grid-conquest")
+DotsAndBoxesGame = _class("DotsAndBoxesGame", "dots-and-boxes")
+HiddenPictureGame = _class("HiddenPictureGame", "hidden-picture")
+PathWeaverGame = _class("PathWeaverGame", "path-weaver")
+QuiltPuzzleGame = _class("QuiltPuzzleGame", "quilt-puzzle")
+GroupSudokuGame = _class("GroupSudokuGame", "group-sudoku")

@@ -17,6 +17,7 @@ from frappe.utils import now_datetime, strip_html_tags
 from quizzly.api import generate_game_pin, hash_token
 from quizzly.games import GameContext, get_game_module
 from quizzly.games import engine as gpe
+from quizzly.games.round_games.game import PROFILES as ROUND_GAME_PROFILES
 from quizzly.profanity import is_profane
 
 NICKNAME_MAX_LENGTH = 20
@@ -78,23 +79,7 @@ CONTENT_PREVIEWS = {
 	},
 }
 
-ROUND_GAME_KEYS = {
-	"bluffline",
-	"sequence-sprint",
-	"picture-peek",
-	"sound-snap",
-	"caption-clash",
-	"story-loom",
-	"signal-spectrum",
-	"memory-mosaic",
-	"common-thread",
-	"escape-together",
-	"bracket-bash",
-	"closest-call",
-	"phrase-forge",
-	"seek-and-show",
-	"one-word-chorus",
-}
+ROUND_GAME_KEYS = set(ROUND_GAME_PROFILES)
 for _game_key in ROUND_GAME_KEYS:
 	CONTENT_PREVIEWS[_game_key] = {
 		"pack_doctype": "GP Game Pack",
