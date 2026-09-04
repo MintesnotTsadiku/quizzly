@@ -40,7 +40,7 @@ PROFILES = {
 	),
 	"picture-peek": (
 		"Picture Peek",
-		"Identify the hidden picture before the final reveal.",
+		"Study the projected picture and identify it with one private answer.",
 		"text",
 		("image", "guessing"),
 		1,
@@ -48,9 +48,9 @@ PROFILES = {
 	),
 	"sound-snap": (
 		"Sound Snap",
-		"Listen closely and identify each sound with as few clues as possible.",
+		"Read a short sound-related clue and identify it from the displayed choices.",
 		"choice",
-		("audio", "quiz"),
+		("sound-clues", "quiz"),
 		1,
 		100,
 	),
@@ -64,7 +64,7 @@ PROFILES = {
 	),
 	"story-loom": (
 		"Story Loom",
-		"Add a constrained continuation and weave one shared story.",
+		"Write a constrained continuation and win votes from the room.",
 		"creative",
 		("story", "cooperative"),
 		3,
@@ -80,7 +80,7 @@ PROFILES = {
 	),
 	"memory-mosaic": (
 		"Memory Mosaic",
-		"Study the scene, then prove what you remember.",
+		"Study the scene and answer one multiple-choice detail question.",
 		"choice",
 		("memory", "image"),
 		1,
@@ -88,7 +88,7 @@ PROFILES = {
 	),
 	"common-thread": (
 		"Common Thread",
-		"Find the connection that links every clue.",
+		"Read the complete clue set and name the connection.",
 		"text",
 		("word", "cooperative"),
 		1,
@@ -96,7 +96,7 @@ PROFILES = {
 	),
 	"escape-together": (
 		"Escape Together",
-		"Solve each stage as a room and unlock the finale.",
+		"Solve one multiple-choice puzzle in each timed round.",
 		"choice",
 		("puzzle", "cooperative"),
 		2,
@@ -104,7 +104,7 @@ PROFILES = {
 	),
 	"bracket-bash": (
 		"Bracket Bash",
-		"Vote through head-to-head matchups until one champion remains.",
+		"Choose the predefined winner for each matchup-style prompt.",
 		"choice",
 		("voting", "tournament"),
 		2,
@@ -112,7 +112,7 @@ PROFILES = {
 	),
 	"closest-call": (
 		"Closest Call",
-		"Make the nearest estimate without going over—or missing by much.",
+		"Make the single nearest estimate by absolute distance from the target.",
 		"number",
 		("estimation", "duel"),
 		2,
@@ -128,7 +128,7 @@ PROFILES = {
 	),
 	"seek-and-show": (
 		"Seek & Show",
-		"Complete a safe room mission and share what your team found.",
+		"Complete a safe room mission and submit one concise text description.",
 		"creative",
 		("mission", "teams"),
 		2,
@@ -136,7 +136,7 @@ PROFILES = {
 	),
 	"one-word-chorus": (
 		"One Word Chorus",
-		"Give one legal clue and help the guesser find the secret.",
+		"Read the complete clue prompt and lock one exact word.",
 		"text",
 		("word", "teams"),
 		3,

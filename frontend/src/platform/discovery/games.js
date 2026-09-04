@@ -191,20 +191,20 @@ const ROUND_GUIDES = {
 };
 const ROUND_COPY = {
 	bluffline:["Invent a believable false answer, then identify the truth while other players try to fool you.","Write one bluff, vote from an anonymous ballot that excludes your own answer, then score for finding truth and fooling the room."],
-	"sequence-sprint":["Ordering every card creates a collaborative race where exact positions, correct neighbours, and speed matter.","Tap the shuffled cards into order, lock the complete sequence, then compare it with the animated solution."],
-	"picture-peek":["A hidden image becomes easier to recognize over time, so every extra clue trades certainty for fewer points.","Study each reveal stage, submit one private guess, and earn the most by recognizing the image early."],
-	"sound-snap":["A short audio cue changes the room's rhythm and rewards careful listening with as few replays as possible.","Listen to the cue, choose what made the sound, and lock before the accessible answer reveal."],
+	"sequence-sprint":["Ordering every card rewards exact positions, correct neighbours, and a fully perfect sequence.","Tap the shuffled cards into order, lock the complete sequence, then compare it with the revealed solution."],
+	"picture-peek":["A projected image tests careful observation through one private text response.","Study the picture and question, submit one answer, then compare it with the reveal for a 1,000-point exact match."],
+	"sound-snap":["A short sound-related text clue becomes a multiple-choice challenge.","Read the clue, lock one displayed choice, then earn 1,000 points if it matches the revealed answer."],
 	"caption-clash":["Everyone writes for the same image, then the room anonymously decides which wholesome caption lands best.","Submit one caption, wait for the anonymous ballot, vote for someone else, and reveal the author and winner."],
-	"story-loom":["Each continuation changes a shared story, while constraints and room voting keep every branch surprising.","Write one constrained continuation, vote on the next branch, and watch the winning sentence join the story."],
+	"story-loom":["One shared opening produces many constrained continuations for the room to compare anonymously.","Write one continuation, vote for another player's line, then earn a 250-point base plus 500 for every vote received."],
 	"signal-spectrum":["Each player submits one estimate from 0 to 100. The game compares every estimate with a hidden target, and closer answers earn more points.","Read the prompt on the big screen, type one estimate from 0 to 100, lock it before time runs out, then see the updated score after the distance is checked."],
-	"memory-mosaic":["The room studies a scene before it disappears, turning shared attention—not specialist knowledge—into points.","Study every detail, wait for concealment, answer the memory question privately, and inspect the annotated reveal."],
-	"common-thread":["Clues arrive one at a time and the connection is worth more before the obvious final clue appears.","Read each new clue, submit the common link as soon as you see it, and recover after a wrong attempt on the next clue."],
-	"escape-together":["Teams solve a recoverable chain of puzzles, balancing speed against hint and incorrect-attempt penalties.","Solve the current stage together, request a hint only when needed, unlock the next node, and finish the final code."],
-	"bracket-bash":["Every two-choice vote advances one nominee through a visible knockout bracket until the room crowns a champion.","Vote in each matchup, watch ties resolve by the host policy, and follow the winner through the bracket."],
-	"closest-call":["Two estimates get a dramatic stage reveal: the smaller distance to the verified answer wins the duel.","Enter one numeric estimate, lock simultaneously, compare distance to truth, and win the best-of duel or bracket."],
-	"phrase-forge":["Shuffled phrase tiles turn recall and reasoning into a race, with partial ordering still visible as progress.","Tap every fragment into order, lock the complete phrase, then read its explanation and context."],
-	"seek-and-show":["Safe physical-world missions get teams moving, but nothing reaches the projector before host approval.","Complete the bounded venue mission, submit proof, wait for moderation, and earn completion, creativity, and speed points."],
-	"one-word-chorus":["Clue-givers must anticipate one another: duplicate clues cancel before the guesser receives one decisive attempt.","Submit one legal word, watch duplicates disappear, then let the designated guesser use the surviving clues once."],
+	"memory-mosaic":["A detailed projected scene turns careful observation into one multiple-choice challenge.","Inspect the scene with its question and choices, lock one answer, then earn 1,000 points for the correct choice."],
+	"common-thread":["The full clue set appears together and challenges everyone to name one connecting word.","Read all clues, lock one text response, then earn 1,000 points for an exact normalized match."],
+	"escape-together":["Each current round presents one puzzle with a predefined multiple-choice solution.","Read the puzzle, lock one choice, then earn 1,000 points if it matches the revealed answer."],
+	"bracket-bash":["Current play presents a matchup-style prompt with predefined choices and scores each round individually.","Choose the contender that matches the prompt, lock once, then earn 1,000 points for the predefined answer."],
+	"closest-call":["Everyone submits a number and the single smallest absolute distance from the target wins.","Enter one numeric estimate, lock before time runs out, then reveal the target; the nearest estimate earns 1,000 points."],
+	"phrase-forge":["Shuffled phrase tiles reward exact positions, correct neighbours, and a fully perfect order.","Tap every fragment into order, lock the complete phrase, then reveal its position, adjacency, and perfection score."],
+	"seek-and-show":["A safe creative mission invites each player to find something nearby and describe it concisely.","Read the mission, submit one text description, then share it at reveal and earn 250 points for a valid response."],
+	"one-word-chorus":["The current round asks every player to identify one word from the same complete clue prompt.","Read the clue, lock one private word, then earn 1,000 points for an exact normalized match."],
 };
 for (const [key,titles] of Object.entries(ROUND_GUIDES)) {
 	const title=key.split("-").map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");

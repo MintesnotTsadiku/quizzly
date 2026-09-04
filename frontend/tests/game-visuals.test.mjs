@@ -3,6 +3,32 @@ import assert from "node:assert/strict";
 import { access } from "node:fs/promises";
 import { GAME_VISUALS, visualFor } from "../src/platform/discovery/gameVisuals.js";
 
+const SHIPPED_GAME_KEYS = [
+	"bluffline",
+	"bracket-bash",
+	"caption-clash",
+	"closest-call",
+	"common-thread",
+	"crowd-compass",
+	"cuecast",
+	"doodle-dash",
+	"escape-together",
+	"memory-mosaic",
+	"one-word-chorus",
+	"phrase-forge",
+	"picture-peek",
+	"quiz",
+	"seek-and-show",
+	"sequence-sprint",
+	"signal-spectrum",
+	"sound-snap",
+	"story-loom",
+];
+
+test("every shipped game has a visual guide", () => {
+	assert.deepEqual(Object.keys(GAME_VISUALS).sort(), SHIPPED_GAME_KEYS);
+});
+
 test("shipped game visuals provide a hero and a worked example", async () => {
 	for (const [key, visual] of Object.entries(GAME_VISUALS)) {
 		assert.match(visual.hero, new RegExp(`/games/${key}/how-to\\.webp$`));
@@ -20,6 +46,6 @@ test("shipped game visuals provide a hero and a worked example", async () => {
 });
 
 test("games without shipped visuals keep the existing detail page", () => {
-	assert.equal(visualFor("quiz"), null);
+	assert.equal(visualFor("not-a-real-game"), null);
 	assert.equal(visualFor(), null);
 });
