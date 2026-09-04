@@ -196,7 +196,7 @@ const ROUND_COPY = {
 	"sound-snap":["A short audio cue changes the room's rhythm and rewards careful listening with as few replays as possible.","Listen to the cue, choose what made the sound, and lock before the accessible answer reveal."],
 	"caption-clash":["Everyone writes for the same image, then the room anonymously decides which wholesome caption lands best.","Submit one caption, wait for the anonymous ballot, vote for someone else, and reveal the author and winner."],
 	"story-loom":["Each continuation changes a shared story, while constraints and room voting keep every branch surprising.","Write one constrained continuation, vote on the next branch, and watch the winning sentence join the story."],
-	"signal-spectrum":["A clue-giver knows a hidden point between two opposites; teammates must interpret the clue and place the marker nearby.","Read the two ends of the scale, discuss one clue, lock a 0–100 marker, then reveal the target and distance band."],
+	"signal-spectrum":["Each player submits one estimate from 0 to 100. The game compares every estimate with a hidden target, and closer answers earn more points.","Read the prompt on the big screen, type one estimate from 0 to 100, lock it before time runs out, then see the updated score after the distance is checked."],
 	"memory-mosaic":["The room studies a scene before it disappears, turning shared attention—not specialist knowledge—into points.","Study every detail, wait for concealment, answer the memory question privately, and inspect the annotated reveal."],
 	"common-thread":["Clues arrive one at a time and the connection is worth more before the obvious final clue appears.","Read each new clue, submit the common link as soon as you see it, and recover after a wrong attempt on the next clue."],
 	"escape-together":["Teams solve a recoverable chain of puzzles, balancing speed against hint and incorrect-attempt penalties.","Solve the current stage together, request a hint only when needed, unlock the next node, and finish the final code."],
@@ -211,6 +211,14 @@ for (const [key,titles] of Object.entries(ROUND_GUIDES)) {
 	const [whyGame,how]=ROUND_COPY[key];
 	GUIDES[key]={contentKey:"pack",whyGame,howTo:["Join the room from your phone.",...how.split(", "),"Continue through the shared reveal and final podium."],hostDoes:"Chooses a themed pack and timing, starts the room, reviews participation, and uses Previous, Next, Pause, or Resume without reopening submissions.",playerSees:"A private response control tailored to this mechanic, a locked confirmation, reveal, score, and rank.",roomSees:`A presentation-safe ${title} stage with participation, timer, reveal, standings, and final podium.`,scoring:"All validation and scoring happen on the server from accepted, idempotent actions; reconnecting restores the same authoritative state.",setup:"One shared screen plus a phone per player. Works responsively in a family room or a large assembly.",accessibility:"Text labels accompany every control; keyboard input, numeric timers, reduced motion, and high contrast are supported.",demos:titles.map((demoTitle,index)=>({demo_key:`${key}-${["church-bible","family-general","big-room"][index]}`,title:demoTitle,blurb:`A ready-to-play ${demoTitle} experience.`,audience:["Church / Bible","Child / Family","General Assembly"][index],...(index===2?{video:`/assets/quizzly/videos/gatherplay/${key}-overview.mp4`,poster:`/assets/quizzly/videos/gatherplay/${key}-overview-poster.jpg`}:{})}))};
 }
+Object.assign(GUIDES["signal-spectrum"], {
+	playerSees:
+		"The prompt, a number field for the 0–100 estimate, a locked confirmation, the round reveal message, and updated standings.",
+	roomSees:
+		"The prompt, response count, timer, round reveal message, and updated scoreboard.",
+	scoring:
+		"A marker within 3 points of the target earns 1,000; within 7 earns 750; within 12 earns 500; within 20 earns 250; farther away earns 0.",
+});
 
 export function guideFor(key) {
 	return GUIDES[key] || GUIDES.quiz;

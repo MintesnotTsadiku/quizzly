@@ -35,6 +35,12 @@
 				</div>
 			</header>
 
+			<GameVisualGuide
+				v-if="gameVisual"
+				:game-title="game.title"
+				:visual="gameVisual"
+			/>
+
 			<section
 				class="mt-7 overflow-hidden rounded-3xl border border-lagoon/25 bg-lagoon/[0.06]"
 			>
@@ -341,9 +347,11 @@
 import { computed, nextTick, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import HostBar from "@/components/HostBar.vue";
+import GameVisualGuide from "@/platform/discovery/GameVisualGuide.vue";
 import PackPicker from "@/platform/discovery/PackPicker.vue";
 import PackPreviewDrawer from "@/platform/discovery/PackPreviewDrawer.vue";
 import PremiumToggle from "@/platform/discovery/PremiumToggle.vue";
+import { visualFor } from "@/platform/discovery/gameVisuals";
 import { guideFor } from "@/platform/discovery/games";
 import { gpCall, rememberHostedSession } from "@/platform/session/gp";
 
@@ -358,6 +366,7 @@ const selectedVideo = ref(null);
 const videoSection = ref(null);
 const previewPack = ref(null);
 const error = ref("");
+const gameVisual = computed(() => visualFor(game.value?.key));
 const setup = ref({
 	deck: "",
 	seconds: 60,
