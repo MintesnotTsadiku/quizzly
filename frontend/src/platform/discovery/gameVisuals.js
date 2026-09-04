@@ -32,6 +32,35 @@ const GAME_VISUALS = {
 			"They earn 900, 800, and 600 points; Hana earns a 150-point artist bonus.",
 		],
 	},
+	"crowd-compass": {
+		hero: `${ASSET_ROOT}/crowd-compass/how-to.webp`,
+		example: `${ASSET_ROOT}/crowd-compass/example-round.webp`,
+		exampleAlt:
+			"Worked default-mode Crowd Compass round with 20 players: popcorn wins 50 percent of the vote and Mimi earns 500 points for predicting popcorn plus 100 because her own vote matches the room, for 600 total.",
+		summary:
+			"First choose honestly for yourself. Then predict the room's most popular answer before any results are revealed; percentage estimation is an optional host setting.",
+		steps: [
+			{
+				title: "Vote for you",
+				detail: "Privately choose the answer that fits you while the room's distribution stays hidden.",
+			},
+			{
+				title: "Predict the room",
+				detail: "Pick the answer you think will be most popular; optionally estimate its percentage.",
+			},
+			{
+				title: "Reveal and score",
+				detail: "See the full distribution; accurate predictions and percentage estimates earn points.",
+			},
+		],
+		exampleSummary:
+			"This default-mode example separates Mimi's honest personal vote from her prediction. The result stays hidden until the timed voting and prediction stages end.",
+		exampleSteps: [
+			"Mimi chooses popcorn for herself, then separately predicts that popcorn will be the room's most popular snack.",
+			"Among 20 players, popcorn receives 10 votes, so its actual share is 50 percent.",
+			"Mimi earns 500 points for the prediction and 100 because her own vote matches the room: 600 total.",
+		],
+	},
 	"signal-spectrum": {
 		hero: `${ASSET_ROOT}/signal-spectrum/how-to.webp`,
 		example: `${ASSET_ROOT}/signal-spectrum/example-round.webp`,
