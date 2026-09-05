@@ -1,12 +1,93 @@
 {
- "actions":[],"autoname":"format:GPG-{YYYY}-{#####}","creation":"2026-08-26 00:00:00","doctype":"DocType","engine":"InnoDB",
- "field_order":["title","game_key","description","is_demo","demo_key","items"],"fields":[
-  {"fieldname":"title","fieldtype":"Data","label":"Title","reqd":1,"in_list_view":1},
-  {"fieldname":"game_key","fieldtype":"Data","label":"Game","reqd":1,"in_list_view":1},
-  {"fieldname":"description","fieldtype":"Small Text","label":"Description"},
-  {"default":"0","fieldname":"is_demo","fieldtype":"Check","label":"Is Demo","read_only":1},
-  {"fieldname":"demo_key","fieldtype":"Data","label":"Demo Key","read_only":1,"unique":1},
-  {"fieldname":"items","fieldtype":"Table","label":"Rounds","options":"GP Game Item","reqd":1}
- ],"links":[],"modified":"2026-08-26 00:00:00","modified_by":"Administrator","module":"Quizzly","name":"GP Game Pack","naming_rule":"Expression","owner":"Administrator",
- "permissions":[{"create":1,"delete":1,"read":1,"write":1,"role":"System Manager"},{"create":1,"delete":1,"if_owner":1,"read":1,"write":1,"role":"Quiz Host"}],"sort_field":"modified","sort_order":"DESC","states":[]
+ "actions": [],
+ "autoname": "format:GPG-{YYYY}-{#####}",
+ "creation": "2026-08-26 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "game_key",
+  "description",
+  "is_demo",
+  "demo_key",
+  "items",
+  "gatherplay_access"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "game_key",
+   "fieldtype": "Data",
+   "label": "Game",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_demo",
+   "fieldtype": "Check",
+   "label": "Is Demo",
+   "read_only": 1
+  },
+  {
+   "fieldname": "demo_key",
+   "fieldtype": "Data",
+   "label": "Demo Key",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Rounds",
+   "options": "GP Game Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gatherplay_access",
+   "fieldtype": "Link",
+   "label": "GatherPlay Access",
+   "options": "GatherPlay Access",
+   "read_only": 1,
+   "hidden": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-08-26 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Quizzly",
+ "name": "GP Game Pack",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "write": 1,
+   "role": "System Manager"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "if_owner": 1,
+   "read": 1,
+   "write": 1,
+   "role": "Quiz Host"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
 }

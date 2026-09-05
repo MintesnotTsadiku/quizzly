@@ -1,0 +1,112 @@
+{
+  "doctype": "DocType",
+  "name": "GatherPlay Access",
+  "module": "Quizzly",
+  "engine": "InnoDB",
+  "issingle": 0,
+  "autoname": "hash",
+  "track_changes": 1,
+  "field_order": [
+    "principal",
+    "user",
+    "guest_expires",
+    "email_verified",
+    "verified_address",
+    "verification_hash",
+    "verification_expires",
+    "period",
+    "hosts_used",
+    "packs_used",
+    "trial_hosts",
+    "trial_packs"
+  ],
+  "fields": [
+    {
+      "fieldname": "principal",
+      "fieldtype": "Data",
+      "label": "Principal",
+      "unique": 1,
+      "reqd": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "user",
+      "fieldtype": "Link",
+      "label": "Account",
+      "options": "User",
+      "read_only": 1
+    },
+    {
+      "fieldname": "guest_expires",
+      "fieldtype": "Datetime",
+      "label": "Trial expiry",
+      "read_only": 1
+    },
+    {
+      "fieldname": "email_verified",
+      "fieldtype": "Check",
+      "label": "Email verified",
+      "read_only": 1
+    },
+    {
+      "fieldname": "verified_address",
+      "fieldtype": "Data",
+      "label": "Verified email",
+      "read_only": 1
+    },
+    {
+      "fieldname": "verification_hash",
+      "fieldtype": "Data",
+      "label": "Verification digest",
+      "hidden": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "verification_expires",
+      "fieldtype": "Datetime",
+      "label": "Verification expiry",
+      "read_only": 1
+    },
+    {
+      "fieldname": "period",
+      "fieldtype": "Data",
+      "label": "Usage month",
+      "read_only": 1
+    },
+    {
+      "fieldname": "hosts_used",
+      "fieldtype": "Int",
+      "label": "Games this month",
+      "read_only": 1
+    },
+    {
+      "fieldname": "packs_used",
+      "fieldtype": "Int",
+      "label": "Packs this month",
+      "read_only": 1
+    },
+    {
+      "fieldname": "trial_hosts",
+      "fieldtype": "Int",
+      "label": "Trial games",
+      "read_only": 1
+    },
+    {
+      "fieldname": "trial_packs",
+      "fieldtype": "Int",
+      "label": "Trial packs",
+      "read_only": 1
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 0
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC"
+}

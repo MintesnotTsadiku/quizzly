@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": [
+    "Guest quota is enforced by document creation, with two durable sessions",
+    "Direct document creation cannot bypass the guest quota",
+    "Account claim transfers ownership and retains consumed trial allowance; unverified hosting is denied",
+    "Email verification is account-bound, single-use and required before unlimited community access",
+    "Private receipt grants expiring provisional access on paid sites",
+    "Rejection removes paid hosting entitlement while retaining control of an existing game",
+    "Admin approval restores access and records the reviewer",
+    "Claimed guest capability cannot access the account's games or packs"
+  ]
+}

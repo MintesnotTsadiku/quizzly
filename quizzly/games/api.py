@@ -14,6 +14,7 @@ from frappe import _
 from frappe.rate_limiter import rate_limit
 from frappe.utils import now_datetime, strip_html_tags
 
+from quizzly import access
 from quizzly.api import generate_game_pin, hash_token
 from quizzly.games import GameContext, get_game_module
 from quizzly.games import engine as gpe
@@ -137,6 +138,12 @@ def list_public_decks(game_key: str | None = None) -> list[dict]:
 @frappe.whitelist(methods=["POST"])
 def create_session(game_key: str, configuration: dict | str | None = None) -> dict:
 	configuration = as_dict(configuration)
+	if game_key == "quiz":
+		frappe.throw("Use the quiz hosting flow for this format.")
+	preview = CONTENT_PREVIEWS.get(game_key)
+	pack = configuration.get("pack") or configuration.get("deck")
+	if preview and pack:
+		access.check_pack(preview["pack_doctype"], pack)
 	module = get_game_module(game_key)
 	ctx = GameContext(session="", pin="", game_key=game_key, configuration=configuration)
 	normalized = module.validate_configuration(ctx, configuration)
@@ -154,7 +161,7 @@ def create_session(game_key: str, configuration: dict | str | None = None) -> di
 			"status": "Lobby",
 			"configuration": normalized,
 		}
-	).insert()
+	).insert(ignore_permissions=True)
 	return {"session": session_doc.name, "game_pin": session_doc.game_pin}
 
 
@@ -334,6 +341,7 @@ def end_session(session: str) -> dict:
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
+	access.check_join()
 	session_doc = get_session_by_pin(pin)
 	if "host_only" in get_game_module(session_doc.game_key).manifest.capabilities:
 		frappe.throw(_("This game is played in the room. No player device or online join is needed."))
@@ -516,9 +524,7 @@ def leave_session(pin: str, token: str) -> None:
 
 def get_host_session(session: str):
 	doc = frappe.get_doc("GP Session", session)
-	if doc.host != frappe.session.user:
-		frappe.throw(_("You are not the host of this session"), frappe.PermissionError)
-	return doc
+	return access.authorize_host(doc)
 
 
 def as_dict(value: dict | str | None) -> dict:
@@ -536,7 +542,7 @@ def as_dict(value: dict | str | None) -> dict:
 def get_live_host_session():
 	names = frappe.get_all(
 		"GP Session",
-		filters={"host": frappe.session.user, "status": ("in", ("Lobby", "Active"))},
+		filters={**access.host_filters(), "status": ("in", ("Lobby", "Active"))},
 		pluck="name",
 		order_by="creation desc",
 	)

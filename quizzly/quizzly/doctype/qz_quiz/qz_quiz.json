@@ -15,7 +15,8 @@
   "show_host_controls",
   "is_demo",
   "demo_key",
-  "questions"
+  "questions",
+  "gatherplay_access"
  ],
  "fields": [
   {
@@ -88,6 +89,14 @@
    "label": "Questions",
    "options": "QZ Question",
    "reqd": 1
+  },
+  {
+   "fieldname": "gatherplay_access",
+   "fieldtype": "Link",
+   "label": "GatherPlay Access",
+   "options": "GatherPlay Access",
+   "read_only": 1,
+   "hidden": 1
   }
  ],
  "links": [],

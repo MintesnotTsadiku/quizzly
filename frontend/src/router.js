@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { redirectGuestToLogin } from "@/auth";
+import { site } from "@/platform/site";
+import { embedded } from "@/theme";
 
 // /play is the single product entry. The original quiz remains a first-class
 // game, namespaced below it so its established screens keep stable route names.
@@ -24,10 +26,33 @@ const quizRoutes = [
 ];
 
 const platformRoutes = [
-	{ path: "/room/:session", name: "RoomHost", component: () => import("@/platform/room/RoomStage.vue") },
-	{ path: "/room-screen/:pin", name: "RoomScreen", component: () => import("@/platform/room/RoomStage.vue") },
 	{
 		path: "/",
+		name: "Landing",
+		component: () => import("@/platform/discovery/LandingPage.vue"),
+	},
+	{
+		path: "/access",
+		name: "Access",
+		component: () => import("@/platform/access/AccessPage.vue"),
+	},
+	{
+		path: "/create",
+		name: "CreatePack",
+		component: () => import("@/platform/access/CreatePack.vue"),
+	},
+	{
+		path: "/room/:session",
+		name: "RoomHost",
+		component: () => import("@/platform/room/RoomStage.vue"),
+	},
+	{
+		path: "/room-screen/:pin",
+		name: "RoomScreen",
+		component: () => import("@/platform/room/RoomStage.vue"),
+	},
+	{
+		path: "/explore",
 		name: "Catalog",
 		component: () => import("@/platform/discovery/CatalogHome.vue"),
 	},
@@ -75,12 +100,20 @@ const router = createRouter({
 	routes,
 });
 
-// Hosting needs a real user; guests would otherwise land on an empty host screen.
+// Server policy authorizes trial hosting; administration still requires sign-in.
 router.beforeEach((to) => {
+	if (to.name === "Landing" && embedded) return { name: "Catalog", query: to.query };
+	if (["RoomHost", "GpHost", "Host"].includes(to.name) && site.allow_guest_host) return;
 	if (
-		["RoomHost", "GpHost", "HostDashboard", "CrowdPackEditor", "Host", "Quizzes", "QuizEditor"].includes(
-			to.name
-		) &&
+		[
+			"RoomHost",
+			"GpHost",
+			"HostDashboard",
+			"CrowdPackEditor",
+			"Host",
+			"Quizzes",
+			"QuizEditor",
+		].includes(to.name) &&
 		redirectGuestToLogin(`${BASE}${to.fullPath}`)
 	) {
 		return false;

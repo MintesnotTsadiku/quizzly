@@ -4,7 +4,14 @@
  "creation": "2026-08-25 12:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
- "field_order": ["title", "ranked", "is_demo", "demo_key", "prompts"],
+ "field_order": [
+  "title",
+  "ranked",
+  "is_demo",
+  "demo_key",
+  "prompts",
+  "gatherplay_access"
+ ],
  "fields": [
   {
    "fieldname": "title",
@@ -39,6 +46,14 @@
    "label": "Prompts",
    "options": "GP Crowd Prompt",
    "reqd": 1
+  },
+  {
+   "fieldname": "gatherplay_access",
+   "fieldtype": "Link",
+   "label": "GatherPlay Access",
+   "options": "GatherPlay Access",
+   "read_only": 1,
+   "hidden": 1
   }
  ],
  "index_web_pages_for_search": 1,

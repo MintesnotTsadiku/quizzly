@@ -1,0 +1,233 @@
+{
+  "doctype": "DocType",
+  "name": "GatherPlay Settings",
+  "module": "Quizzly",
+  "engine": "InnoDB",
+  "issingle": 1,
+  "track_changes": 1,
+  "field_order": [
+    "branding_section",
+    "product_name",
+    "tagline",
+    "intro",
+    "accent_color",
+    "logo",
+    "enable_install",
+    "access_section",
+    "access_mode",
+    "allow_guest_join",
+    "allow_guest_host",
+    "allow_guest_create",
+    "guest_host_limit",
+    "guest_pack_limit",
+    "guest_days",
+    "require_verified_email",
+    "trust_existing_hosts",
+    "member_host_limit",
+    "member_pack_limit",
+    "payment_section",
+    "plan_name",
+    "price",
+    "currency",
+    "payment_instructions",
+    "paid_host_limit",
+    "paid_pack_limit",
+    "plan_days",
+    "optimistic_approval",
+    "provisional_days",
+    "payment_help"
+  ],
+  "fields": [
+    {
+      "fieldname": "branding_section",
+      "fieldtype": "Section Break",
+      "label": "Identity"
+    },
+    {
+      "fieldname": "product_name",
+      "fieldtype": "Data",
+      "label": "Product name",
+      "default": "GatherPlay",
+      "reqd": 1
+    },
+    {
+      "fieldname": "tagline",
+      "fieldtype": "Data",
+      "label": "Tagline",
+      "default": "Good company. Great games."
+    },
+    {
+      "fieldname": "intro",
+      "fieldtype": "Small Text",
+      "label": "Landing introduction",
+      "default": "Turn spare moments into shared memories. Games for your people, your place, your kind of fun."
+    },
+    {
+      "fieldname": "accent_color",
+      "fieldtype": "Color",
+      "label": "Accent color",
+      "default": "#6743b5"
+    },
+    {
+      "fieldname": "logo",
+      "fieldtype": "Attach Image",
+      "label": "Logo"
+    },
+    {
+      "fieldname": "enable_install",
+      "fieldtype": "Check",
+      "label": "Suggest app installation",
+      "default": "1"
+    },
+    {
+      "fieldname": "access_section",
+      "fieldtype": "Section Break",
+      "label": "Access and trials"
+    },
+    {
+      "fieldname": "access_mode",
+      "fieldtype": "Select",
+      "label": "Access mode",
+      "options": "Community\nPaid",
+      "default": "Community",
+      "reqd": 1
+    },
+    {
+      "fieldname": "allow_guest_join",
+      "fieldtype": "Check",
+      "label": "Guests can join games",
+      "default": "1"
+    },
+    {
+      "fieldname": "allow_guest_host",
+      "fieldtype": "Check",
+      "label": "Guests can host",
+      "default": "1"
+    },
+    {
+      "fieldname": "allow_guest_create",
+      "fieldtype": "Check",
+      "label": "Guests can create private packs",
+      "default": "1"
+    },
+    {
+      "fieldname": "guest_host_limit",
+      "fieldtype": "Int",
+      "label": "Guest hosted games",
+      "default": "2",
+      "description": "Per browser trial; clearing browser data can restart a trial. Rate limits also apply."
+    },
+    {
+      "fieldname": "guest_pack_limit",
+      "fieldtype": "Int",
+      "label": "Guest private packs",
+      "default": "1"
+    },
+    {
+      "fieldname": "guest_days",
+      "fieldtype": "Int",
+      "label": "Guest trial validity (days)",
+      "default": "7"
+    },
+    {
+      "fieldname": "require_verified_email",
+      "fieldtype": "Check",
+      "label": "Verify email after trial",
+      "default": "1"
+    },
+    {
+      "fieldname": "trust_existing_hosts",
+      "fieldtype": "Check",
+      "label": "Trust existing Quiz Host and System Manager accounts",
+      "default": "1"
+    },
+    {
+      "fieldname": "member_host_limit",
+      "fieldtype": "Int",
+      "label": "Free member games per month",
+      "default": "0",
+      "description": "0 means unlimited in Community mode; no allowance in Paid mode."
+    },
+    {
+      "fieldname": "member_pack_limit",
+      "fieldtype": "Int",
+      "label": "Free member packs per month",
+      "default": "0"
+    },
+    {
+      "fieldname": "payment_section",
+      "fieldtype": "Section Break",
+      "label": "Optional paid access"
+    },
+    {
+      "fieldname": "plan_name",
+      "fieldtype": "Data",
+      "label": "Paid plan name",
+      "default": "GatherPlay Plus"
+    },
+    {
+      "fieldname": "price",
+      "fieldtype": "Currency",
+      "label": "Plan price",
+      "default": "0"
+    },
+    {
+      "fieldname": "currency",
+      "fieldtype": "Data",
+      "label": "Currency code",
+      "default": "ETB"
+    },
+    {
+      "fieldname": "payment_instructions",
+      "fieldtype": "Small Text",
+      "label": "Payment instructions"
+    },
+    {
+      "fieldname": "paid_host_limit",
+      "fieldtype": "Int",
+      "label": "Paid games per month",
+      "default": "100"
+    },
+    {
+      "fieldname": "paid_pack_limit",
+      "fieldtype": "Int",
+      "label": "Paid packs per month",
+      "default": "20"
+    },
+    {
+      "fieldname": "plan_days",
+      "fieldtype": "Int",
+      "label": "Access duration (days)",
+      "default": "30"
+    },
+    {
+      "fieldname": "optimistic_approval",
+      "fieldtype": "Check",
+      "label": "Grant provisional access on receipt",
+      "default": "1"
+    },
+    {
+      "fieldname": "provisional_days",
+      "fieldtype": "Int",
+      "label": "Provisional access expires after (days)",
+      "default": "3"
+    },
+    {
+      "fieldname": "payment_help",
+      "fieldtype": "HTML",
+      "label": "Payment help",
+      "options": "<p>Receipts are private. Review them in GatherPlay Receipt. Rejection revokes provisional access for new games; existing games can finish. One provisional grant per account per calendar month.</p>"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 0
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC"
+}

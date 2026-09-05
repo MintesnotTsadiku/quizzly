@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe.rate_limiter import rate_limit
 from frappe.utils import now_datetime, strip_html_tags
 
-from quizzly import engine
+from quizzly import access, engine
 from quizzly.avatars import get_boot_pack
 from quizzly.engine import publish_session_event
 from quizzly.nicknames import get_boot_words
@@ -35,8 +35,7 @@ def get_spa_boot() -> dict:
 @frappe.whitelist()
 def create_session(quiz: str) -> dict:
 	quiz_doc = frappe.get_doc("QZ Quiz", quiz)
-	if not quiz_doc.is_demo:
-		quiz_doc.check_permission("read")
+	access.check_pack("QZ Quiz", quiz)
 	session = frappe.get_doc(
 		{
 			"doctype": "QZ Session",
@@ -45,7 +44,7 @@ def create_session(quiz: str) -> dict:
 			"game_pin": generate_game_pin(),
 			"status": "Lobby",
 		}
-	).insert()
+	).insert(ignore_permissions=True)
 	return {"session": session.name, "game_pin": session.game_pin}
 
 
@@ -217,6 +216,7 @@ def duplicate_quiz(quiz: str) -> dict:
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
+	access.check_join()
 	session = get_session_by_pin(pin)
 	if session.status != "Lobby":
 		frappe.throw(_("Game has already started"))
@@ -369,15 +369,13 @@ def leave_session(pin: str, token: str) -> None:
 
 def get_host_session(session: str) -> Document:
 	doc = frappe.get_doc("QZ Session", session)
-	if doc.host != frappe.session.user:
-		frappe.throw(_("You are not the host of this session"), frappe.PermissionError)
-	return doc
+	return access.authorize_host(doc)
 
 
 def get_live_host_session() -> Document | None:
 	names = frappe.get_all(
 		"QZ Session",
-		filters={"host": frappe.session.user, "status": ("in", ("Lobby", "Active"))},
+		filters={**access.host_filters(), "status": ("in", ("Lobby", "Active"))},
 		pluck="name",
 		order_by="creation desc",
 	)

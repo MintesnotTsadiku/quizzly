@@ -1,12 +1,19 @@
 <template>
 	<header class="gp-nav" :class="{ 'gp-nav-embedded': embedded }">
 		<RouterLink class="gp-brand" to="/" aria-label="GatherPlay home">
-			<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+			<img v-if="site.logo" :src="site.logo" alt="" width="32" height="32" /><svg
+				v-else
+				width="32"
+				height="32"
+				viewBox="0 0 32 32"
+				aria-hidden="true"
+			>
 				<path d="M5 4h9v9H5zM18 4h9v9h-9zM5 17h9v9H5z" fill="currentColor" />
 				<circle cx="22.5" cy="21.5" r="6" fill="currentColor" />
 			</svg>
 			<span
-				>GatherPlay<span v-if="embedded" class="gp-tenant">{{
+				>{{ site.product_name
+				}}<span v-if="embedded" class="gp-tenant">{{
 					brand.short_name !== "GatherPlay"
 						? brand.short_name
 						: "Games for your community"
@@ -14,7 +21,7 @@
 			>
 		</RouterLink>
 		<nav aria-label="GatherPlay navigation">
-			<RouterLink to="/" :aria-current="route.name === 'Catalog' ? 'page' : undefined"
+			<RouterLink to="/explore" :aria-current="route.name === 'Catalog' ? 'page' : undefined"
 				>Explore</RouterLink
 			>
 			<RouterLink
@@ -23,9 +30,8 @@
 				:aria-current="route.name === 'HostDashboard' ? 'page' : undefined"
 				>My sessions</RouterLink
 			>
-			<RouterLink v-if="!guest" class="gp-nav-content" to="/host/quizzes"
-				>Create a quiz</RouterLink
-			>
+			<RouterLink class="gp-nav-content" to="/create">Create a pack</RouterLink>
+			<RouterLink to="/access">Your access</RouterLink>
 		</nav>
 		<div class="gp-nav-actions">
 			<ThemeButton v-if="!embedded" class="gp-theme" />
@@ -43,6 +49,7 @@ import { call } from "@/api";
 import { redirectGuestToLogin } from "@/auth";
 import { brand, embedded } from "@/theme";
 import ThemeButton from "@/components/ThemeButton.vue";
+import { site } from "@/platform/site";
 const route = useRoute();
 const guest = !window.session_user || window.session_user === "Guest";
 function login() {

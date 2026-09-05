@@ -128,18 +128,11 @@
 									: "Choose your content and how you’ll play. Your lobby opens before the game starts."
 							}}
 						</p>
-						<label class="gp-field"
-							><span>How will you play?</span
-							><select v-model="participation">
-								<option
-									v-for="mode in modes"
-									:key="mode.value"
-									:value="mode.value"
-								>
-									{{ mode.label }}
-								</option>
-							</select></label
-						>
+						<GatherChoices
+							v-model="participation"
+							label="How will you play?"
+							:options="modes"
+						/>
 						<p class="gp-setup-note">
 							{{
 								participation === "shared"
@@ -149,21 +142,24 @@
 										: "Players join with a code. Keep private prompts on the right person’s device. A shared screen is optional."
 							}}
 						</p>
-						<label class="gp-field"
-							><span>{{
+						<GatherSelect
+							v-model="selectedPack"
+							:label="
 								roomGame
-									? "Pick a conversation pack"
-									: "Choose a ready-to-play pack"
-							}}</span
-							><select v-model="selectedPack" :disabled="!packs.length">
-								<option v-if="!packs.length" value="">
-									No ready-made packs available
-								</option>
-								<option v-for="pack in packs" :key="pack.name" :value="pack.name">
-									{{ pack.title }}
-								</option>
-							</select></label
-						>
+									? 'Pick a conversation pack'
+									: 'Choose a ready-to-play pack'
+							"
+							:options="
+								packs.map((p) => ({
+									value: p.name,
+									label: p.title,
+									description: p.prompt_count
+										? p.prompt_count + ' prompts · ready to play'
+										: 'Three conversations · no timer',
+								}))
+							"
+							:disabled="!packs.length"
+						/>
 						<button
 							v-if="selectedPack && !roomGame"
 							class="gp-example-next"
@@ -172,27 +168,37 @@
 							Preview the prompts →
 						</button>
 						<template v-if="!roomGame && game.key !== 'quiz'">
-							<label class="gp-field"
-								><span>{{
-									game.key === "crowd-compass"
-										? "Time to vote and predict"
-										: "Round length"
-								}}</span
-								><select v-model.number="seconds">
-									<option v-for="n in times" :key="n" :value="n">
-										{{ n }} seconds
-									</option>
-								</select></label
-							>
-							<label v-if="game.key === 'crowd-compass'" class="gp-field"
-								><span>Between rounds</span
-								><select v-model="pace">
-									<option value="manual">Host advances · room to talk</option>
-									<option value="auto">Automatic · keep it moving</option>
-								</select></label
-							>
+							<GatherChoices
+								v-model="seconds"
+								:label="
+									game.key === 'crowd-compass'
+										? 'Time to vote and predict'
+										: 'Round length'
+								"
+								compact
+								:options="times.map((n) => ({ value: n, label: n + ' sec' }))"
+							/>
+							<GatherChoices
+								v-if="game.key === 'crowd-compass'"
+								v-model="pace"
+								label="Between rounds"
+								:options="[
+									{
+										value: 'manual',
+										label: 'Room to talk',
+										description: 'You decide when to move on',
+									},
+									{
+										value: 'auto',
+										label: 'Keep it moving',
+										description: 'Rounds advance automatically',
+									},
+								]"
+							/>
 						</template>
-						<p v-if="error" role="alert" class="gp-error">{{ error }}</p>
+						<p v-if="error" role="alert" class="gp-error">
+							{{ error }} <RouterLink to="/access">Your access →</RouterLink>
+						</p>
 						<button
 							class="gp-button"
 							:disabled="creating || !selectedPack"
@@ -202,7 +208,9 @@
 								creating
 									? "Opening your room…"
 									: guest
-										? "Sign in to host"
+										? site.allow_guest_host
+											? "Try hosting a game"
+											: "Sign in to host"
 										: roomGame
 											? "Set up our room"
 											: "Open the lobby"
@@ -213,7 +221,7 @@
 							{{
 								roomGame
 									? "Three playful prompts. No countdown. Passing is welcome."
-									: "Hosting requires a host account. Guests can join without signing up."
+									: "Your site’s allowance applies. Visit Your access to see what’s included."
 							}}
 						</p>
 						<RouterLink
@@ -292,6 +300,9 @@ import { guideFor } from "./games";
 import { visualFor } from "./gameVisuals";
 import { gpCall, rememberHostedSession } from "@/platform/session/gp";
 import { redirectGuestToLogin } from "@/auth";
+import { site, refreshAccess } from "@/platform/site";
+import GatherSelect from "@/components/GatherSelect.vue";
+import GatherChoices from "@/components/GatherChoices.vue";
 import { readError } from "@/api";
 const route = useRoute(),
 	router = useRouter(),
@@ -406,10 +417,15 @@ watch(
 	{ immediate: true },
 );
 async function host() {
-	if (redirectGuestToLogin()) return;
+	if (guest && !site.allow_guest_host && redirectGuestToLogin()) return;
 	creating.value = true;
 	error.value = "";
 	try {
+		const access = await refreshAccess();
+		if (access.hosts_remaining === 0) {
+			router.push("/access");
+			return;
+		}
 		if (game.value.key === "quiz") {
 			window.location.href = `/play/quizzly/host?quiz=${encodeURIComponent(selectedPack.value)}`;
 			return;

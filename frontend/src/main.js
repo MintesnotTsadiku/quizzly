@@ -18,6 +18,8 @@ async function bootstrap() {
 	}
 
 	await loadSpaBoot();
+	const {loadSite} = await import("./platform/site");
+	await loadSite();
 
 	const [{ default: router }, { default: App }, { initSocket }] = await Promise.all([
 		import("./router"),

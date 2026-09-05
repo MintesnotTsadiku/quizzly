@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "Mobile install suggestion waits for a tap and respects dismissal",
+    "Legacy quiz hosting works for a guest trial",
+    "Same-browser sign-in claims the guest trial into the existing account",
+    "Private pack library survives reload and reopens the editable pack"
+  ],
+  "errors": [],
+  "passed": true
+}

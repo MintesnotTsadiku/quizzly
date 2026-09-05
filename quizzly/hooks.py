@@ -42,6 +42,11 @@ website_redirects = [
 export_python_type_annotations = True
 require_type_annotated_api_methods = True
 
+doc_events = {
+	**{dt: {"before_insert": "quizzly.access.before_create"} for dt in ("GP Session", "QZ Session")},
+	**{dt: {"before_insert": "quizzly.access.before_create", "validate": "quizzly.access.protect_pack"} for dt in ("QZ Quiz", "GP Crowd Pack", "GP Cue Deck", "GP Draw Pack", "GP Game Pack")},
+}
+
 # GatherPlay game modules; the registry loads these once per worker (docs/gatherplay)
 quizzly_game_modules = [
 	"quizzly.games.common_ground.game.CommonGroundGame",

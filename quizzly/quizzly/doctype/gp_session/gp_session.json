@@ -13,7 +13,8 @@
   "configuration",
   "current_round",
   "started_at",
-  "ended_at"
+  "ended_at",
+  "gatherplay_access"
  ],
  "fields": [
   {
@@ -76,6 +77,14 @@
    "fieldtype": "Datetime",
    "label": "Ended At",
    "read_only": 1
+  },
+  {
+   "fieldname": "gatherplay_access",
+   "fieldtype": "Link",
+   "label": "GatherPlay Access",
+   "options": "GatherPlay Access",
+   "read_only": 1,
+   "hidden": 1
   }
  ],
  "links": [],

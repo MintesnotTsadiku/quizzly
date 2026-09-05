@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "checks": [
+    "Verification fragment survives the sign-in redirect; confirmation requires sign-in",
+    "Final backend serves the public configuration and leaves Community mode enabled"
+  ]
+}

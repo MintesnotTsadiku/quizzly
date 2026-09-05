@@ -1,15 +1,43 @@
 import { frappeRequest } from "frappe-ui";
 import { getSiteName } from "./site";
 
-const HOST_ACCESS_ERROR = "Log in with a Quiz Host account to write and host quizzes.";
+const HOST_ACCESS_ERROR = "Visit Your access to check the hosting options on this site.";
 
-// A host screen that a non-host opens fails on its first call; the framework's own
-// message names doctypes and permissions, which means nothing to a teacher.
+// Preserve actionable policy messages instead of replacing every denial with a role name.
 export function readError(e) {
-	return e.exc_type === "PermissionError" ? HOST_ACCESS_ERROR : e.messages?.[0] || e.message;
+	return e.messages?.[0] || e.message || HOST_ACCESS_ERROR;
 }
 
 export function call(method, params = {}) {
+	const hostMethods = new Set([
+		"create_session",
+		"get_host_state",
+		"start_session",
+		"host_command",
+		"end_session",
+		"advance_room",
+		"set_lobby_locked",
+		"lock_lobby",
+		"unlock_lobby",
+		"kick_participant",
+		"get_lobby",
+		"set_auto_advance",
+		"next_question",
+		"skip_question",
+		"list_quizzes",
+	]);
+	if (
+		window.session_user === "Guest" &&
+		(method.startsWith("quizzly.games.api.") || method.startsWith("quizzly.api.")) &&
+		hostMethods.has(method.split(".").at(-1))
+	) {
+		params = {
+			method: method.split(".").at(-1),
+			params,
+			legacy: method.startsWith("quizzly.api."),
+		};
+		method = "quizzly.access.guest_host";
+	}
 	return frappeRequest({
 		url: `/api/method/${method}`,
 		method: "POST",
@@ -32,7 +60,7 @@ export async function get(method) {
 	if (!response.ok) {
 		throw Object.assign(
 			new Error(payload.message || `Request failed (${response.status})`),
-			payload
+			payload,
 		);
 	}
 	return payload.message;

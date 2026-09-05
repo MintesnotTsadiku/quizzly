@@ -12,6 +12,8 @@ declare module 'vue' {
     AvatarPic: typeof import('./src/components/AvatarPic.vue')['default']
     ConfirmDialog: typeof import('./src/components/ConfirmDialog.vue')['default']
     DrainRing: typeof import('./src/components/DrainRing.vue')['default']
+    GatherChoices: typeof import('./src/components/GatherChoices.vue')['default']
+    GatherSelect: typeof import('./src/components/GatherSelect.vue')['default']
     HostBar: typeof import('./src/components/HostBar.vue')['default']
     QuizPreview: typeof import('./src/components/QuizPreview.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

@@ -1,7 +1,7 @@
 <template>
 	<div class="gather-ui gp-stage" :class="{ 'gp-stage-screen': screen }">
 		<header class="gp-stage-top">
-			<RouterLink class="gp-brand" to="/">✳ GatherPlay</RouterLink
+			<RouterLink class="gp-brand" to="/">✳ {{ site.product_name }}</RouterLink
 			><span>Common Ground · {{ screen ? "Shared screen" : "Host view" }}</span
 			><a
 				v-if="!screen && snapshot.game_pin"
@@ -143,6 +143,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch, nextTick } from "vue"
 import { useRoute, useRouter } from "vue-router";
 import GameArtwork from "@/platform/discovery/GameArtwork.vue";
 import { gpCall, rememberHostedSession, forgetHostedSession } from "@/platform/session/gp";
+import { site } from "@/platform/site";
 import { readError } from "@/api";
 const route = useRoute(),
 	router = useRouter();

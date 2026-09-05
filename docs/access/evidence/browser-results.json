@@ -1,0 +1,16 @@
+{
+  "checks": [
+    "Landing loads with site branding",
+    "Pack picker supports keyboard selection",
+    "Guest hosts a real room with an HttpOnly private trial cookie",
+    "Another guest cannot read host state",
+    "Guest completes all cooperative rounds",
+    "Private question pack saves; second guest pack is blocked; another guest sees none",
+    "Custom pack opens a real lobby; third guest-hosted game is denied",
+    "PWA manifest and scoped service worker are active",
+    "Offline navigation shows an honest recovery screen",
+    "390px landing and controls have no horizontal overflow"
+  ],
+  "errors": [],
+  "passed": true
+}
