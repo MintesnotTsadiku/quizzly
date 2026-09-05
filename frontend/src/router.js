@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { redirectGuestToLogin } from "@/auth";
 
 // /play is the single product entry. The original quiz remains a first-class
 // game, namespaced below it so its established screens keep stable route names.
@@ -78,9 +79,8 @@ router.beforeEach((to) => {
 		["GpHost", "HostDashboard", "CrowdPackEditor", "Host", "Quizzes", "QuizEditor"].includes(
 			to.name
 		) &&
-		window.session_user === "Guest"
+		redirectGuestToLogin(`${BASE}${to.fullPath}`)
 	) {
-		window.location.href = `/login?redirect-to=${encodeURIComponent(`${BASE}${to.fullPath}`)}`;
 		return false;
 	}
 });

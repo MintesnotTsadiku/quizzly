@@ -8,6 +8,7 @@ from quizzly.api import generate_game_pin, hash_token
 from quizzly.games import engine as gpe
 from quizzly.games import get_game_module
 from quizzly.games.api import (
+	as_dict,
 	create_session,
 	get_public_state,
 	join_session,
@@ -17,6 +18,20 @@ from quizzly.games.api import (
 
 
 class TestRegistry(IntegrationTestCase):
+	def test_create_session_is_an_authenticated_whitelisted_method(self):
+		frappe.set_user("Administrator")
+		frappe.is_whitelisted(create_session)
+		frappe.set_user("Guest")
+		with self.assertRaises(frappe.PermissionError):
+			frappe.is_whitelisted(create_session)
+
+	def test_browser_json_object_arguments_are_normalized(self):
+		self.assertEqual(as_dict('{"seconds": 30}'), {"seconds": 30})
+		self.assertEqual(as_dict({"seconds": 30}), {"seconds": 30})
+		self.assertEqual(as_dict(None), {})
+		with self.assertRaises(frappe.ValidationError):
+			as_dict('["not", "an", "object"]')
+
 	def test_registered_modules_expose_manifests(self):
 		from quizzly.games import manifests
 

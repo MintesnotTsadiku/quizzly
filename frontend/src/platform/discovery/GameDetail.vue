@@ -346,6 +346,7 @@
 <script setup>
 import { computed, nextTick, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { redirectGuestToLogin } from "@/auth";
 import HostBar from "@/components/HostBar.vue";
 import GameVisualGuide from "@/platform/discovery/GameVisualGuide.vue";
 import PackPicker from "@/platform/discovery/PackPicker.vue";
@@ -421,6 +422,7 @@ function choosePreviewedPack(pack) {
 }
 
 function beginHosting() {
+	if (redirectGuestToLogin()) return;
 	if (guide.value.hostUrl) {
 		window.location.href = guide.value.hostUrl;
 		return;
@@ -429,6 +431,7 @@ function beginHosting() {
 }
 
 async function createSession() {
+	if (redirectGuestToLogin()) return;
 	error.value = "";
 	creating.value = true;
 	try {
@@ -454,6 +457,7 @@ async function createSession() {
 }
 
 async function hostDemo(demo) {
+	if (redirectGuestToLogin()) return;
 	error.value = "";
 	creatingDemo.value = demo.name;
 	try {

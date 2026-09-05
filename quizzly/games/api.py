@@ -133,9 +133,9 @@ def list_public_decks(game_key: str | None = None) -> list[dict]:
 # --- host --------------------------------------------------------------------
 
 
-@frappe.whitelist()
-def create_session(game_key: str, configuration: dict | None = None) -> dict:
-	configuration = configuration or {}
+@frappe.whitelist(methods=["POST"])
+def create_session(game_key: str, configuration: dict | str | None = None) -> dict:
+	configuration = as_dict(configuration)
 	module = get_game_module(game_key)
 	ctx = GameContext(session="", pin="", game_key=game_key, configuration=configuration)
 	normalized = module.validate_configuration(ctx, configuration)
@@ -216,10 +216,10 @@ def start_session(session: str) -> dict:
 	return {"ok": True}
 
 
-@frappe.whitelist()
-def host_command(session: str, command: str, payload: dict | None = None) -> dict:
+@frappe.whitelist(methods=["POST"])
+def host_command(session: str, command: str, payload: dict | str | None = None) -> dict:
 	"""Lobby commands mutate and republish; live commands ride the control flag."""
-	payload = payload or {}
+	payload = as_dict(payload)
 	session_doc = get_host_session(session)
 	if (
 		command
@@ -433,7 +433,7 @@ def get_public_state(pin: str) -> dict:
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(key="token", limit=60, seconds=60)
 def submit_action(
-	pin: str, token: str, action_type: str, idempotency_key: str, payload: dict | None = None
+	pin: str, token: str, action_type: str, idempotency_key: str, payload: dict | str | None = None
 ) -> dict:
 	session_doc = get_session_by_pin(pin)
 	if session_doc.status != "Active":
@@ -449,8 +449,9 @@ def submit_action(
 	if state.get("paused"):
 		frappe.throw(_("The host has paused this game"))
 	module = get_game_module(session_doc.game_key)
+	payload = as_dict(payload)
 	decision = module.submit_action(
-		gpe.context_for(session_doc), state, participant_view(participant), action_type, payload or {}
+		gpe.context_for(session_doc), state, participant_view(participant), action_type, payload
 	)
 	if not decision.accepted:
 		frappe.throw(_(decision.reason or "Action rejected"))
@@ -504,6 +505,18 @@ def get_host_session(session: str):
 	if doc.host != frappe.session.user:
 		frappe.throw(_("You are not the host of this session"), frappe.PermissionError)
 	return doc
+
+
+def as_dict(value: dict | str | None) -> dict:
+	"""Normalize JSON object arguments sent by browser form transports."""
+	if not value:
+		return {}
+	if isinstance(value, dict):
+		return value
+	parsed = frappe.parse_json(value)
+	if not isinstance(parsed, dict):
+		frappe.throw(_("Expected a JSON object"))
+	return parsed
 
 
 def get_live_host_session():
