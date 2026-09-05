@@ -1,0 +1,18 @@
+{
+  "checks": [
+    "Three isolated guest browsers join: two household/team entries and an individual",
+    "Every guest submits a real vote and private prediction",
+    "Shared-device identity survives reload; live reveal reaches shared screen",
+    "Every guest submits a real vote and private prediction",
+    "Shared-device identity survives reload; live reveal reaches shared screen",
+    "Every guest submits a real vote and private prediction",
+    "Shared-device identity survives reload; live reveal reaches shared screen",
+    "Three rounds build to the 1,000-point finale and persist exact scores and aggregate recap",
+    "Amharic card downloads; room moment requires opt-in and names/PIN are excluded",
+    "Replay creates an authorized fresh lobby with the same settings and a new PIN",
+    "Amharic device-free host and shared-screen prompts agree; three conversations and shares finish through the UI"
+  ],
+  "errors": [],
+  "session": "5a02fccdrj",
+  "passed": true
+}

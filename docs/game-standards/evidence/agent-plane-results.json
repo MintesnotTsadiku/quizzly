@@ -1,0 +1,7 @@
+{
+  "before_run": "BSR-2026-01006",
+  "after_run": "BSR-2026-01007",
+  "console_errors": [],
+  "network_errors": [],
+  "passed": true
+}

@@ -30,7 +30,7 @@ The site remains in Community mode. Adding a language does not switch on payment
 
 The existing competitive foundations include timers, private submissions, reveals, scoring, leaderboards and replay. Common Ground intentionally provides a different, cooperative loop: three conversations and three share moments, with passing allowed and no countdown or ranking.
 
-The proposed stronger game-design program is **not yet implemented**. In particular, Room Quest, a deliberate opening/build/climax round sequence and shareable result cards remain recommendations. No new progression or payment feature should be inferred from the new artwork.
+Crowd Compass now has opening/build/finale progression, a higher-value final prediction, optional shareable results cards and a fresh-room replay action. See [the game standards implementation](../game-standards/README.md). Room Quest and progression for other game families remain recommendations; the artwork itself does not imply new gameplay or payment features.
 
 The direction is:
 

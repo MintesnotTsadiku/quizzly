@@ -235,6 +235,24 @@
 							/>
 							<GatherChoices
 								v-if="game.key === 'crowd-compass'"
+								v-model="journey"
+								:label="$t('Round journey')"
+								:options="[
+									{
+										value: true,
+										label: 'Build to a finale',
+										description:
+											'+500 per correct prediction. +1,000 in the final round of 3+ pack rounds.',
+									},
+									{
+										value: false,
+										label: 'Classic scoring',
+										description: '+500 per correct prediction throughout.',
+									},
+								]"
+							/>
+							<GatherChoices
+								v-if="game.key === 'crowd-compass'"
 								v-model="pace"
 								:label="$t('Between rounds')"
 								:options="[
@@ -372,6 +390,7 @@ import GatherSelect from "@/components/GatherSelect.vue";
 import GatherChoices from "@/components/GatherChoices.vue";
 import { readError } from "@/api";
 import { locale, languageUrl } from "@/i18n";
+const journey = ref(true);
 const route = useRoute(),
 	router = useRouter(),
 	game = ref(null),
@@ -526,6 +545,7 @@ async function host() {
 				vote_seconds: seconds.value,
 				prediction_seconds: seconds.value,
 				rounds: 5,
+				gathering_arc: journey.value,
 			});
 		const created = await gpCall("create_session", {
 			game_key: game.value.key,

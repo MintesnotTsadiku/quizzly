@@ -1,11 +1,13 @@
 <template>
 	<div class="flex h-full flex-col overflow-hidden bg-night">
 		<div class="flex justify-end px-4 py-2"><LanguageSwitch /></div>
+		<RoundJourney v-if="!podium && gameKey === 'crowd-compass'" :arc="view.arc" />
 		<!-- Podium outranks everything: the last thing a room sees must be the winner -->
 		<div
 			v-if="podium"
-			class="flex min-h-0 flex-1 flex-col items-center justify-center gap-10 p-10"
+			class="flex min-h-0 flex-1 flex-col items-center gap-8 overflow-y-auto p-8"
 		>
+			<CrowdEnding v-if="gameKey === 'crowd-compass'" :ending="ending" screen />
 			<h2 class="font-display text-6xl font-extrabold text-paper">
 				{{ $t("Final results") }}
 			</h2>
@@ -107,7 +109,7 @@
 		<!-- Live: the projector is the room's face; prompts and controls live elsewhere -->
 		<div
 			v-else-if="status === 'Active'"
-			class="flex min-h-0 flex-1 flex-col items-center justify-center gap-10 p-10"
+			class="flex min-h-0 flex-1 flex-col items-center gap-8 overflow-y-auto p-8"
 		>
 			<component
 				:is="live.ScreenLive"
@@ -183,6 +185,8 @@
 </template>
 
 <script setup>
+import RoundJourney from "@/platform/ending/RoundJourney.vue";
+import CrowdEnding from "@/platform/ending/CrowdEnding.vue";
 import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { locale } from "@/i18n";
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
@@ -211,6 +215,7 @@ const status = ref("");
 const gameKey = ref("cuecast");
 const view = ref({});
 const podium = ref(null);
+const ending = ref(null);
 const publicParticipants = ref([]);
 const copied = ref(false);
 const qrDataUrl = ref("");
@@ -265,9 +270,15 @@ function onEvent(message) {
 	} else if (type === "platform.action_progress") {
 		view.value = { ...view.value, solved: payload.count };
 	} else if (type === "platform.scoreboard_updated") {
-		view.value = { ...view.value, phase: "scoreboard", teams: payload.teams };
+		view.value = {
+			...view.value,
+			phase: "scoreboard",
+			arc: payload.arc || view.value.arc,
+			teams: payload.teams,
+		};
 		stopCountdown();
 	} else if (type === "platform.session_ended") {
+		refresh();
 		podium.value = payload.teams || [];
 		status.value = "Ended";
 		stopCountdown();
@@ -296,7 +307,10 @@ function applyState(state) {
 	seqSeen = Math.max(seqSeen, state.state_version ?? 0);
 	gameKey.value = state.game_key || gameKey.value;
 	status.value = state.status;
-	if (state.podium) podium.value = state.podium;
+	if (state.podium) {
+		podium.value = state.podium;
+		ending.value = state.ending || null;
+	}
 	if (state.view) view.value = { ...view.value, ...state.view };
 	if (
 		status.value === "Active" &&

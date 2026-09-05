@@ -257,6 +257,15 @@
 					</div>
 					<div class="grid gap-2 sm:grid-cols-2">
 						<PremiumToggle
+							v-model="setup.gathering_arc"
+							:label="$t('Build to a finale')"
+							:hint="
+								$t(
+									'With 3+ pack rounds: +500 per correct prediction, +1,000 in the final round.',
+								)
+							"
+						/>
+						<PremiumToggle
 							v-model="setup.estimation"
 							:label="$t('Share-estimation bonus')"
 							hint="Reward close percentage guesses"
@@ -572,8 +581,10 @@
 		<!-- Live console -->
 		<div
 			v-else
-			class="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 p-6 text-center sm:p-10"
+			class="flex flex-1 flex-col items-center gap-8 p-6 text-center sm:p-10"
+			:class="podium ? 'justify-start' : 'justify-center'"
 		>
+			<RoundJourney v-if="!podium && gameKey === 'crowd-compass'" :arc="view.arc" />
 			<component
 				:is="live.HostLive"
 				v-if="!podium && gamePhases.includes(view.phase)"
@@ -625,6 +636,8 @@
 			</template>
 
 			<template v-else-if="podium">
+				<LanguageSwitch v-if="gameKey === 'crowd-compass'" />
+				<CrowdEnding v-if="gameKey === 'crowd-compass'" :ending="ending" />
 				<h1 class="font-display text-5xl font-extrabold text-paper sm:text-6xl">
 					{{ $t("Final results") }}
 				</h1>
@@ -654,7 +667,15 @@
 					</li>
 				</ol>
 				<div class="mt-2 flex flex-wrap justify-center gap-2">
-					<button class="ctl ctl-go" @click="newRoom">{{ $t("New room") }}</button>
+					<button
+						v-if="gameKey === 'crowd-compass'"
+						class="ctl ctl-go"
+						:disabled="creating"
+						@click="replayRoom"
+					>
+						{{ $t(creating ? "Opening your room…" : "Play again with a new room") }}
+					</button>
+					<button class="ctl" @click="newRoom">{{ $t("New room") }}</button>
 					<RouterLink class="ctl" :to="{ name: 'HostDashboard' }">
 						{{ $t("Dashboard") }}
 					</RouterLink>
@@ -662,6 +683,10 @@
 						{{ $t("All games") }}
 					</RouterLink>
 				</div>
+				<p v-if="gameKey === 'crowd-compass'" class="text-sm text-paper/60">
+					{{ $t("Same settings, reshuffled pack. Everyone joins the new room code.") }}
+				</p>
+				<p v-if="error" role="alert" class="text-alert">{{ $t(error) }}</p>
 			</template>
 
 			<template v-else>
@@ -771,7 +796,9 @@
 				<p class="text-sm text-paper/50">
 					{{
 						$t(
-							"It joins the queue after the current prompt. Blank rooms start with these.",
+							configuration.gathering_arc
+								? "Extra prompts play after the finale, with classic scoring."
+								: "It joins the queue after the current prompt. Blank rooms start with these.",
 						)
 					}}
 				</p>
@@ -805,6 +832,8 @@
 </template>
 
 <script setup>
+import RoundJourney from "@/platform/ending/RoundJourney.vue";
+import CrowdEnding from "@/platform/ending/CrowdEnding.vue";
 import { locale } from "@/i18n";
 import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
@@ -855,6 +884,7 @@ const previewPack = ref(null);
 const lobbyLocked = ref(false);
 const view = ref({});
 const podium = ref(null);
+const ending = ref(null);
 const starting = ref(false);
 const creating = ref(false);
 const qrDataUrl = ref("");
@@ -879,6 +909,7 @@ const setup = ref({
 	seconds: 60,
 	vote_seconds: 15,
 	prediction_seconds: 15,
+	gathering_arc: true,
 	teams_count: 2,
 	sudden_death: true,
 	estimation: true,
@@ -1020,12 +1051,14 @@ function onEvent(envelopeMessage) {
 		view.value = {
 			...view.value,
 			phase: "scoreboard",
+			arc: payload.arc || view.value.arc,
 			teams: payload.teams,
 			last_voided: payload.last_voided,
 		};
 		phase.value = "scoreboard";
 		stopCountdown();
 	} else if (type === "platform.session_ended") {
+		refresh();
 		podium.value = payload.teams || [];
 		phase.value = "podium";
 		stopCountdown();
@@ -1069,6 +1102,7 @@ async function applyState(state) {
 	rememberHostedSession(state.session);
 
 	if (state.status === "Ended" || state.podium) {
+		ending.value = state.ending || null;
 		podium.value = state.podium || [];
 		phase.value = "podium";
 		stopCountdown();
@@ -1224,6 +1258,32 @@ async function hostAction(method, params = {}) {
 	} catch (e) {
 		error.value = readError(e);
 		await refresh().catch(() => {});
+	}
+}
+
+async function replayRoom() {
+	error.value = "";
+	creating.value = true;
+	try {
+		const created = await gpCall("create_session", {
+			game_key: gameKey.value,
+			configuration: { ...configuration.value },
+		});
+		stopRoom?.();
+		podium.value = null;
+		ending.value = null;
+		view.value = {};
+		seqSeen = 0;
+		await applyState(await gpCall("get_host_state", { session: created.session }));
+		await router.replace({
+			name: "GpHost",
+			query: { session: created.session, lang: locale.value },
+		});
+		stopRoom = useSessionRoom(socket, pin.value, onEvent, refresh, "gp");
+	} catch (e) {
+		error.value = readError(e);
+	} finally {
+		creating.value = false;
 	}
 }
 

@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "Polished Amharic/English exports and 360px results show the full card without horizontal overflow",
+    "Production CMS iframe preserves authentication, shows persisted results and downloads the Amharic card"
+  ],
+  "errors": [],
+  "passed": true
+}

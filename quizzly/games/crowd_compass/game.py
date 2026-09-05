@@ -24,6 +24,7 @@ from quizzly.games import (
 	ScoreDelta,
 	Transition,
 )
+from quizzly.games.crowd_compass.progression import round_arc
 from quizzly.games.engine import accepted_actions, create_teams
 
 PROMPT_READY_SECONDS = 4
@@ -90,6 +91,10 @@ class CrowdCompassGame(GameModule):
 		if scoring_mode not in ("Individual", "Team average"):
 			frappe.throw(_("Unknown scoring mode"))
 		room_match = configuration.get("room_match")
+		try:
+			arc = bool(int(configuration.get("gathering_arc", 1)))
+		except (TypeError, ValueError):
+			frappe.throw(_("Choose a valid round journey."))
 		return {
 			"pack": pack,
 			"ranked": ranked,
@@ -103,6 +108,9 @@ class CrowdCompassGame(GameModule):
 			"quorum": max(1, min(100, quorum)),
 			"rounds": max(0, min(50, rounds)),
 			"prompt_count": prompt_count,
+			"gathering_arc": bool(
+				arc and pack and min(max(0, min(50, rounds)) or prompt_count, prompt_count) >= 3
+			),
 		}
 
 	def start_game(self, ctx, participants: list[dict]) -> Transition:
@@ -117,6 +125,7 @@ class CrowdCompassGame(GameModule):
 			"teams_mode": bool(teams),
 			"voided": [],
 		}
+		module_state["planned_rounds"] = len(module_state["queue"])
 		return self.open_prompt(ctx, module_state)
 
 	def build_queue(self, ctx) -> list[dict]:
@@ -187,9 +196,7 @@ class CrowdCompassGame(GameModule):
 					publish={"type": "crowd_compass.intermission", "phase": "intermission"},
 				)
 			# finish_game expects the full state envelope, not the bare module state
-			return Transition(
-				phase="podium", finished=self.finish_game(ctx, {"module_state": module_state})
-			)
+			return Transition(phase="podium", finished=self.finish_game(ctx, {"module_state": module_state}))
 		module_state.update(
 			{
 				"round_index": module_state["round_index"] + 1,
@@ -198,8 +205,14 @@ class CrowdCompassGame(GameModule):
 				"position": position + 1,
 			}
 		)
+		module_state["arc"] = round_arc(
+			ctx.configuration.get("gathering_arc"),
+			position + 1,
+			module_state.get("planned_rounds", len(module_state["queue"])),
+		)
 		public = {
 			"type": "crowd_compass.vote_opened",
+			"arc": module_state.get("arc"),
 			"phase": "prompt_open",
 			"turn": position,
 			"total": len(module_state["queue"]),
@@ -221,6 +234,7 @@ class CrowdCompassGame(GameModule):
 		module_state = dict(state["module_state"])
 		public = {
 			"type": "crowd_compass.prediction_opened",
+			"arc": module_state.get("arc"),
 			"phase": "prediction_open",
 			"turn": module_state["position"] - 1,
 			"total": len(module_state["queue"]),
@@ -242,8 +256,16 @@ class CrowdCompassGame(GameModule):
 
 	def reveal(self, ctx, state) -> Transition:
 		module_state = dict(state["module_state"])
-		votes = [a for a in accepted_actions(ctx.session, module_state["round_index"]) if a.action_type == "cast_vote"]
-		predictions = [a for a in accepted_actions(ctx.session, module_state["round_index"]) if a.action_type == "make_prediction"]
+		votes = [
+			a
+			for a in accepted_actions(ctx.session, module_state["round_index"])
+			if a.action_type == "cast_vote"
+		]
+		predictions = [
+			a
+			for a in accepted_actions(ctx.session, module_state["round_index"])
+			if a.action_type == "make_prediction"
+		]
 		choices = module_state["current"]["choices"]
 		choice_ids = [c["id"] for c in choices]
 
@@ -268,7 +290,7 @@ class CrowdCompassGame(GameModule):
 						ScoreDelta(
 							subject_type="Participant",
 							subject=participant,
-							points=500,
+							points=(module_state.get("arc") or {}).get("prediction_points", 500),
 							category="correct_prediction",
 							idempotency_key=f"r{module_state['round_index']}:{prediction.name}:predict",
 						)
@@ -305,7 +327,9 @@ class CrowdCompassGame(GameModule):
 					team_id = self.team_of(ctx.session, vote.participant)
 					if not team_id:
 						continue
-					team_plurality = self.team_plurality(votes, team_id, choice_ids, ctx.configuration["ranked"])
+					team_plurality = self.team_plurality(
+						votes, team_id, choice_ids, ctx.configuration["ranked"]
+					)
 					if self.pick_choice(vote.payload) in team_plurality:
 						deltas.append(
 							ScoreDelta(
@@ -320,6 +344,10 @@ class CrowdCompassGame(GameModule):
 		distribution = tally
 		module_state["plurality"] = plurality
 		summary = {
+			"prompt": module_state["current"]["prompt"],
+			"choices": choices,
+			"ranked": ctx.configuration["ranked"],
+			"arc": module_state.get("arc"),
 			"tally": tally,
 			"distribution": distribution,
 			"plurality": plurality,
@@ -329,6 +357,7 @@ class CrowdCompassGame(GameModule):
 		}
 		public = {
 			"type": "crowd_compass.revealed",
+			"arc": module_state.get("arc"),
 			"phase": "reveal",
 			"turn": module_state["position"] - 1,
 			"total": len(module_state["queue"]),
@@ -358,6 +387,7 @@ class CrowdCompassGame(GameModule):
 		voided = module_state.get("voided") or []
 		public = {
 			"type": "platform.scoreboard_updated",
+			"arc": module_state.get("arc"),
 			"phase": "scoreboard",
 			"turn": module_state["position"] - 1,
 			"total": len(module_state["queue"]),
@@ -458,7 +488,11 @@ class CrowdCompassGame(GameModule):
 			frappe.throw(_("A live prompt needs text and at least two choices"))
 		module_state = dict(state["module_state"])
 		queue = list(module_state["queue"])
-		queue.insert(module_state["position"], {"prompt": text, "choices": choices, "live": True})
+		prompt = {"prompt": text, "choices": choices, "live": True}
+		if ctx.configuration.get("gathering_arc"):
+			queue.append(prompt)  # Keep the announced finale in place; extra prompts are encores.
+		else:
+			queue.insert(module_state["position"], prompt)
 		module_state["queue"] = queue
 		wake = time.time() + 1 if state["phase"] == "intermission" else state["next_ts"]
 		return Transition(
@@ -511,6 +545,7 @@ class CrowdCompassGame(GameModule):
 		module_state = state["module_state"]
 		current = module_state.get("current") or {}
 		view = {
+			"arc": module_state.get("arc"),
 			"phase": state["phase"],
 			"turn": module_state.get("position", 1) - 1,
 			"total": len(module_state.get("queue") or []),
@@ -610,7 +645,9 @@ class CrowdCompassGame(GameModule):
 				fields=["score"],
 			)
 			average = round(sum(m.score for m in members) / len(members)) if members else 0
-			rows.append({"name": team.name, "team_name": team.team_name, "color": team.color, "score": average})
+			rows.append(
+				{"name": team.name, "team_name": team.team_name, "color": team.color, "score": average}
+			)
 		rows.sort(key=lambda r: (-r["score"], r["team_name"]))
 		leaderboard = []
 		prev_score = None
@@ -641,7 +678,9 @@ class CrowdCompassGame(GameModule):
 					fields=["score"],
 				)
 				average = round(sum(m.score for m in members) / len(members)) if members else 0
-				rows.append({"name": team.name, "team_name": team.team_name, "color": team.color, "score": average})
+				rows.append(
+					{"name": team.name, "team_name": team.team_name, "color": team.color, "score": average}
+				)
 			rows.sort(key=lambda r: (-r["score"], r["team_name"]))
 			if ranked:
 				prev_score = None

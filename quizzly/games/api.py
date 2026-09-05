@@ -187,6 +187,7 @@ def get_host_state(session: str | None = None) -> dict:
 	}
 	if session_doc.status == "Ended":
 		result["podium"] = final_leaderboard(session_doc.name)
+		result["ending"] = ending_snapshot(session_doc)
 		return result
 	if session_doc.status != "Active":
 		return result
@@ -407,6 +408,7 @@ def get_player_state(pin: str, token: str) -> dict:
 			**result,
 			"podium": final_leaderboard(session_doc.name),
 			"rank": participant.rank,
+			"ending": ending_snapshot(session_doc),
 		}
 
 	state = gpe.get_state(session_doc.name)
@@ -438,7 +440,11 @@ def get_public_state(pin: str) -> dict:
 		"title": get_game_module(session_doc.game_key).manifest.title,
 	}
 	if session_doc.status == "Ended":
-		return {**result, "podium": final_leaderboard(session_doc.name)}
+		return {
+			**result,
+			"podium": final_leaderboard(session_doc.name),
+			"ending": ending_snapshot(session_doc),
+		}
 	if session_doc.status != "Active":
 		return {**result, **public_lobby_state(session_doc)}
 
@@ -725,3 +731,24 @@ def advance_room(session: str, expected_version: int) -> dict:
 			gpe.apply_transition(session_doc, state, transition)
 		frappe.db.commit()
 	return {"ok": True}
+
+
+def ending_snapshot(session_doc):
+	# Called only after the existing host/player/public snapshot authorization.
+	if session_doc.status != "Ended" or session_doc.game_key != "crowd-compass":
+		return None
+	from quizzly.games.crowd_compass.progression import recap_from_rounds
+
+	rows = frappe.get_all(
+		"GP Round",
+		filters={"session": session_doc.name, "status": "Resolved"},
+		fields=["resolution"],
+		order_by="round_index asc",
+	)
+	recap = recap_from_rounds([frappe.parse_json(row.resolution) or {} for row in rows])
+	return {
+		**recap,
+		"entries": frappe.db.count(
+			"GP Participant", {"session": session_doc.name, "status": ("!=", "Kicked")}
+		),
+	}

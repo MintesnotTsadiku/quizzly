@@ -22,7 +22,12 @@
 </template>
 <script setup>
 import { useId } from "vue";
-defineProps({ modelValue: [String, Number], label: String, options: Array, compact: Boolean });
+defineProps({
+	modelValue: [String, Number, Boolean],
+	label: String,
+	options: Array,
+	compact: Boolean,
+});
 defineEmits(["update:modelValue"]);
 const id = useId();
 </script>

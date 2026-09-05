@@ -1,5 +1,5 @@
 <template>
-	<div class="flex h-full flex-col bg-night">
+	<div class="flex h-full flex-col overflow-y-auto bg-night">
 		<header
 			v-if="player && phase !== 'kicked'"
 			class="flex shrink-0 items-center justify-between gap-3 border-b border-haze px-4 py-2.5"
@@ -35,8 +35,13 @@
 		</header>
 
 		<main
-			class="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 p-6 text-center"
+			class="flex flex-1 flex-col items-center gap-6 p-6 text-center"
+			:class="phase === 'podium' ? 'justify-start' : 'justify-center'"
 		>
+			<RoundJourney
+				v-if="phase !== 'podium' && phase !== 'kicked' && gameKey === 'crowd-compass'"
+				:arc="view.arc"
+			/>
 			<template v-if="phase === 'kicked'">
 				<h1 class="font-display text-3xl font-extrabold text-paper">
 					{{ $t("The host removed you") }}
@@ -143,6 +148,7 @@
 
 			<!-- Podium -->
 			<template v-else-if="phase === 'podium'">
+				<CrowdEnding v-if="gameKey === 'crowd-compass'" :ending="ending" />
 				<h1 class="font-display text-5xl font-extrabold leading-tight text-paper">
 					{{ headline }}
 				</h1>
@@ -195,6 +201,9 @@
 </template>
 
 <script setup>
+import RoundJourney from "@/platform/ending/RoundJourney.vue";
+import CrowdEnding from "@/platform/ending/CrowdEnding.vue";
+import { t } from "@/i18n";
 import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { computed, inject, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -231,6 +240,7 @@ const prompt = ref("");
 const solvedCount = ref(0);
 const submitting = ref(false);
 const podium = ref(null);
+const ending = ref(null);
 let seqSeen = -1;
 
 const gameKey = computed(() => player.value?.gameKey || "cuecast");
@@ -249,9 +259,9 @@ const headline = computed(() => {
 	const mine =
 		(podium.value || []).find((row) => row.name === player.value?.participant) ||
 		(podium.value || []).find((row) => row.name === myTeam.value?.name);
-	if (!mine) return "Final results";
-	if (mine.rank === 1) return "You won! 🏆";
-	return `You finished #${mine.rank}`;
+	if (!mine) return t("Final results");
+	if (mine.rank === 1) return t("You won");
+	return t("You finished #{rank}", { rank: mine.rank });
 });
 
 function onEvent(message) {
@@ -274,10 +284,16 @@ function onEvent(message) {
 	} else if (type === "platform.action_progress") {
 		solvedCount.value = payload.count;
 	} else if (type === "platform.scoreboard_updated") {
-		view.value = { ...view.value, phase: "scoreboard", teams: payload.teams };
+		view.value = {
+			...view.value,
+			phase: "scoreboard",
+			arc: payload.arc || view.value.arc,
+			teams: payload.teams,
+		};
 		phase.value = "scoreboard";
 		stopCountdown();
 	} else if (type === "platform.session_ended") {
+		refreshPrivate();
 		podium.value = payload.teams || [];
 		phase.value = "podium";
 		stopCountdown();
@@ -306,6 +322,7 @@ async function refreshPrivate() {
 
 function applyState(state) {
 	if (state.status === "Ended" || state.podium) {
+		ending.value = state.ending || null;
 		podium.value = state.podium || [];
 		phase.value = "podium";
 		stopCountdown();

@@ -1,0 +1,4 @@
+/assets/quizzly/fonts/gatherplay-fonts.css doesn't exist at build time, it will remain unchanged to be resolved at runtime
+/assets/quizzly/fonts/noto-sans-ethiopic.ttf referenced in /home/minte/projects/training-apps/apps/quizzly/frontend/src/index.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+✓ 2206 modules transformed.
+✓ built in 19.05s
