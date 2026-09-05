@@ -32,7 +32,8 @@
 					</div>
 				</header>
 				<div class="gp-detail-grid">
-					<section class="gp-example" :aria-label="$t('Try an example round')">
+					<TryBoard v-if="boardGame" />
+					<section v-else class="gp-example" :aria-label="$t('Try an example round')">
 						<a
 							v-if="coverImage"
 							class="gp-game-illustration"
@@ -170,11 +171,14 @@
 								$t(
 									roomGame
 										? "One host device. Everyone else can put theirs away."
-										: "Choose your content and how you’ll play. Your lobby opens before the game starts.",
+										: boardGame
+											? "Choose who places the marks. Your lobby opens before the match starts."
+											: "Choose your content and how you’ll play. Your lobby opens before the game starts.",
 								)
 							}}
 						</p>
 						<GatherChoices
+							v-if="!boardGame"
 							v-model="participation"
 							:label="$t('How will you play?')"
 							:options="modes"
@@ -182,15 +186,44 @@
 						<p class="gp-setup-note">
 							{{
 								$t(
-									participation === "shared"
-										? "Join once per team or household with a group nickname. Agree on one answer; each device gets one score."
-										: roomGame
-											? "Make small groups of 2–5. Read the prompt aloud, or open it on a shared screen. No one needs to join online."
-											: "Players join with a code. Keep private prompts on the right person’s device. A shared screen is optional.",
+									boardGame
+										? "Take turns on a real X/O board. No question pack or timer needed."
+										: participation === "shared"
+											? "Join once per team or household with a group nickname. Agree on one answer; each device gets one score."
+											: roomGame
+												? "Make small groups of 2–5. Read the prompt aloud, or open it on a shared screen. No one needs to join online."
+												: "Players join with a code. Keep private prompts on the right person’s device. A shared screen is optional.",
+								)
+							}}
+						</p>
+						<GatherChoices
+							v-if="boardGame"
+							v-model="boardControl"
+							:label="$t('Who places the marks?')"
+							:options="[
+								{
+									value: 'players',
+									label: 'Player devices',
+									description:
+										'Two sides. Players rotate turns on their own or shared devices.',
+								},
+								{
+									value: 'shared',
+									label: 'One shared board',
+									description:
+										'Use the host device. Pass it between X and O. No joining needed.',
+								},
+							]"
+						/>
+						<p v-if="boardGame" class="gp-setup-note">
+							{{
+								$t(
+									"Three boards. First to two wins, or the highest score after three. Draws give neither side a point.",
 								)
 							}}
 						</p>
 						<GatherSelect
+							v-if="!boardGame"
 							v-model="selectedPack"
 							:label="
 								roomGame
@@ -211,13 +244,13 @@
 							:disabled="!packs.length"
 						/>
 						<button
-							v-if="selectedPack && !roomGame"
+							v-if="selectedPack && !roomGame && !boardGame"
 							class="gp-example-next"
 							@click="preview = packs.find((p) => p.name === selectedPack)"
 						>
 							{{ $t("Preview the prompts →") }}
 						</button>
-						<template v-if="!roomGame && game.key !== 'quiz'">
+						<template v-if="!roomGame && !boardGame && game.key !== 'quiz'">
 							<GatherChoices
 								v-model="seconds"
 								:label="
@@ -275,7 +308,7 @@
 						</p>
 						<button
 							class="gp-button"
-							:disabled="creating || !selectedPack"
+							:disabled="creating || (!selectedPack && !boardGame)"
 							@click="host"
 						>
 							{{
@@ -335,17 +368,17 @@
 							}}
 						</p>
 					</details>
-					<details v-if="!roomGame">
+					<details v-if="!roomGame && !boardGame">
 						<summary>{{ $t("Scoring and facilitation") }}</summary>
 						<p>{{ $t(guide.scoring) }}</p>
 						<p>{{ $t(guide.hostDoes) }}</p>
 					</details>
-					<details v-if="!roomGame">
+					<details v-if="!roomGame && !boardGame">
 						<summary>{{ $t("Full visual guide and room setup") }}</summary>
 						<p>{{ $t(guide.setup) }}</p>
 						<GameVisualGuide v-if="visual" :game-title="game.title" :visual="visual" />
 					</details>
-					<details v-if="guideVideo">
+					<details v-if="guideVideo && !boardGame">
 						<summary>{{ $t("Watch a real round") }}</summary>
 						<video
 							controls
@@ -374,6 +407,7 @@
 	</div>
 </template>
 <script setup>
+import TryBoard from "@/games/grid_conquest/TryBoard.vue";
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import HostBar from "@/components/HostBar.vue";
@@ -407,6 +441,8 @@ const exampleStep = ref(0),
 	sampleChoice = ref(null),
 	samplePrediction = ref(null);
 const guest = !window.session_user || window.session_user === "Guest";
+const boardGame = computed(() => game.value?.key === "grid-conquest");
+const boardControl = ref("players");
 const roomGame = computed(() => game.value?.key === "common-ground");
 const profile = computed(() => profileFor(game.value));
 const guide = computed(() => (roomGame.value ? {} : guideFor(game.value?.key)));
@@ -547,6 +583,11 @@ async function host() {
 				rounds: 5,
 				gathering_arc: journey.value,
 			});
+		if (boardGame.value) {
+			delete configuration.pack;
+			delete configuration.deck;
+			Object.assign(configuration, { control_mode: boardControl.value });
+		}
 		const created = await gpCall("create_session", {
 			game_key: game.value.key,
 			configuration,

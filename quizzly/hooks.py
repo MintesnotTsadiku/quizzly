@@ -69,7 +69,7 @@ quizzly_game_modules = [
 	"quizzly.games.round_games.game.PhraseForgeGame",
 	"quizzly.games.round_games.game.SeekAndShowGame",
 	"quizzly.games.round_games.game.OneWordChorusGame",
-	"quizzly.games.round_games.game.GridConquestGame",
+	"quizzly.games.grid_conquest.game.GridConquestGame",
 	"quizzly.games.round_games.game.DotsAndBoxesGame",
 	"quizzly.games.round_games.game.HiddenPictureGame",
 	"quizzly.games.round_games.game.PathWeaverGame",

@@ -102,10 +102,9 @@ def tick_once() -> bool:
 			if due and not control:
 				doc_for_policy = frappe.get_doc("GP Session", session)
 				module = get_game_module(doc_for_policy.game_key)
-				if (
-					not (frappe.parse_json(doc_for_policy.configuration) or {}).get("auto_progress", True)
-					and module.is_presentation_phase(state["phase"])
-				):
+				if not (frappe.parse_json(doc_for_policy.configuration) or {}).get(
+					"auto_progress", True
+				) and module.is_presentation_phase(state["phase"]):
 					# Hold settled results indefinitely in manual mode. The host's Next
 					# command still takes the normal module transition.
 					state["next_ts"] = time.time() + ADVANCE_WAIT_CAP
@@ -213,7 +212,13 @@ def apply_transition(session_doc, old_state: dict, transition: Transition) -> No
 	if old_state and get_game_module(session_doc.game_key).is_presentation_phase(old_state.get("phase", "")):
 		history = list(old_state.get("presentation_history") or [])
 		# Keep only settled snapshots; no live state, tokens, answers, or secrets.
-		history.append({k: v for k, v in old_state.items() if k not in {"presentation_history", "presentation_replay", "return_state"}})
+		history.append(
+			{
+				k: v
+				for k, v in old_state.items()
+				if k not in {"presentation_history", "presentation_replay", "return_state"}
+			}
+		)
 		new_state["presentation_history"] = history[-8:]
 	elif old_state.get("presentation_history"):
 		new_state["presentation_history"] = old_state["presentation_history"]
@@ -225,7 +230,14 @@ def apply_transition(session_doc, old_state: dict, transition: Transition) -> No
 			frappe.db.set_value("GP Session", session_doc.name, "current_round", round_index)
 		open_round_row(session_doc.name, module_state, next_ts)
 
+	if session_doc.game_key == "grid-conquest" and module_state.get("rules_version") == 2:
+		from quizzly.games.grid_conquest.session import checkpoint
+
+		checkpoint(session_doc, new_state)
+
 	payload = {"phase": transition.phase, **(transition.publish or {})}
+	if session_doc.game_key == "grid-conquest" and module_state.get("rules_version") == 2:
+		payload.update(revision=version, paused=bool(new_state.get("paused")))
 	publish_session_event(
 		session_doc,
 		new_state,
@@ -328,7 +340,9 @@ def persist_leaderboard(leaderboard: list[dict]) -> None:
 		doctype = "GP Team" if entry.get("subject_type", "Team") == "Team" else "GP Participant"
 		# score rides along: computed standings (e.g. team averages) must land in the
 		# record too, or the Ended snapshot reads zeros
-		frappe.db.set_value(doctype, entry["name"], {"rank": rank, "score": entry.get("score", 0)})
+		frappe.db.set_value(
+			doctype, entry["name"], {"rank": entry.get("rank", rank), "score": entry.get("score", 0)}
+		)
 
 
 # --- hot state ---------------------------------------------------------------
@@ -353,7 +367,15 @@ def set_state(session: str, state: dict, ttl: float) -> None:
 def get_state(session: str) -> dict | None:
 	# never from process-local cache: the long-lived ticker must see what other
 	# processes wrote, or it spins on a vanished session
-	return frappe.cache.get_value(state_key(session), use_local_cache=False)
+	state = frappe.cache.get_value(state_key(session), use_local_cache=False)
+	if state is None or (
+		(state.get("module_state") or {}).get("rules_version") == 2
+		and state.get("game_key") == "grid-conquest"
+	):
+		from quizzly.games.grid_conquest.session import restore
+
+		return restore(session)
+	return state
 
 
 def clear_state(session: str) -> None:
@@ -390,13 +412,19 @@ def show_previous(session: str, state: dict) -> None:
 		return
 	snapshot = history.pop()
 	replay = dict(snapshot)
-	replay.update({
-		"presentation_replay": True,
-		"return_state": {k: v for k, v in state.items() if k not in {"presentation_history", "presentation_replay", "return_state"}},
-		"presentation_history": history,
-		"next_ts": time.time() + ADVANCE_WAIT_CAP,
-		"deadline_ts": time.time() + ADVANCE_WAIT_CAP,
-	})
+	replay.update(
+		{
+			"presentation_replay": True,
+			"return_state": {
+				k: v
+				for k, v in state.items()
+				if k not in {"presentation_history", "presentation_replay", "return_state"}
+			},
+			"presentation_history": history,
+			"next_ts": time.time() + ADVANCE_WAIT_CAP,
+			"deadline_ts": time.time() + ADVANCE_WAIT_CAP,
+		}
+	)
 	set_state(session, replay, ttl=ADVANCE_WAIT_CAP + STATE_TTL_MARGIN)
 	publish_control_state(session, replay)
 

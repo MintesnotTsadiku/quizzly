@@ -8,10 +8,12 @@
 			class="flex min-h-0 flex-1 flex-col items-center gap-8 overflow-y-auto p-8"
 		>
 			<CrowdEnding v-if="gameKey === 'crowd-compass'" :ending="ending" screen />
-			<h2 class="font-display text-6xl font-extrabold text-paper">
+			<GridEnding v-if="ending?.grid" :ending="ending" />
+			<h2 v-if="!ending?.grid" class="font-display text-6xl font-extrabold text-paper">
 				{{ $t("Final results") }}
 			</h2>
 			<ol
+				v-if="!ending?.grid"
 				class="grid w-full max-w-5xl gap-5"
 				:class="podium.length > 2 ? 'sm:grid-cols-2' : ''"
 			>
@@ -113,6 +115,7 @@
 		>
 			<component
 				:is="live.ScreenLive"
+				:pin="pin"
 				v-if="gamePhases.includes(view.phase)"
 				:view="view"
 				:remaining="remaining"
@@ -186,6 +189,7 @@
 
 <script setup>
 import RoundJourney from "@/platform/ending/RoundJourney.vue";
+import GridEnding from "@/games/grid_conquest/Ending.vue";
 import CrowdEnding from "@/platform/ending/CrowdEnding.vue";
 import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { locale } from "@/i18n";

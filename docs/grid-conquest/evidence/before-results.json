@@ -1,0 +1,7 @@
+{
+  "checks": [
+    "Reproduced: a text question and answer buttons; no playable X/O board"
+  ],
+  "errors": [],
+  "passed": true
+}

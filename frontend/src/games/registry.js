@@ -1,3 +1,6 @@
+import GridHostLive from "./grid_conquest/HostLive.vue";
+import GridPlayerLive from "./grid_conquest/PlayerLive.vue";
+import GridScreenLive from "./grid_conquest/ScreenLive.vue";
 // Compile-time game registry: the backend manifest is authoritative for what is
 // playable; this maps each game key to the live-view components its phases need.
 // Shared shells (lobby, scoreboard, podium) stay in the platform.
@@ -14,18 +17,53 @@ import RoundHostLive from "./round_games/HostLive.vue";
 import RoundScreenLive from "./round_games/ScreenLive.vue";
 import RoundPlayerLive from "./round_games/PlayerLive.vue";
 
-const ROUND_KEYS = ["bluffline","sequence-sprint","picture-peek","sound-snap","caption-clash","story-loom","signal-spectrum","memory-mosaic","common-thread","escape-together","bracket-bash","closest-call","phrase-forge","seek-and-show","one-word-chorus","grid-conquest","dots-and-boxes","hidden-picture","path-weaver","quilt-puzzle","group-sudoku"];
+const ROUND_KEYS = [
+	"bluffline",
+	"sequence-sprint",
+	"picture-peek",
+	"sound-snap",
+	"caption-clash",
+	"story-loom",
+	"signal-spectrum",
+	"memory-mosaic",
+	"common-thread",
+	"escape-together",
+	"bracket-bash",
+	"closest-call",
+	"phrase-forge",
+	"seek-and-show",
+	"one-word-chorus",
+	"grid-conquest",
+	"dots-and-boxes",
+	"hidden-picture",
+	"path-weaver",
+	"quilt-puzzle",
+	"group-sudoku",
+];
 
 export const GAME_LIVE = {
-	cuecast: { HostLive: CueCastHostLive, ScreenLive: CueCastScreenLive, PlayerLive: CueCastPlayerLive },
+	cuecast: {
+		HostLive: CueCastHostLive,
+		ScreenLive: CueCastScreenLive,
+		PlayerLive: CueCastPlayerLive,
+	},
 	"crowd-compass": {
 		HostLive: CrowdHostLive,
 		ScreenLive: CrowdScreenLive,
 		PlayerLive: CrowdPlayerLive,
 	},
-	"doodle-dash": { HostLive:DoodleHostLive, ScreenLive:DoodleScreenLive, PlayerLive:DoodlePlayerLive },
+	"doodle-dash": {
+		HostLive: DoodleHostLive,
+		ScreenLive: DoodleScreenLive,
+		PlayerLive: DoodlePlayerLive,
+	},
 };
-for (const key of ROUND_KEYS) GAME_LIVE[key] = { HostLive:RoundHostLive, ScreenLive:RoundScreenLive, PlayerLive:RoundPlayerLive };
+for (const key of ROUND_KEYS)
+	GAME_LIVE[key] = {
+		HostLive: RoundHostLive,
+		ScreenLive: RoundScreenLive,
+		PlayerLive: RoundPlayerLive,
+	};
 
 // Phases each game paints itself; everything else (scoreboard, podium, lobby) is
 // the platform's.
@@ -34,7 +72,7 @@ export const GAME_PHASES = {
 	"crowd-compass": ["intermission", "prompt_open", "prediction_open", "reveal"],
 	"doodle-dash": ["draw_ready", "draw_open", "draw_reveal"],
 };
-for (const key of ROUND_KEYS) GAME_PHASES[key] = ["round_open","vote_open","round_reveal"];
+for (const key of ROUND_KEYS) GAME_PHASES[key] = ["round_open", "vote_open", "round_reveal"];
 
 export function liveFor(gameKey) {
 	return GAME_LIVE[gameKey] || GAME_LIVE.cuecast;
@@ -60,6 +98,26 @@ export const GAME_SETUP = {
 		packField: "pack",
 		editor: "crowd-compass",
 	},
-	"doodle-dash": { contentDoctype:"GP Draw Pack", promptDoctype:"GP Draw Prompt", contentLabel:"Pack", packField:"pack", editor:null },
+	"doodle-dash": {
+		contentDoctype: "GP Draw Pack",
+		promptDoctype: "GP Draw Prompt",
+		contentLabel: "Pack",
+		packField: "pack",
+		editor: null,
+	},
 };
-for (const key of ROUND_KEYS) GAME_SETUP[key] = { contentDoctype:"GP Game Pack", promptDoctype:"GP Game Item", contentLabel:"Pack", packField:"pack", editor:null };
+for (const key of ROUND_KEYS)
+	GAME_SETUP[key] = {
+		contentDoctype: "GP Game Pack",
+		promptDoctype: "GP Game Item",
+		contentLabel: "Pack",
+		packField: "pack",
+		editor: null,
+	};
+
+GAME_LIVE["grid-conquest"] = {
+	HostLive: GridHostLive,
+	PlayerLive: GridPlayerLive,
+	ScreenLive: GridScreenLive,
+};
+GAME_PHASES["grid-conquest"] = ["grid_turn", "grid_round_over", "round_open", "round_reveal"];

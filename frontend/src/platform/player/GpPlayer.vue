@@ -86,6 +86,7 @@
 				:prompt="prompt"
 				:solved-count="solvedCount"
 				:submitting="submitting"
+				:error="actionError"
 				:my-vote="view.my_vote"
 				:my-second="view.my_second"
 				:my-prediction="view.my_prediction"
@@ -149,10 +150,14 @@
 			<!-- Podium -->
 			<template v-else-if="phase === 'podium'">
 				<CrowdEnding v-if="gameKey === 'crowd-compass'" :ending="ending" />
-				<h1 class="font-display text-5xl font-extrabold leading-tight text-paper">
+				<GridEnding v-if="ending?.grid" :ending="ending" />
+				<h1
+					v-if="!ending?.grid"
+					class="font-display text-5xl font-extrabold leading-tight text-paper"
+				>
 					{{ headline }}
 				</h1>
-				<ol class="flex w-full max-w-sm flex-col gap-2.5">
+				<ol v-if="!ending?.grid" class="flex w-full max-w-sm flex-col gap-2.5">
 					<li
 						v-for="row in rankedStandings"
 						:key="row.name"
@@ -202,12 +207,13 @@
 
 <script setup>
 import RoundJourney from "@/platform/ending/RoundJourney.vue";
+import GridEnding from "@/games/grid_conquest/Ending.vue";
 import CrowdEnding from "@/platform/ending/CrowdEnding.vue";
 import { t } from "@/i18n";
 import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { computed, inject, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { call } from "@/api";
+import { call, readError } from "@/api";
 import { useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 import ThemeButton from "@/components/ThemeButton.vue";
@@ -239,6 +245,7 @@ const view = ref({});
 const prompt = ref("");
 const solvedCount = ref(0);
 const submitting = ref(false);
+const actionError = ref("");
 const podium = ref(null);
 const ending = ref(null);
 let seqSeen = -1;
@@ -268,6 +275,7 @@ function onEvent(message) {
 	if (!message || typeof message !== "object") return;
 	const type = message.type;
 	const payload = message.payload || {};
+	if (type === "platform.lobby_updated" && gameKey.value === "grid-conquest") refreshPrivate();
 	if (
 		type === "platform.state_changed" ||
 		type.split(".")[0] === gameKey.value.replace("-", "_")
@@ -474,7 +482,12 @@ async function guess(payload) {
 }
 async function roundSubmit(payload) {
 	const { action_type = "submit", ...value } = payload || {};
-	await gameAction(action_type, value);
+	actionError.value = "";
+	try {
+		await gameAction(action_type, value);
+	} catch (e) {
+		actionError.value = readError(e);
+	}
 }
 
 async function leave() {

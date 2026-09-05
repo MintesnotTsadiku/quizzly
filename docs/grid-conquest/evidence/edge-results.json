@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "Two simultaneous requests place exactly one mark",
+    "Authenticated iframe preserves host controls and live board synchronization",
+    "Amharic mobile layout fits a 360px screen",
+    "No browser console errors or uncaught exceptions"
+  ],
+  "errors": [],
+  "passed": true
+}

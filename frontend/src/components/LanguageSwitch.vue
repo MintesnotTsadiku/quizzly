@@ -33,6 +33,9 @@ button {
 	font: inherit;
 	white-space: nowrap;
 }
+button[lang="am"] {
+	font-family: "Gather Ethiopic", "Instrument Sans", sans-serif;
+}
 button[aria-pressed="true"] {
 	background: var(--gp-primary, #7355b5);
 	color: white;

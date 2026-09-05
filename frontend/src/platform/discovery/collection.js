@@ -12,6 +12,24 @@ export const featuredKeys = [
 ];
 export const categories = ["All games", "Connect", "Perform", "Create", "Think", "Compete"];
 const profiles = {
+	"grid-conquest": {
+		category: "Compete",
+		devices: ["own", "shared", "host"],
+		deviceLabel: "Player devices or one shared board",
+		people: "2 sides · rotate players or share devices",
+		time: "5 min",
+		color: "butter",
+		kicker: "X and O, together.",
+		description:
+			"Take turns on one real board. Make a line, block a rival and cheer your side.",
+		sample: "Tap the square that completes X’s row.",
+		steps: [
+			"Join as two sides, X and O, or use one shared host device.",
+			"On your turn, tap an empty square. Connect three across, down or diagonally.",
+			"A win earns one point. Play up to three boards; the starting side alternates.",
+		],
+		access: "No speed bonus or countdown. Use touch, mouse, or arrow keys and Enter. X/O shapes and spoken square labels accompany colour. The host can help place a move.",
+	},
 	"common-ground": {
 		category: "Connect",
 		devices: ["host"],

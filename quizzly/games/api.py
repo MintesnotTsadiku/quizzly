@@ -18,6 +18,7 @@ from quizzly import access
 from quizzly.api import generate_game_pin, hash_token
 from quizzly.games import GameContext, get_game_module
 from quizzly.games import engine as gpe
+from quizzly.games.grid_conquest.session import is_board
 from quizzly.games.round_games.game import PROFILES as ROUND_GAME_PROFILES
 from quizzly.profanity import is_profane
 
@@ -154,6 +155,7 @@ def create_session(game_key: str, configuration: dict | str | None = None) -> di
 	normalized["auto_progress"] = (
 		False
 		if "host_only" in module.manifest.capabilities
+		or (game_key == "grid-conquest" and normalized.get("rules_version") == 2)
 		else bool(int(configuration.get("auto_progress", 1)))
 	)
 	session_doc = frappe.get_doc(
@@ -220,7 +222,14 @@ def start_session(session: str) -> dict:
 		frappe.throw(_("Session has already started"))
 	participants = lobby_participants(session_doc.name)
 	module = get_game_module(session_doc.game_key)
-	if not participants and "host_only" not in module.manifest.capabilities:
+	if (
+		not participants
+		and "host_only" not in module.manifest.capabilities
+		and not (
+			is_board(session_doc)
+			and frappe.parse_json(session_doc.configuration).get("control_mode") == "shared"
+		)
+	):
 		frappe.throw(_("No participants have joined yet"))
 	session_doc.status = "Active"
 	session_doc.started_at = now_datetime()
@@ -228,7 +237,7 @@ def start_session(session: str) -> dict:
 	ctx = gpe.context_for(session_doc)
 	first = module.start_game(ctx, participants)
 	publish_lobby_update(session_doc)
-	if "host_only" in module.manifest.capabilities:
+	if "host_only" in module.manifest.capabilities or is_board(session_doc):
 		# Human-paced rooms advance through versioned host commands, not the ticker.
 		gpe.apply_transition(session_doc, {}, first)
 	else:
@@ -242,6 +251,10 @@ def host_command(session: str, command: str, payload: dict | str | None = None) 
 	"""Lobby commands mutate and republish; live commands ride the control flag."""
 	payload = as_dict(payload)
 	session_doc = get_host_session(session)
+	if is_board(session_doc) and session_doc.status == "Active":
+		from quizzly.games.grid_conquest.session import command as board_command
+
+		return board_command(session_doc, command, payload)
 	if (
 		command
 		not in {
@@ -331,6 +344,10 @@ def end_session(session: str) -> dict:
 		session_doc.save()
 		gpe.publish_session_event(session_doc, {}, "platform.session_ended", {"cancelled": True})
 	elif session_doc.status == "Active":
+		if is_board(session_doc):
+			with frappe.cache.lock(f"gp:board:{session}", timeout=30):
+				gpe.finish_session(session_doc)
+			return {"ok": True}
 		if "host_only" in get_game_module(session_doc.game_key).manifest.capabilities:
 			gpe.finish_session(session_doc)
 		else:
@@ -350,7 +367,7 @@ def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
 	session_doc = get_session_by_pin(pin)
 	if "host_only" in get_game_module(session_doc.game_key).manifest.capabilities:
 		frappe.throw(_("This game is played in the room. No player device or online join is needed."))
-	if session_doc.status != "Lobby":
+	if session_doc.status != "Lobby" and not (is_board(session_doc) and session_doc.status == "Active"):
 		frappe.throw(_("Game has already started"))
 	if session_doc.lobby_locked:
 		frappe.throw(_("Lobby is locked"))
@@ -374,6 +391,9 @@ def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
 			"joined_at": now_datetime(),
 		}
 	).insert(ignore_permissions=True)
+	from quizzly.games.grid_conquest.session import assign_joiner
+
+	assign_joiner(session_doc, participant)
 	publish_lobby_update(session_doc)
 	return {
 		"participant_token": token,
@@ -471,6 +491,10 @@ def submit_action(
 	if session_doc.status != "Active":
 		frappe.throw(_("Game is not active"))
 	participant = get_participant_by_token(session_doc, token)
+	if is_board(session_doc):
+		from quizzly.games.grid_conquest.session import command as board_command
+
+		return board_command(session_doc, action_type, as_dict(payload), participant)
 	idempotency_key = str(idempotency_key or "").strip()[:64]
 	if not idempotency_key:
 		frappe.throw(_("Missing idempotency key"))
@@ -735,6 +759,25 @@ def advance_room(session: str, expected_version: int) -> dict:
 
 def ending_snapshot(session_doc):
 	# Called only after the existing host/player/public snapshot authorization.
+	if session_doc.status == "Ended" and is_board(session_doc):
+		rows = frappe.get_all(
+			"GP Round",
+			filters={"session": session_doc.name},
+			fields=["resolution"],
+			order_by="round_index desc",
+			limit=1,
+		)
+		snapshot = (frappe.parse_json(rows[0].resolution) or {}).get("grid_snapshot") if rows else None
+		if snapshot:
+			ms = snapshot["module_state"]
+			x, o = ms["wins"]["X"], ms["wins"]["O"]
+			return {
+				"grid": True,
+				"wins": ms["wins"],
+				"winner": "X" if x > o else "O" if o > x else "draw",
+				"boards_played": ms["round_index"] + int(bool(ms.get("winner"))),
+			}
+		return None
 	if session_doc.status != "Ended" or session_doc.game_key != "crowd-compass":
 		return None
 	from quizzly.games.crowd_compass.progression import recap_from_rounds

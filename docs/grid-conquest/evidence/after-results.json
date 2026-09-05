@@ -1,0 +1,21 @@
+{
+  "checks": [
+    "Discovery teaches the same playable board; practice win and reset work",
+    "Server rejects a move from the wrong side",
+    "Stale revisions and occupied squares are rejected",
+    "Pause blocks moves; reloading a player restores board and role",
+    "Lost Redis board state restores from the durable database snapshot",
+    "Two sides and a late joiner play a winning line; shared screen stays synchronized",
+    "Next board alternates starter; a full draw awards no points; the late joiner takes a turn",
+    "Host can help place one mark, then control returns to the players",
+    "Three-board match ends 2–0 with persistent results after reload",
+    "Replay opens a fresh room with the same board settings",
+    "Host-only play needs no joining devices; a tied match gives both sides equal rank",
+    "Two simultaneous requests place exactly one mark",
+    "Authenticated iframe preserves host controls and live board synchronization",
+    "Amharic mobile layout fits a 360px screen",
+    "No browser console errors or uncaught exceptions"
+  ],
+  "errors": [],
+  "passed": true
+}

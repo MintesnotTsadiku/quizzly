@@ -565,13 +565,25 @@
 				<button class="ctl" @click="end">{{ $t("Exit") }}</button>
 				<button
 					class="ctl ctl-go"
-					:disabled="starting || !participants.length"
+					:disabled="
+						starting ||
+						(gameKey === 'grid-conquest' &&
+							configuration.control_mode === 'players' &&
+							participants.length < 2) ||
+						(!participants.length &&
+							!(
+								gameKey === 'grid-conquest' &&
+								configuration.control_mode === 'shared'
+							))
+					"
 					@click="startGame"
 				>
 					{{
 						starting
 							? $t("Starting…")
-							: $t("Start · {count} players", { count: participants.length })
+							: gameKey === "grid-conquest"
+								? $t("Start match")
+								: $t("Start · {count} players", { count: participants.length })
 					}}
 				</button>
 			</div>
@@ -587,6 +599,7 @@
 			<RoundJourney v-if="!podium && gameKey === 'crowd-compass'" :arc="view.arc" />
 			<component
 				:is="live.HostLive"
+				:pin="pin"
 				v-if="!podium && gamePhases.includes(view.phase)"
 				:view="view"
 				:remaining="remaining"
@@ -596,6 +609,9 @@
 				:solved-count="solvedCount"
 				@reassign="reassignPerformer"
 				@compose="composer = true"
+				:busy="gridBusy"
+				:error="error"
+				@grid-command="gridCommand"
 			/>
 
 			<template v-else-if="!podium && view.phase === 'scoreboard'">
@@ -638,10 +654,14 @@
 			<template v-else-if="podium">
 				<LanguageSwitch v-if="gameKey === 'crowd-compass'" />
 				<CrowdEnding v-if="gameKey === 'crowd-compass'" :ending="ending" />
-				<h1 class="font-display text-5xl font-extrabold text-paper sm:text-6xl">
+				<GridEnding v-if="ending?.grid" :ending="ending" />
+				<h1
+					v-if="!ending?.grid"
+					class="font-display text-5xl font-extrabold text-paper sm:text-6xl"
+				>
 					{{ $t("Final results") }}
 				</h1>
-				<ol class="flex w-full max-w-xl flex-col gap-3">
+				<ol v-if="!ending?.grid" class="flex w-full max-w-xl flex-col gap-3">
 					<li
 						v-for="team in podium"
 						:key="team.name"
@@ -668,7 +688,7 @@
 				</ol>
 				<div class="mt-2 flex flex-wrap justify-center gap-2">
 					<button
-						v-if="gameKey === 'crowd-compass'"
+						v-if="['crowd-compass', 'grid-conquest'].includes(gameKey)"
 						class="ctl ctl-go"
 						:disabled="creating"
 						@click="replayRoom"
@@ -696,7 +716,7 @@
 			</template>
 
 			<div
-				v-if="!podium && phase !== 'lobby'"
+				v-if="!podium && phase !== 'lobby' && view.rules_version !== 2"
 				class="flex flex-wrap items-center justify-center gap-3"
 			>
 				<button v-if="view.phase !== 'scoreboard'" class="ctl" @click="skipTurn">
@@ -833,6 +853,7 @@
 
 <script setup>
 import RoundJourney from "@/platform/ending/RoundJourney.vue";
+import GridEnding from "@/games/grid_conquest/Ending.vue";
 import CrowdEnding from "@/platform/ending/CrowdEnding.vue";
 import { locale } from "@/i18n";
 import LanguageSwitch from "@/components/LanguageSwitch.vue";
@@ -885,6 +906,7 @@ const lobbyLocked = ref(false);
 const view = ref({});
 const podium = ref(null);
 const ending = ref(null);
+const gridBusy = ref(false);
 const starting = ref(false);
 const creating = ref(false);
 const qrDataUrl = ref("");
@@ -1012,6 +1034,7 @@ function onEvent(envelopeMessage) {
 	const type = envelopeMessage.type;
 	const payload = envelopeMessage.payload || envelopeMessage;
 	if (type === "platform.lobby_updated") {
+		if (gameKey.value === "grid-conquest") refresh();
 		participants.value = payload.participants || [];
 		teams.value = (payload.teams || []).map((t) => ({ ...t, editName: t.team_name }));
 		lobbyLocked.value = Boolean(payload.lobby_locked);
@@ -1214,7 +1237,7 @@ function choosePreviewedPack(pack) {
 onMounted(async () => {
 	initSound("host");
 	try {
-		const remembered = loadHostedSession();
+		const remembered = route.query.session || loadHostedSession();
 		let state = null;
 		if (remembered) {
 			state = await gpCall("get_host_state", { session: remembered }).catch(() => null);
@@ -1248,6 +1271,10 @@ onMounted(async () => {
 });
 
 watch(setupGame, (game) => {
+	if (game === "grid-conquest") {
+		router.push("/games/grid-conquest");
+		return;
+	}
 	if (game) loadPacks(game);
 });
 
@@ -1258,6 +1285,20 @@ async function hostAction(method, params = {}) {
 	} catch (e) {
 		error.value = readError(e);
 		await refresh().catch(() => {});
+	}
+}
+
+async function gridCommand({ command, ...payload }) {
+	if (gridBusy.value) return;
+	gridBusy.value = true;
+	error.value = "";
+	try {
+		await gpCall("host_command", { session: session.value, command, payload });
+	} catch (e) {
+		error.value = readError(e);
+	} finally {
+		await refresh();
+		gridBusy.value = false;
 	}
 }
 
@@ -1329,9 +1370,9 @@ async function createSession() {
 
 async function startGame() {
 	starting.value = true;
-	if (await hostAction("start_session")) {
-		await refresh();
-	} else {
+	try {
+		if (await hostAction("start_session")) await refresh();
+	} finally {
 		starting.value = false;
 	}
 }
@@ -1437,6 +1478,7 @@ async function end() {
 
 function newRoom() {
 	forgetHostedSession();
-	window.location.href = "/play/host";
+	window.location.href =
+		gameKey.value === "grid-conquest" ? "/play/games/grid-conquest" : "/play/host";
 }
 </script>

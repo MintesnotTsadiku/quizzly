@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "checks": [
+    "Arrow-key navigation and Enter place a winning mark",
+    "Keyboard reset restores the practice board",
+    "Reduced-motion browser mode supported"
+  ]
+}
