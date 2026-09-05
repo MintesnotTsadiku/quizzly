@@ -24,6 +24,8 @@ const quizRoutes = [
 ];
 
 const platformRoutes = [
+	{ path: "/room/:session", name: "RoomHost", component: () => import("@/platform/room/RoomStage.vue") },
+	{ path: "/room-screen/:pin", name: "RoomScreen", component: () => import("@/platform/room/RoomStage.vue") },
 	{
 		path: "/",
 		name: "Catalog",
@@ -76,7 +78,7 @@ const router = createRouter({
 // Hosting needs a real user; guests would otherwise land on an empty host screen.
 router.beforeEach((to) => {
 	if (
-		["GpHost", "HostDashboard", "CrowdPackEditor", "Host", "Quizzes", "QuizEditor"].includes(
+		["RoomHost", "GpHost", "HostDashboard", "CrowdPackEditor", "Host", "Quizzes", "QuizEditor"].includes(
 			to.name
 		) &&
 		redirectGuestToLogin(`${BASE}${to.fullPath}`)

@@ -45,6 +45,7 @@ def list_games() -> list[dict]:
 			"interaction_tags": list(m.interaction_tags),
 			"status": m.status,
 			"frontend_key": m.frontend_key,
+			"capabilities": list(m.capabilities),
 		}
 		for m in sorted(manifests(), key=lambda m: m.title)
 	]
@@ -139,7 +140,11 @@ def create_session(game_key: str, configuration: dict | str | None = None) -> di
 	module = get_game_module(game_key)
 	ctx = GameContext(session="", pin="", game_key=game_key, configuration=configuration)
 	normalized = module.validate_configuration(ctx, configuration)
-	normalized["auto_progress"] = bool(int(configuration.get("auto_progress", 1)))
+	normalized["auto_progress"] = (
+		False
+		if "host_only" in module.manifest.capabilities
+		else bool(int(configuration.get("auto_progress", 1)))
+	)
 	session_doc = frappe.get_doc(
 		{
 			"doctype": "GP Session",
@@ -202,16 +207,20 @@ def start_session(session: str) -> dict:
 	if session_doc.status != "Lobby":
 		frappe.throw(_("Session has already started"))
 	participants = lobby_participants(session_doc.name)
-	if not participants:
-		frappe.throw(_("No participants have joined yet"))
 	module = get_game_module(session_doc.game_key)
+	if not participants and "host_only" not in module.manifest.capabilities:
+		frappe.throw(_("No participants have joined yet"))
 	session_doc.status = "Active"
 	session_doc.started_at = now_datetime()
 	session_doc.save()
 	ctx = gpe.context_for(session_doc)
 	first = module.start_game(ctx, participants)
 	publish_lobby_update(session_doc)
-	gpe.enqueue_game_loop(session_doc, first)
+	if "host_only" in module.manifest.capabilities:
+		# Human-paced rooms advance through versioned host commands, not the ticker.
+		gpe.apply_transition(session_doc, {}, first)
+	else:
+		gpe.enqueue_game_loop(session_doc, first)
 	frappe.db.commit()
 	return {"ok": True}
 
@@ -310,7 +319,10 @@ def end_session(session: str) -> dict:
 		session_doc.save()
 		gpe.publish_session_event(session_doc, {}, "platform.session_ended", {"cancelled": True})
 	elif session_doc.status == "Active":
-		gpe.end_active_session(session_doc)
+		if "host_only" in get_game_module(session_doc.game_key).manifest.capabilities:
+			gpe.finish_session(session_doc)
+		else:
+			gpe.end_active_session(session_doc)
 	return {"ok": True}
 
 
@@ -323,6 +335,8 @@ def end_session(session: str) -> dict:
 @rate_limit(limit=10, seconds=60)
 def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
 	session_doc = get_session_by_pin(pin)
+	if "host_only" in get_game_module(session_doc.game_key).manifest.capabilities:
+		frappe.throw(_("This game is played in the room. No player device or online join is needed."))
 	if session_doc.status != "Lobby":
 		frappe.throw(_("Game has already started"))
 	if session_doc.lobby_locked:
@@ -678,3 +692,26 @@ def set_lobby_locked(session: str, locked: bool) -> dict:
 	doc.reload()
 	publish_lobby_update(doc)
 	return lobby_state(doc)
+
+
+@frappe.whitelist(methods=["POST"])
+def advance_room(session: str, expected_version: int) -> dict:
+	"""Advance a host-only room once, including safe retry after a lost response."""
+	session_doc = get_host_session(session)
+	module = get_game_module(session_doc.game_key)
+	if "host_only" not in module.manifest.capabilities:
+		frappe.throw(_("This game uses player controls"))
+	with frappe.cache.lock(f"gp:room-command:{session}", timeout=10):
+		session_doc.reload()
+		if session_doc.status != "Active":
+			frappe.throw(_("This room is not active"))
+		state = gpe.get_state(session)
+		if not state:
+			frappe.throw(_("This room has expired. Start a new game."))
+		if int(expected_version) != state["version"]:
+			return {"ok": True, "already_advanced": True}
+		transition = module.advance_state(gpe.context_for(session_doc), state, {"command": "next"})
+		if transition:
+			gpe.apply_transition(session_doc, state, transition)
+		frappe.db.commit()
+	return {"ok": True}

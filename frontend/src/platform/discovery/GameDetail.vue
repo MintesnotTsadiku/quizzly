@@ -1,487 +1,450 @@
 <template>
-	<div class="flex h-full flex-col overflow-y-auto bg-night">
+	<div class="gather-ui gp-page">
 		<HostBar />
-		<div class="mx-auto w-full max-w-5xl flex-1 px-5 py-10 sm:px-8" v-if="game">
-			<RouterLink
-				class="font-mono text-xs uppercase tracking-[0.22em] text-paper/40 transition hover:text-paper"
-				:to="{ name: 'Catalog' }"
+		<main class="gp-container">
+			<RouterLink class="gp-breadcrumb" :to="{ name: 'Catalog' }"
+				>← Explore games</RouterLink
 			>
-				← All games
-			</RouterLink>
-
-			<header class="mt-8 flex flex-wrap items-start justify-between gap-6">
-				<div class="min-w-0 max-w-2xl">
-					<h1
-						class="font-display text-5xl font-extrabold leading-none text-paper sm:text-6xl"
-					>
-						{{ game.title }}
-					</h1>
-					<p class="mt-4 text-lg text-paper/60">{{ game.summary }}</p>
-					<p
-						class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-xs uppercase tracking-wide text-paper/45"
-					>
-						<span>{{ playersLabel(game) }}</span>
-						<span v-if="game.recommended_players"
-							>best {{ game.recommended_players }}</span
-						>
-						<span v-if="game.typical_minutes">~{{ game.typical_minutes }} min</span>
-					</p>
-				</div>
-				<div class="flex shrink-0 flex-col gap-3">
-					<button v-if="!hosting" class="ctl ctl-go" @click="beginHosting">
-						Host this game
-					</button>
-					<p v-if="error" class="max-w-56 text-sm text-alert">{{ error }}</p>
-				</div>
-			</header>
-
-			<GameVisualGuide
-				v-if="gameVisual"
-				:game-title="game.title"
-				:visual="gameVisual"
-			/>
-
-			<section
-				class="mt-7 overflow-hidden rounded-3xl border border-lagoon/25 bg-lagoon/[0.06]"
-			>
-				<div class="flex gap-4 p-5 sm:items-center sm:p-6">
-					<div
-						class="grid size-11 shrink-0 place-items-center rounded-2xl bg-lagoon/15 text-ok"
-					>
-						<svg
-							class="size-5 fill-none stroke-current"
-							viewBox="0 0 24 24"
-							stroke-width="1.8"
-						>
-							<path d="M8 5v14l11-7Z" />
-							<path d="M4 5v14" />
-						</svg>
-					</div>
+			<div v-if="loading" role="status" class="gp-state">Getting the game ready…</div>
+			<div v-else-if="!game" class="gp-state">
+				<h1>We couldn’t find that game.</h1>
+				<p>{{ error || "Choose another game from the collection." }}</p>
+				<RouterLink class="gp-button" :to="{ name: 'Catalog' }">Explore games</RouterLink>
+			</div>
+			<template v-else>
+				<header class="gp-detail-header">
 					<div>
-						<p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ok">
-							What makes it a game
+						<p class="gp-eyebrow">
+							{{ profile.category }} ·
+							{{ profile.kicker || "A new way to play together" }}
 						</p>
-						<p
-							class="mt-1.5 max-w-3xl text-sm leading-relaxed text-paper/70 sm:text-base"
-						>
-							{{ guide.whyGame }}
-						</p>
+						<h1>{{ game.title }}</h1>
+						<p>{{ profile.description }}</p>
+						<div class="gp-detail-tags">
+							<span>{{ profile.people }}</span
+							><span>About {{ profile.time }}</span
+							><span>{{ profile.deviceLabel }}</span>
+						</div>
 					</div>
-				</div>
-			</section>
-
-			<!-- Host panel: deck + pacing, or demo shortcut -->
-			<section v-if="hosting" class="mt-8 rounded-3xl border border-haze bg-dusk p-6 sm:p-8">
-				<div class="flex flex-wrap items-end justify-between gap-3">
-					<div>
-						<h2 class="font-display text-xl font-bold text-paper">Set up the room</h2>
-						<p class="mt-1 text-sm text-paper/45">
-							Choose the content and pace. You can inspect every prompt first.
+				</header>
+				<div class="gp-detail-grid">
+					<section class="gp-example" aria-label="Try an example round">
+						<GameArtwork :game-key="game.key" :color="profile.color" />
+						<div class="gp-example-content">
+							<p class="gp-eyebrow">
+								{{
+									exampleStep ? "Here’s what happens next" : "Try a little round"
+								}}
+								· Example only
+							</p>
+							<h2>{{ profile.sample || game.summary }}</h2>
+							<template v-if="game.key === 'crowd-compass'">
+								<p class="gp-caption">
+									{{
+										exampleStep
+											? "Now predict the group’s favourite. These are sample results, not a live vote."
+											: "First, pick the answer that sounds like you."
+									}}
+								</p>
+								<div class="gp-example-choices">
+									<button
+										v-for="(choice, index) in ['A · Outside', 'B · Inside']"
+										:key="choice"
+										:aria-pressed="sampleChoice === index"
+										@click="chooseExample(index)"
+									>
+										{{ choice }}
+									</button>
+								</div>
+								<div
+									v-if="exampleStep === 2"
+									class="gp-example-result"
+									role="status"
+								>
+									<strong>Outside: 6 votes · Inside: 4 votes</strong><br />{{
+										samplePrediction === 0
+											? "You read this sample room!"
+											: "A surprise! Outside wins this sample room."
+									}}
+									In a real game, the reveal starts the conversation.
+								</div>
+							</template>
+							<template v-else-if="game.key === 'quiz'">
+								<div class="gp-example-choices">
+									<button
+										v-for="(choice, index) in ['A · Venus', 'B · Mars']"
+										:key="choice"
+										:aria-pressed="sampleChoice === index"
+										@click="
+											sampleChoice = index;
+											exampleStep = 1;
+										"
+									>
+										{{ choice }}
+									</button>
+								</div>
+								<div v-if="exampleStep" class="gp-example-result" role="status">
+									<strong>{{
+										sampleChoice === 1 ? "That’s it!" : "Good try! It’s Mars."
+									}}</strong>
+									Iron-rich dust gives Mars its reddish colour.
+								</div>
+							</template>
+							<template v-else>
+								<button
+									class="gp-button gp-button-secondary"
+									@click="exampleStep = exampleStep ? 0 : 1"
+								>
+									{{
+										exampleStep
+											? "Try the prompt again"
+											: "Show me how it feels"
+									}}
+									<span aria-hidden="true">→</span>
+								</button>
+								<div v-if="exampleStep" class="gp-example-result" role="status">
+									{{ exampleReveal }}
+								</div>
+							</template>
+							<button
+								v-if="exampleStep && ['crowd-compass', 'quiz'].includes(game.key)"
+								class="gp-example-next"
+								@click="resetExample"
+							>
+								Try again
+							</button>
+							<p class="gp-caption">
+								No account needed to explore. Your example answers aren’t saved.
+							</p>
+						</div>
+					</section>
+					<section class="gp-setup" aria-labelledby="setup-title">
+						<p class="gp-eyebrow">Bring your people</p>
+						<h2 id="setup-title">Make it your game</h2>
+						<p>
+							{{
+								roomGame
+									? "One host device. Everyone else can put theirs away."
+									: "Choose your content and how you’ll play. Your lobby opens before the game starts."
+							}}
 						</p>
-					</div>
-					<span
-						class="rounded-full border border-haze px-3 py-1 font-mono text-[9px] uppercase tracking-wider text-paper/40"
-						>Takes less than a minute</span
-					>
-				</div>
-				<div class="mt-6 grid gap-6 lg:grid-cols-2">
-					<div class="flex flex-col gap-2">
-						<span
-							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-							>Content pack</span
+						<label class="gp-field"
+							><span>How will you play?</span
+							><select v-model="participation">
+								<option
+									v-for="mode in modes"
+									:key="mode.value"
+									:value="mode.value"
+								>
+									{{ mode.label }}
+								</option>
+							</select></label
 						>
-						<PackPicker
-							v-model="setup.deck"
-							:packs="decks"
-							@preview="previewPack = $event"
-						/>
+						<p class="gp-setup-note">
+							{{
+								participation === "shared"
+									? "Join once per team or household with a group nickname. Agree on one answer; each device gets one score."
+									: roomGame
+										? "Make small groups of 2–5. Read the prompt aloud, or open it on a shared screen. No one needs to join online."
+										: "Players join with a code. Keep private prompts on the right person’s device. A shared screen is optional."
+							}}
+						</p>
+						<label class="gp-field"
+							><span>{{
+								roomGame
+									? "Pick a conversation pack"
+									: "Choose a ready-to-play pack"
+							}}</span
+							><select v-model="selectedPack" :disabled="!packs.length">
+								<option v-if="!packs.length" value="">
+									No ready-made packs available
+								</option>
+								<option v-for="pack in packs" :key="pack.name" :value="pack.name">
+									{{ pack.title }}
+								</option>
+							</select></label
+						>
 						<button
-							v-if="selectedPack"
-							type="button"
-							class="flex items-center gap-2 self-start text-xs font-semibold text-ok transition hover:text-paper"
-							@click="previewPack = selectedPack"
+							v-if="selectedPack && !roomGame"
+							class="gp-example-next"
+							@click="preview = packs.find((p) => p.name === selectedPack)"
 						>
-							<span class="grid size-6 place-items-center rounded-lg bg-lagoon/10"
-								>↗</span
-							>
-							Preview all {{ selectedPack.prompt_count }} prompts
+							Preview the prompts →
 						</button>
-					</div>
-					<div v-if="guide.contentKey !== 'deck'" class="flex flex-col gap-2">
-						<span
-							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>
-							Vote time
-						</span>
-						<div class="flex gap-2">
-							<button
-								v-for="s in [10, 15, 20]"
-								:key="s"
-								type="button"
-								class="ctl flex-1"
-								:data-on="setup.vote_seconds === s"
-								@click="setup.vote_seconds = s"
+						<template v-if="!roomGame && game.key !== 'quiz'">
+							<label class="gp-field"
+								><span>{{
+									game.key === "crowd-compass"
+										? "Time to vote and predict"
+										: "Round length"
+								}}</span
+								><select v-model.number="seconds">
+									<option v-for="n in times" :key="n" :value="n">
+										{{ n }} seconds
+									</option>
+								</select></label
 							>
-								{{ s }}s
-							</button>
-						</div>
-					</div>
-					<div v-else class="flex flex-col gap-2">
-						<span
-							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>
-							Round length
-						</span>
-						<div class="flex gap-2">
-							<button
-								v-for="s in [30, 60, 90]"
-								:key="s"
-								type="button"
-								class="ctl flex-1"
-								:data-on="setup.seconds === s"
-								@click="setup.seconds = s"
+							<label v-if="game.key === 'crowd-compass'" class="gp-field"
+								><span>Between rounds</span
+								><select v-model="pace">
+									<option value="manual">Host advances · room to talk</option>
+									<option value="auto">Automatic · keep it moving</option>
+								</select></label
 							>
-								{{ s }}s
-							</button>
-						</div>
-					</div>
-					<div v-if="guide.contentKey === 'deck'" class="flex flex-col gap-2">
-						<span
-							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-							>Teams</span
-						>
-						<div class="flex gap-2">
-							<button
-								v-for="n in [2, 3, 4]"
-								:key="n"
-								type="button"
-								class="ctl flex-1"
-								:data-on="setup.teams_count === n"
-								@click="setup.teams_count = n"
-							>
-								{{ n }}
-							</button>
-						</div>
-					</div>
-					<div v-else class="flex flex-col gap-2">
-						<span
-							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>
-							Prediction time
-						</span>
-						<div class="flex gap-2">
-							<button
-								v-for="s in [10, 15, 20]"
-								:key="s"
-								type="button"
-								class="ctl flex-1"
-								:data-on="setup.prediction_seconds === s"
-								@click="setup.prediction_seconds = s"
-							>
-								{{ s }}s
-							</button>
-						</div>
-					</div>
-					<div class="flex items-end justify-between gap-4">
-						<PremiumToggle
-							v-if="guide.contentKey === 'deck'"
-							v-model="setup.sudden_death"
-							label="Sudden-death tiebreaker"
-							hint="Keep playing until one winner remains"
-						/>
+						</template>
+						<p v-if="error" role="alert" class="gp-error">{{ error }}</p>
 						<button
-							class="ctl ctl-go"
-							:disabled="!setup.deck || creating"
-							@click="createSession"
+							class="gp-button"
+							:disabled="creating || !selectedPack"
+							@click="host"
 						>
-							{{ creating ? "Creating…" : "Open the lobby" }}
+							{{
+								creating
+									? "Opening your room…"
+									: guest
+										? "Sign in to host"
+										: roomGame
+											? "Set up our room"
+											: "Open the lobby"
+							}}
+							<span aria-hidden="true">→</span>
 						</button>
-					</div>
-				</div>
-			</section>
-
-			<PackPreviewDrawer
-				:pack="previewPack"
-				@close="previewPack = null"
-				@choose="choosePreviewedPack"
-			/>
-
-			<section class="mt-12 grid gap-10 lg:grid-cols-2">
-				<div>
-					<h2 class="font-display text-2xl font-bold text-paper">How to play</h2>
-					<ol class="mt-5 flex flex-col gap-4">
-						<li
-							v-for="(step, index) in guide.howTo"
-							:key="index"
-							class="flex gap-4 text-paper/70"
+						<p class="gp-setup-note">
+							{{
+								roomGame
+									? "Three playful prompts. No countdown. Passing is welcome."
+									: "Hosting requires a host account. Guests can join without signing up."
+							}}
+						</p>
+						<RouterLink
+							v-if="!packs.length && game.key === 'quiz'"
+							class="gp-example-next"
+							:to="{ name: 'Quizzes' }"
+							>Create your own quiz →</RouterLink
 						>
-							<span class="font-mono text-sm font-bold tabular-nums text-accent">
-								{{ String(index + 1).padStart(2, "0") }}
-							</span>
-							{{ step }}
+					</section>
+				</div>
+				<section class="gp-steps">
+					<h2>How to play</h2>
+					<ol>
+						<li v-for="(step, i) in steps" :key="step">
+							<span>{{ i + 1 }}</span
+							>{{ step }}
 						</li>
 					</ol>
-					<h3 class="mt-8 font-display text-base font-bold text-paper">Scoring</h3>
-					<p class="mt-2 text-sm leading-relaxed text-paper/60">{{ guide.scoring }}</p>
-					<h3 class="mt-6 font-display text-base font-bold text-paper">Room setup</h3>
-					<p class="mt-2 text-sm leading-relaxed text-paper/60">{{ guide.setup }}</p>
+				</section>
+				<div class="gp-disclosures">
+					<details>
+						<summary>Make room for everyone</summary>
+						<p>{{ profile.access }}</p>
+						<p v-if="roomGame">
+							In a large gathering, let everyone talk in parallel groups. Invite two
+							or three groups to share instead of asking every person. New arrivals
+							can join any conversation; people can step away at any time.
+						</p>
+					</details>
+					<details v-if="!roomGame">
+						<summary>Scoring and facilitation</summary>
+						<p>{{ guide.scoring }}</p>
+						<p>{{ guide.hostDoes }}</p>
+					</details>
+					<details v-if="!roomGame">
+						<summary>Full visual guide and room setup</summary>
+						<p>{{ guide.setup }}</p>
+						<GameVisualGuide v-if="visual" :game-title="game.title" :visual="visual" />
+					</details>
+					<details v-if="guideVideo">
+						<summary>Watch a real round</summary>
+						<video
+							controls
+							preload="none"
+							:poster="guideVideo.poster"
+							style="width: 100%; max-width: 900px; margin-top: 16px"
+							:src="guideVideo.video"
+						>
+							Use the full visual guide above to follow each step.
+						</video>
+					</details>
+					<details v-if="roomGame">
+						<summary>Connection and privacy</summary>
+						<p>
+							Internet is needed to open and advance the session. If the connection
+							drops, keep talking about the visible prompt; reconnect before
+							continuing. No attendee names or spoken answers are recorded. The
+							public screen contains only prompts.
+						</p>
+					</details>
 				</div>
-				<div class="flex flex-col gap-6">
-					<div class="rounded-2xl border border-haze bg-dusk p-5">
-						<h3
-							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>
-							The host does
-						</h3>
-						<p class="mt-2 text-sm leading-relaxed text-paper/70">
-							{{ guide.hostDoes }}
-						</p>
-					</div>
-					<div class="rounded-2xl border border-haze bg-dusk p-5">
-						<h3
-							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>
-							Players see
-						</h3>
-						<p class="mt-2 text-sm leading-relaxed text-paper/70">
-							{{ guide.playerSees }}
-						</p>
-					</div>
-					<div class="rounded-2xl border border-haze bg-dusk p-5">
-						<h3
-							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>
-							The room sees
-						</h3>
-						<p class="mt-2 text-sm leading-relaxed text-paper/70">
-							{{ guide.roomSees }}
-						</p>
-					</div>
-					<div class="rounded-2xl border border-haze bg-dusk p-5">
-						<h3
-							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>
-							Accessibility
-						</h3>
-						<p class="mt-2 text-sm leading-relaxed text-paper/70">
-							{{ guide.accessibility }}
-						</p>
-					</div>
-				</div>
-			</section>
-
-			<!-- Demo packs: three audience flavours per module (implementation plan §1) -->
-			<section v-if="guide.demos?.length" class="mt-14">
-				<h2 class="font-display text-2xl font-bold text-paper">Play a demo</h2>
-				<p class="mt-2 text-paper/50">
-					Ready-made decks you can host instantly or duplicate and make your own.
-				</p>
-				<div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-					<div
-						v-for="demo in demoCards(guide.demos)"
-						:key="demo.demo_key"
-						class="group flex flex-col rounded-3xl border border-haze bg-dusk p-6 transition hover:border-lagoon"
-					>
-						<span
-							class="w-fit rounded-full border border-haze px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-ok"
-						>
-							{{ demo.audience }}
-						</span>
-						<h3 class="mt-4 font-display text-xl font-bold text-paper">
-							{{ demo.title }}
-						</h3>
-						<p class="mt-2 flex-1 text-sm leading-relaxed text-paper/60">
-							{{ demo.blurb }}
-						</p>
-						<p class="mt-4 font-mono text-xs text-paper/40">
-							{{ demo.prompt_count }} prompts
-						</p>
-						<div class="mt-4 flex flex-wrap gap-2">
-							<button
-								class="ctl"
-								:disabled="creatingDemo === demo.name"
-								@click="hostDemo(demo)"
-							>
-								{{ creatingDemo === demo.name ? "Opening…" : "Host demo" }}
-							</button>
-							<button v-if="demo.video" class="ctl ctl-go" @click="watchDemo(demo)">
-								Watch demo
-							</button>
-							<button class="ctl" @click="previewPack = demo">View prompts</button>
-						</div>
-					</div>
-				</div>
-			</section>
-
-			<section
-				v-if="selectedVideo || firstVideoDemo()"
-				ref="videoSection"
-				class="mt-14 overflow-hidden rounded-3xl border border-haze bg-dusk"
-			>
-				<div class="p-6 sm:p-8">
-					<p class="font-mono text-[11px] uppercase tracking-[0.22em] text-ok">
-						Game demo
-					</p>
-					<h2 class="mt-2 font-display text-2xl font-bold text-paper">
-						{{ (selectedVideo || firstVideoDemo()).title }}
-					</h2>
-					<p class="mt-2 text-sm text-paper/55">
-						See the host, shared screen, and players complete a real round.
-					</p>
-				</div>
-				<video
-					class="aspect-video w-full bg-black"
-					controls
-					preload="none"
-					:poster="(selectedVideo || firstVideoDemo()).poster"
-				>
-					<source :src="(selectedVideo || firstVideoDemo()).video" type="video/mp4" />
-					Your browser does not support embedded video.
-				</video>
-			</section>
-		</div>
+			</template>
+			<PackPreviewDrawer :pack="preview" @close="preview = null" @choose="choosePack" />
+		</main>
 	</div>
 </template>
-
 <script setup>
-import { computed, nextTick, onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
-import { redirectGuestToLogin } from "@/auth";
+import { computed, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import HostBar from "@/components/HostBar.vue";
-import GameVisualGuide from "@/platform/discovery/GameVisualGuide.vue";
-import PackPicker from "@/platform/discovery/PackPicker.vue";
-import PackPreviewDrawer from "@/platform/discovery/PackPreviewDrawer.vue";
-import PremiumToggle from "@/platform/discovery/PremiumToggle.vue";
-import { visualFor } from "@/platform/discovery/gameVisuals";
-import { guideFor } from "@/platform/discovery/games";
+import GameArtwork from "./GameArtwork.vue";
+import GameVisualGuide from "./GameVisualGuide.vue";
+import PackPreviewDrawer from "./PackPreviewDrawer.vue";
+import { profileFor } from "./collection";
+import { guideFor } from "./games";
+import { visualFor } from "./gameVisuals";
 import { gpCall, rememberHostedSession } from "@/platform/session/gp";
-
-const router = useRouter();
-const game = ref(null);
-const guide = ref({ howTo: [], demos: [] });
-const decks = ref([]);
-const hosting = ref(false);
-const creating = ref(false);
-const creatingDemo = ref(null);
-const selectedVideo = ref(null);
-const videoSection = ref(null);
-const previewPack = ref(null);
-const error = ref("");
-const gameVisual = computed(() => visualFor(game.value?.key));
-const setup = ref({
-	deck: "",
-	seconds: 60,
-	vote_seconds: 15,
-	prediction_seconds: 15,
-	teams_count: 2,
-	sudden_death: true,
-});
-const selectedPack = computed(() => decks.value.find((deck) => deck.name === setup.value.deck));
-
-onMounted(async () => {
+import { redirectGuestToLogin } from "@/auth";
+import { readError } from "@/api";
+const route = useRoute(),
+	router = useRouter(),
+	game = ref(null),
+	loading = ref(true),
+	error = ref(""),
+	packs = ref([]),
+	selectedPack = ref(""),
+	preview = ref(null),
+	creating = ref(false),
+	participation = ref("own"),
+	seconds = ref(30),
+	pace = ref("manual");
+const exampleStep = ref(0),
+	sampleChoice = ref(null),
+	samplePrediction = ref(null);
+const guest = !window.session_user || window.session_user === "Guest";
+const roomGame = computed(() => game.value?.key === "common-ground");
+const profile = computed(() => profileFor(game.value));
+const guide = computed(() => (roomGame.value ? {} : guideFor(game.value?.key)));
+const guideVideo = computed(() => guide.value.demos?.find((demo) => demo.video));
+const visual = computed(() => visualFor(game.value?.key));
+const steps = computed(() =>
+	profile.value.steps.length ? profile.value.steps : guide.value.howTo || [],
+);
+const times = computed(() =>
+	game.value?.key === "crowd-compass"
+		? [10, 15, 20]
+		: ["cuecast", "doodle-dash"].includes(game.value?.key)
+			? [30, 60, 90]
+			: [15, 30, 45, 60],
+);
+const modes = computed(() =>
+	profile.value.devices.map((value) => ({
+		value,
+		label: {
+			host: "Host device only · play in the room",
+			own: "One device per player",
+			shared: "One device per team or household",
+		}[value],
+	})),
+);
+const exampleReveal = computed(
+	() =>
+		({
+			"common-ground":
+				"“We all like the smell of rain, a quiet walk, and making someone laugh.” Now ask: which answer surprised you?",
+			cuecast:
+				"One person takes slow, giant steps. A teammate shouts “walking on the moon!” Mark it correct, and try the next prompt.",
+			"doodle-dash":
+				"Two wobbly circles, a triangle, and handlebars. Someone guesses “bicycle!” The imperfect drawing is half the fun.",
+			"sequence-sprint":
+				"Talk through what has to happen first, then arrange seed, sprout, plant, flower. Each shared device submits one order.",
+		})[game.value?.key] || game.value?.summary,
+);
+function resetExample() {
+	exampleStep.value = 0;
+	sampleChoice.value = null;
+	samplePrediction.value = null;
+}
+function chooseExample(i) {
+	if (!exampleStep.value) {
+		sampleChoice.value = i;
+		exampleStep.value = 1;
+	} else {
+		samplePrediction.value = i;
+		exampleStep.value = 2;
+	}
+}
+function choosePack(pack) {
+	selectedPack.value = pack.name;
+	preview.value = null;
+}
+let loadId = 0;
+watch(
+	() => route.params.game,
+	async (key) => {
+		const id = ++loadId;
+		loading.value = true;
+		error.value = "";
+		game.value = null;
+		packs.value = [];
+		selectedPack.value = "";
+		resetExample();
+		try {
+			const list = await gpCall("list_games");
+			if (id !== loadId) return;
+			game.value = list.find((g) => g.key === key && g.status === "Available");
+			if (!game.value) return;
+			participation.value = profile.value.devices[0];
+			seconds.value = key === "crowd-compass" ? 20 : 60;
+			const result =
+				key === "common-ground"
+					? [
+							{ name: "everyday", title: "Little things, big connections" },
+							{ name: "imagination", title: "A little imagination" },
+						]
+					: await gpCall("list_public_decks", { game_key: key });
+			if (id !== loadId) return;
+			packs.value = result.sort(
+				(a, b) =>
+					Number((a.demo_key || "").includes("church")) -
+					Number((b.demo_key || "").includes("church")),
+			);
+			selectedPack.value = packs.value[0]?.name || "";
+		} catch (e) {
+			if (id === loadId) error.value = readError(e);
+		} finally {
+			if (id === loadId) loading.value = false;
+		}
+	},
+	{ immediate: true },
+);
+async function host() {
+	if (redirectGuestToLogin()) return;
+	creating.value = true;
+	error.value = "";
 	try {
-		const games = await gpCall("list_games");
-		game.value = games.find((g) => g.key === routeGame()) || games[0];
-		if (!game.value || game.value.status !== "Available") {
-			router.replace({ name: "Catalog" });
+		if (game.value.key === "quiz") {
+			window.location.href = `/play/quizzly/host?quiz=${encodeURIComponent(selectedPack.value)}`;
 			return;
 		}
-		guide.value = guideFor(game.value.key);
-		decks.value = await gpCall("list_public_decks", { game_key: game.value.key });
-	} catch (e) {
-		error.value = e.messages?.[0] || e.message;
-	}
-});
-
-function routeGame() {
-	return window.location.pathname.split("/games/")[1]?.split("/")[0];
-}
-
-function demoCards(demos) {
-	return demos
-		.map((demo) => {
-			const pack = decks.value.find((deck) => deck.demo_key === demo.demo_key);
-			return { ...pack, ...demo, name: pack?.name, prompt_count: pack?.prompt_count ?? "—" };
-		})
-		.filter((demo) => demo.name);
-}
-
-function firstVideoDemo() {
-	return guide.value.demos?.find((demo) => demo.video);
-}
-
-async function watchDemo(demo) {
-	selectedVideo.value = demo;
-	await nextTick();
-	videoSection.value?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function choosePreviewedPack(pack) {
-	setup.value.deck = pack.name;
-	previewPack.value = null;
-}
-
-function beginHosting() {
-	if (redirectGuestToLogin()) return;
-	if (guide.value.hostUrl) {
-		window.location.href = guide.value.hostUrl;
-		return;
-	}
-	hosting.value = true;
-}
-
-async function createSession() {
-	if (redirectGuestToLogin()) return;
-	error.value = "";
-	creating.value = true;
-	try {
-		const configuration = { ...setup.value };
-		if (guide.value.contentKey !== "deck") {
-			configuration[guide.value.contentKey] = setup.value.deck;
-			delete configuration.deck;
-			delete configuration.seconds;
-			delete configuration.teams_count;
-			delete configuration.sudden_death;
-		}
+		const configuration = roomGame.value
+			? { pack: selectedPack.value }
+			: {
+					[guide.value.contentKey || "pack"]: selectedPack.value,
+					seconds: seconds.value,
+					teams_count: 2,
+					auto_progress: pace.value === "auto" ? 1 : 0,
+				};
+		if (game.value.key === "crowd-compass")
+			Object.assign(configuration, {
+				vote_seconds: seconds.value,
+				prediction_seconds: seconds.value,
+				rounds: 5,
+			});
 		const created = await gpCall("create_session", {
 			game_key: game.value.key,
 			configuration,
 		});
 		rememberHostedSession(created.session);
-		router.push({ name: "GpHost", query: { session: created.session } });
+		await router.push(
+			roomGame.value
+				? { name: "RoomHost", params: { session: created.session } }
+				: {
+						name: "GpHost",
+						query: { session: created.session, participation: participation.value },
+					},
+		);
 	} catch (e) {
-		error.value = e.messages?.[0] || e.message;
+		error.value = readError(e);
 	} finally {
 		creating.value = false;
 	}
-}
-
-async function hostDemo(demo) {
-	if (redirectGuestToLogin()) return;
-	error.value = "";
-	creatingDemo.value = demo.name;
-	try {
-		if (game.value.key === "quiz") {
-			window.location.href = `/play/quizzly/host?quiz=${encodeURIComponent(demo.name)}`;
-			return;
-		}
-		const contentKey = guide.value.contentKey;
-		const created = await gpCall("create_session", {
-			game_key: game.value.key,
-			configuration: { [contentKey]: demo.name, seconds: 60, teams_count: 2 },
-		});
-		rememberHostedSession(created.session);
-		router.push({ name: "GpHost", query: { session: created.session } });
-	} catch (e) {
-		error.value = e.messages?.[0] || e.message;
-	} finally {
-		creatingDemo.value = null;
-	}
-}
-
-function playersLabel(game) {
-	return game.max_players
-		? `${game.min_players}–${game.max_players} players`
-		: `${game.min_players}+ players`;
 }
 </script>

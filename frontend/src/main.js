@@ -1,4 +1,5 @@
 import "./index.css";
+import "./platform/gather.css";
 import "./theme";
 import { createApp } from "vue";
 import { FrappeUI, setConfig, frappeRequest } from "frappe-ui";

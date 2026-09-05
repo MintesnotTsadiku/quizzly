@@ -1,51 +1,55 @@
 <template>
-	<header
-        :class="{ 'quizzly-embedded-nav': embedded }"
-		class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-haze px-4 py-3 sm:gap-x-5 sm:px-6"
-	>
-		<RouterLink v-if="!embedded"
-			class="flex items-center gap-2 font-display text-lg font-extrabold text-paper"
-			to="/"
-		>
-			<img alt="" class="size-7 rounded-md" :src="logoUrl" />
-			{{ brand.short_name }}
-		</RouterLink>
-		<nav class="flex items-center gap-2" aria-label="Quizzly navigation"><RouterLink v-if="embedded" class="ctl" :data-on="route.path === '/'" to="/">Games</RouterLink><RouterLink v-if="embedded" class="ctl" :data-on="route.path === '/join'" to="/join">Join</RouterLink>
-			<RouterLink class="ctl" :data-on="isHosting" to="/host">Host</RouterLink>
-			<RouterLink class="ctl" :data-on="route.name === 'HostDashboard'" to="/host/dashboard"
-				>Dashboard</RouterLink
+	<header class="gp-nav" :class="{ 'gp-nav-embedded': embedded }">
+		<RouterLink class="gp-brand" to="/" aria-label="GatherPlay home">
+			<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+				<path d="M5 4h9v9H5zM18 4h9v9h-9zM5 17h9v9H5z" fill="currentColor" />
+				<circle cx="22.5" cy="21.5" r="6" fill="currentColor" />
+			</svg>
+			<span
+				>GatherPlay<span v-if="embedded" class="gp-tenant">{{
+					brand.short_name !== "GatherPlay"
+						? brand.short_name
+						: "Games for your community"
+				}}</span></span
 			>
-			<RouterLink class="ctl" :data-on="isAuthoring" to="/host/quizzes">Quizzes</RouterLink>
+		</RouterLink>
+		<nav aria-label="GatherPlay navigation">
+			<RouterLink to="/" :aria-current="route.name === 'Catalog' ? 'page' : undefined"
+				>Explore</RouterLink
+			>
+			<RouterLink
+				v-if="!guest"
+				to="/host/dashboard"
+				:aria-current="route.name === 'HostDashboard' ? 'page' : undefined"
+				>My sessions</RouterLink
+			>
+			<RouterLink v-if="!guest" class="gp-nav-content" to="/host/quizzes"
+				>Create a quiz</RouterLink
+			>
 		</nav>
-		<span v-if="!embedded" class="ml-auto flex items-center gap-4">
-			<ThemeButton class="ctl" />
-			<span class="hidden truncate font-mono text-xs text-paper/40 sm:inline">{{
-				user
-			}}</span>
-			<button class="font-mono text-xs text-paper/40 hover:text-paper" @click="logout">
-				Logout
-			</button>
-		</span>
+		<div class="gp-nav-actions">
+			<ThemeButton v-if="!embedded" class="gp-theme" />
+			<RouterLink class="gp-button gp-button-small" to="/join"
+				>Join a game <span aria-hidden="true">↗</span></RouterLink
+			>
+			<button v-if="guest" class="gp-login" @click="login">Sign in</button>
+			<button v-else-if="!embedded" class="gp-login" @click="logout">Sign out</button>
+		</div>
 	</header>
 </template>
-
 <script setup>
-import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { call } from "@/api";
+import { redirectGuestToLogin } from "@/auth";
+import { brand, embedded } from "@/theme";
 import ThemeButton from "@/components/ThemeButton.vue";
-
-import { brand, embedded, resolvedTheme } from "@/theme";
-const logoUrl = computed(() => (resolvedTheme.value === "dark" ? brand.value.logo_dark || brand.value.logo_light : brand.value.logo_light) || "/assets/quizzly/images/quizzly-logo.svg");
-
 const route = useRoute();
-const user = window.session_user;
-
-const isHosting = computed(() => route.path === "/host");
-const isAuthoring = computed(() => route.path.startsWith("/host/quizzes"));
-
+const guest = !window.session_user || window.session_user === "Guest";
+function login() {
+	redirectGuestToLogin();
+}
 async function logout() {
 	await call("logout");
-	window.location.href = "/play/quizzly/join";
+	window.location.href = "/play/";
 }
 </script>

@@ -71,7 +71,7 @@
 			<!-- The game's own phases -->
 			<component
 				:is="live.PlayerLive"
-				v-else-if="gamePhases.includes(view.phase)"
+				v-else-if="phase !== 'podium' && gamePhases.includes(view.phase)"
 				:view="view"
 				:remaining="remaining"
 				:timer-percent="timerPercent"
@@ -93,7 +93,7 @@
 			/>
 
 			<!-- Scoreboard -->
-			<template v-else-if="view.phase === 'scoreboard' && standings.length">
+			<template v-else-if="phase !== 'podium' && view.phase === 'scoreboard' && standings.length">
 				<h1 class="font-display text-3xl font-extrabold text-paper">Standings</h1>
 				<ol class="flex w-full max-w-sm flex-col gap-2.5">
 					<li

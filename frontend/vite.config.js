@@ -47,7 +47,7 @@ export default defineConfig({
 	},
 	plugins: [
 		frappeui({
-			frappeProxy: true,
+			frappeProxy: { port: Number(process.env.VITE_PORT || 8081) },
 			lucideIcons: true,
 			jinjaBootData: true,
 			buildConfig: {

@@ -168,8 +168,8 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import QRCode from "qrcode";
 import { useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
@@ -180,6 +180,7 @@ import { liveFor, phasesFor } from "@/games/registry";
 
 const socket = inject("$socket");
 const route = useRoute();
+const router = useRouter();
 const {
 	remaining,
 	total: windowSeconds,
@@ -198,6 +199,7 @@ const copied = ref(false);
 const qrDataUrl = ref("");
 let seqSeen = -1;
 let stopRoom = null;
+onBeforeUnmount(() => stopRoom?.());
 
 const live = computed(() => liveFor(gameKey.value));
 const gamePhases = computed(() => phasesFor(gameKey.value));
@@ -268,6 +270,12 @@ async function refresh() {
 }
 
 function applyState(state) {
+	if (state.game_key === "common-ground") {
+		gameKey.value = state.game_key;
+		router.replace({ name: "RoomScreen", params: { pin } });
+		return;
+	}
+	if (state.participants) publicParticipants.value = state.participants;
 	seqSeen = Math.max(seqSeen, state.state_version ?? 0);
 	gameKey.value = state.game_key || gameKey.value;
 	status.value = state.status;
@@ -292,6 +300,7 @@ onMounted(async () => {
 		color: { dark: "#16111F", light: "#F4F0FA" },
 	});
 	await refresh();
+	if (gameKey.value === "common-ground") return;
 	stopRoom = useSessionRoom(socket, pin, onEvent, refresh, "gp");
 });
 </script>

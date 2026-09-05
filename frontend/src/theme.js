@@ -1,12 +1,12 @@
 import { ref, watch } from 'vue'
 import { acceptsAppearance, channels, configurationTokens, TOKEN_MAP } from './appearance'
 
-const STORAGE_KEY = 'church_management_system-theme'
+const STORAGE_KEY = 'gatherplay-theme'
 const NEXT = { auto: 'light', light: 'dark', dark: 'auto' }
 const root = document.documentElement
 export const embedded = window.parent !== window && new URLSearchParams(window.location.search).get('embed') === 'cms'
 export const resolvedTheme = ref('light')
-export const brand = ref({ short_name: 'Quizzly', logo_light: '/assets/quizzly/images/quizzly-logo.svg' })
+export const brand = ref({ short_name: 'GatherPlay', logo_light: '/assets/quizzly/images/gatherplay-logo.svg' })
 export const theme = ref(localStorage.getItem(STORAGE_KEY) === 'system' ? 'auto' : localStorage.getItem(STORAGE_KEY) || localStorage.getItem('quizzly-theme') || 'auto')
 let configuration = null
 let inherited = false
@@ -52,8 +52,8 @@ if (embedded) {
   })
   window.parent.postMessage({ type: 'quizzly:ready', version: 1 }, location.origin)
 }
-// Standalone pages read the same backend-owned identity/theme if the provider exists.
-fetch('/api/method/quizzly.branding.get_application_branding')
+// The embedded compatibility provider is a fallback until the parent sends appearance.
+if (embedded) fetch('/api/method/quizzly.branding.get_application_branding')
   .then(response => response.ok ? response.json() : null)
   .then(payload => {
     const config = payload?.message?.configuration

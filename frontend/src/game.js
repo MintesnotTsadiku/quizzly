@@ -1,4 +1,4 @@
-import { onBeforeUnmount, ref } from "vue";
+import { getCurrentInstance, onBeforeUnmount, ref } from "vue";
 
 const SILENCE_LIMIT_MS = 20000;
 const OFFLINE_RESYNC_MS = 3000;
@@ -123,7 +123,7 @@ export function useSessionRoom(socket, pin, onEvent, resync, prefix = "qz") {
 		socket.emit(`${prefix}_leave`, pin);
 	}
 
-	onBeforeUnmount(stop);
+	if (getCurrentInstance()) onBeforeUnmount(stop);
 	return stop;
 }
 

@@ -1,0 +1,25 @@
+{
+  "base": "http://127.0.0.1:8081",
+  "checks": [
+    "Independent guest identity and curated six-game collection",
+    "Device/category intersection and recoverable empty state",
+    "Interactive worked example without authentication",
+    "Unknown detail has explicit recovery",
+    "Guest host-route authorization redirect",
+    "390px catalog and detail without horizontal overflow",
+    "Real host-only session starts with zero participants; public screen has no host controls",
+    "Host reload resumes the same conversation",
+    "Disconnected host retains prompt and recovers",
+    "Three conversations and shares finish on both host and public display",
+    "Replay creates a fresh session; end confirmation can be cancelled",
+    "Same-origin embedded branding keeps GatherPlay identity and host context",
+    "Unknown shared-screen room has recovery"
+  ],
+  "errors": [],
+  "expectedOfflineErrors": 2,
+  "sessionIds": [
+    "rp3e3ht1qa",
+    "rv8mfs9ji9"
+  ],
+  "passed": true
+}

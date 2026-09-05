@@ -22,7 +22,7 @@
 				Play along
 			</h1>
 			<p class="mt-3 text-paper/50">
-				Type the PIN on the big screen, pick a face, and you're in.
+				Use the code from your host. Join as yourself, or use a group name when sharing a device.
 			</p>
 
 			<form class="mt-9 flex flex-col gap-6" @submit.prevent="join">
@@ -42,7 +42,7 @@
 
 				<label class="flex flex-col gap-2">
 					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>Nickname</span
+						>Your name or group name</span
 					>
 					<input
 						v-model="nickname"

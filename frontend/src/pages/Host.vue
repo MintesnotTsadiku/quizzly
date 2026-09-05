@@ -824,7 +824,8 @@ onMounted(async () => {
 			: await loadHostState();
 		if (state.session) {
 			await applyState(state);
-			useSessionRoom(socket, state.game_pin, onSessionEvent, refresh);
+			stopSessionRoom?.();
+			stopSessionRoom = useSessionRoom(socket, state.game_pin, onSessionEvent, refresh);
 			return;
 		}
 		quizzes.value = await call("quizzly.api.list_quizzes");
@@ -842,7 +843,8 @@ async function createSession(quiz) {
 	try {
 		const created = await call("quizzly.api.create_session", { quiz });
 		await applyState(await call("quizzly.api.get_host_state", { session: created.session }));
-		useSessionRoom(socket, session.value.game_pin, onSessionEvent, refresh);
+		stopSessionRoom?.();
+		stopSessionRoom = useSessionRoom(socket, session.value.game_pin, onSessionEvent, refresh);
 	} catch (e) {
 		error.value = readError(e);
 	}
@@ -971,7 +973,9 @@ async function end() {
 	if ((await hostCall("quizzly.api.end_session")) && inLobby) reset();
 }
 
+let stopSessionRoom;
 onUnmounted(() => {
+	stopSessionRoom?.();
 	clearTimeout(climbTimer);
 	window.removeEventListener("keydown", onKeydown);
 });

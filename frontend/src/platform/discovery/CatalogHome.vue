@@ -1,109 +1,200 @@
 <template>
-	<div class="quizzly-catalog flex h-full flex-col overflow-y-auto bg-night">
+	<div class="gather-ui gp-page">
 		<HostBar />
-		<div class="mx-auto w-full max-w-5xl flex-1 px-5 py-10 sm:px-8">
-			<header class="mb-10">
-				<p
-					class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent"
-				>
-					<svg class="h-3 w-3 fill-gold" viewBox="0 0 24 24">
-						<path :d="gameIcon('cuecast')" />
-					</svg>
-					GatherPlay
-				</p>
-				<h1
-					class="mt-3 font-display text-5xl font-extrabold leading-none text-paper sm:text-6xl"
-				>
-					Pick a game
-				</h1>
-				<p class="mt-4 max-w-xl text-paper/50">
-					One PIN, a big screen and everyone's phones. The room is the product — every
-					game keeps people looking up, not down.
-				</p>
-			</header>
-
-			<p v-if="error" class="mb-6 text-alert">{{ error }}</p>
-
-			<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+		<main class="gp-container" id="main-content">
+			<section class="gp-hero">
+				<div class="gp-hero-copy">
+					<p class="gp-eyebrow">
+						<span class="gp-status-dot"></span> Made for being together
+					</p>
+					<h1>Good company.<br /><em>Great games.</em></h1>
+					<p>
+						Turn “what should we do?” into one more round.<br class="gp-desktop" />
+						Games for your people, your place, your kind of fun.
+					</p>
+					<a class="gp-button" href="#games"
+						>Find your next game <span aria-hidden="true">↓</span></a
+					>
+					<div class="gp-hero-foot">
+						<span class="gp-faces" aria-hidden="true">● ● ●</span> Friends. Families.
+						Classrooms. Everyone’s invited.
+					</div>
+				</div>
 				<RouterLink
-					v-for="game in games"
-					:key="game.key"
-					class="group relative flex flex-col rounded-3xl border border-haze bg-dusk p-6 transition hover:border-ember"
-					:class="game.status !== 'Available' ? 'pointer-events-none opacity-55' : ''"
-					:to="
-						game.status === 'Available'
-							? { name: 'GameDetail', params: { game: game.key } }
-							: {}
-					"
+					class="gp-feature"
+					:to="{ name: 'GameDetail', params: { game: 'common-ground' } }"
 				>
-					<span class="flex items-start justify-between">
-						<span
-							class="grid size-12 place-items-center rounded-2xl"
-							:class="game.status === 'Available' ? 'bg-ember' : 'bg-haze'"
-						>
-							<svg class="size-7 fill-sunk" viewBox="0 0 24 24">
-								<path :d="gameIcon(game.key)" />
-							</svg>
-						</span>
-						<span
-							v-if="game.status !== 'Available'"
-							class="rounded-full border border-haze px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-paper/50"
-						>
-							{{ game.status }}
-						</span>
-					</span>
-					<h2 class="mt-5 font-display text-2xl font-bold text-paper">
-						{{ game.title }}
-					</h2>
-					<p class="mt-2 flex-1 text-sm leading-relaxed text-paper/60">
-						{{ game.summary }}
-					</p>
-					<p
-						class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-wide text-paper/40"
-					>
-						<span>{{ playersLabel(game) }}</span>
-						<span v-if="game.typical_minutes">~{{ game.typical_minutes }} min</span>
-					</p>
-					<p class="mt-3 flex flex-wrap gap-1.5">
-						<span
-							v-for="tag in game.interaction_tags || []"
-							:key="tag"
-							class="rounded-full border border-haze px-2.5 py-0.5 text-xs text-paper/60"
-						>
-							{{ tag }}
-						</span>
-					</p>
-					<span
-						v-if="game.status === 'Available'"
-						class="mt-5 flex items-center gap-2 font-display text-sm font-bold text-accent transition group-hover:gap-3"
-					>
-						Learn &amp; play <span aria-hidden="true">→</span>
-					</span>
+					<span class="gp-feature-tag">NEW · NO PLAYER PHONES NEEDED</span>
+					<GameArtwork game-key="common-ground" color="peach" />
+					<div class="gp-feature-copy">
+						<div>
+							<p>Start with a little connection</p>
+							<h2>Common Ground</h2>
+							<span>8 minutes. A few surprises. A room closer together.</span>
+						</div>
+						<span class="gp-circle-arrow" aria-hidden="true">↗</span>
+					</div>
 				</RouterLink>
-			</div>
-		</div>
+			</section>
+			<section class="gp-finder" aria-label="Find games for your devices">
+				<div>
+					<p class="gp-eyebrow">Your room, your rules</p>
+					<h2>What devices do you have?</h2>
+				</div>
+				<div class="gp-device-options">
+					<button
+						v-for="option in deviceOptions"
+						:key="option.id"
+						:aria-pressed="device === option.id"
+						@click="device = option.id"
+					>
+						<span aria-hidden="true">{{ option.icon }}</span
+						>{{ option.label }}
+					</button>
+				</div>
+			</section>
+			<section id="games" class="gp-collection">
+				<div class="gp-section-head">
+					<div>
+						<p class="gp-eyebrow">Less choosing, more playing</p>
+						<h2>Find the room’s next favourite</h2>
+					</div>
+					<label class="gp-search"
+						><span aria-hidden="true">⌕</span
+						><input
+							v-model="query"
+							type="search"
+							aria-label="Search games"
+							placeholder="Find a game…"
+					/></label>
+				</div>
+				<div class="gp-category-row">
+					<div class="gp-categories" aria-label="Game category">
+						<button
+							v-for="item in categories"
+							:key="item"
+							:aria-pressed="category === item"
+							@click="category = item"
+						>
+							{{ item }}
+						</button>
+					</div>
+					<span aria-live="polite">{{ filtered.length }} games</span>
+				</div>
+				<p v-if="loading" role="status" class="gp-state">Finding something fun…</p>
+				<div v-else-if="error" class="gp-state" role="alert">
+					<p>{{ error }}</p>
+					<button class="gp-button" @click="load">Try again</button>
+				</div>
+				<div v-else-if="!filtered.length" class="gp-state">
+					<h3>No games with that combination yet.</h3>
+					<p>Try another category or device setup.</p>
+					<button class="gp-button" @click="reset">Show all games</button>
+				</div>
+				<div v-else class="gp-game-grid">
+					<RouterLink
+						v-for="game in filtered"
+						:key="game.key"
+						class="gp-game-card"
+						:to="{ name: 'GameDetail', params: { game: game.key } }"
+					>
+						<GameArtwork :game-key="game.key" :color="profileFor(game).color" />
+						<div class="gp-card-copy">
+							<div class="gp-card-top">
+								<span>{{ profileFor(game).category }}</span
+								><span>{{ profileFor(game).time }}</span>
+							</div>
+							<h3>{{ game.title }} <span aria-hidden="true">↗</span></h3>
+							<p>{{ profileFor(game).description }}</p>
+							<div class="gp-card-meta">{{ profileFor(game).deviceLabel }}</div>
+						</div>
+					</RouterLink>
+				</div>
+				<button
+					v-if="!showAll && !loading && !error"
+					class="gp-more"
+					@click="showAll = true"
+				>
+					Explore all {{ games.length }} formats <span aria-hidden="true">→</span>
+				</button>
+				<p v-if="showAll" class="gp-caption">
+					More formats include focused puzzle and question-based variants. Check each
+					guide for its current rules.
+				</p>
+			</section>
+			<section class="gp-room-note">
+				<span class="gp-note-star" aria-hidden="true">✳</span>
+				<div>
+					<h2>The best part isn’t on the screen.</h2>
+					<p>
+						Make a little room for laughter, a new perspective, or a wonderfully wrong
+						answer.
+					</p>
+				</div>
+				<RouterLink :to="{ name: 'GameDetail', params: { game: 'common-ground' } }"
+					>Try a game without player phones ↗</RouterLink
+				>
+			</section>
+			<footer class="gp-footer">
+				<strong>GatherPlay</strong><span>Good company is all you need to begin.</span
+				><RouterLink to="/join">Have a code? Join in →</RouterLink>
+			</footer>
+		</main>
 	</div>
 </template>
-
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import HostBar from "@/components/HostBar.vue";
-import { catalogGames, gameIcon } from "@/platform/discovery/games";
-
-const games = ref([]);
-const error = ref("");
-
-onMounted(async () => {
+import GameArtwork from "./GameArtwork.vue";
+import { catalogGames } from "./games";
+import { categories, featuredKeys, matchesDevice, profileFor } from "./collection";
+const games = ref([]),
+	loading = ref(true),
+	error = ref(""),
+	query = ref(""),
+	device = ref("any"),
+	category = ref("All games"),
+	showAll = ref(false);
+const deviceOptions = [
+	{ id: "any", label: "Any setup", icon: "✳" },
+	{ id: "own", label: "Everyone has a phone", icon: "▯" },
+	{ id: "shared", label: "We’ll share devices", icon: "▯▯" },
+	{ id: "host", label: "Just the host", icon: "☀" },
+];
+const filtered = computed(() =>
+	games.value
+		.filter(
+			(g) =>
+				g.status === "Available" &&
+				(showAll.value || query.value || featuredKeys.includes(g.key)),
+		)
+		.filter(
+			(g) =>
+				matchesDevice(g, device.value) &&
+				(category.value === "All games" || profileFor(g).category === category.value) &&
+				`${g.title} ${g.summary}`.toLowerCase().includes(query.value.trim().toLowerCase()),
+		)
+		.sort(
+			(a, b) =>
+				(featuredKeys.indexOf(a.key) < 0 ? 99 : featuredKeys.indexOf(a.key)) -
+				(featuredKeys.indexOf(b.key) < 0 ? 99 : featuredKeys.indexOf(b.key)),
+		),
+);
+function reset() {
+	query.value = "";
+	device.value = "any";
+	category.value = "All games";
+}
+async function load() {
+	loading.value = true;
+	error.value = "";
 	try {
 		games.value = await catalogGames();
-	} catch (e) {
-		error.value = e.messages?.[0] || e.message;
+	} catch {
+		error.value = "We couldn’t load the games. Check your connection and try again.";
+	} finally {
+		loading.value = false;
 	}
-});
-
-function playersLabel(game) {
-	return game.max_players
-		? `${game.min_players}–${game.max_players} players`
-		: `${game.min_players}+ players`;
 }
+onMounted(load);
 </script>

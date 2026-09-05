@@ -676,7 +676,8 @@ class CrowdCompassGame(GameModule):
 
 	def reveal_view(self, ctx, state) -> dict:
 		module_state = state["module_state"]
-		votes = [a for a in accepted_actions(ctx.session, module_state["round_index"]) if a.action_type == "cast_vote"]
+		actions = accepted_actions(ctx.session, module_state["round_index"])
+		votes = [a for a in actions if a.action_type == "cast_vote"]
 		choices = module_state["current"]["choices"]
 		choice_ids = [c["id"] for c in choices]
 		firsts = [self.pick_choice(a.payload) for a in votes]
@@ -689,6 +690,7 @@ class CrowdCompassGame(GameModule):
 			"distribution": distribution,
 			"plurality": module_state.get("plurality") or [],
 			"votes": len(votes),
+			"predictions": sum(a.action_type == "make_prediction" for a in actions),
 			"quorum_met": len(votes) >= ctx.configuration["quorum"],
 			"voided": module_state["round_index"] in (module_state.get("voided") or []),
 		}

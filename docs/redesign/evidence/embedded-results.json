@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "Actual authenticated CMS /home/games embeds the redesigned product",
+    "768px dark-theme tablet renders without horizontal overflow"
+  ],
+  "errors": [],
+  "passed": true
+}

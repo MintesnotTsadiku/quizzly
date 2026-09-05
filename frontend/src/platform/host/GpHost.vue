@@ -476,7 +476,7 @@
 		>
 			<component
 				:is="live.HostLive"
-				v-if="gamePhases.includes(view.phase)"
+				v-if="!podium && gamePhases.includes(view.phase)"
 				:view="view"
 				:remaining="remaining"
 				:timer-percent="timerPercent"
@@ -487,7 +487,7 @@
 				@compose="composer = true"
 			/>
 
-			<template v-else-if="view.phase === 'scoreboard'">
+			<template v-else-if="!podium && view.phase === 'scoreboard'">
 				<h2 class="font-display text-3xl font-extrabold text-paper">
 					Scoreboard
 					<span
@@ -691,7 +691,7 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref, watch } from "vue";
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import QRCode from "qrcode";
 import { call, readError } from "@/api";
@@ -750,6 +750,7 @@ const pushing = ref(false);
 const draft = ref({ prompt: "", choice_1: "", choice_2: "", choice_3: "", choice_4: "" });
 const error = ref("");
 let stopRoom = null;
+onBeforeUnmount(() => stopRoom?.());
 let seqSeen = -1;
 
 watch(composer, (open) =>
@@ -880,6 +881,10 @@ function onEvent(envelopeMessage) {
 		};
 		phase.value = "scoreboard";
 		stopCountdown();
+	} else if (type === "platform.session_ended") {
+		podium.value = payload.teams || [];
+		phase.value = "podium";
+		stopCountdown();
 	} else if (type === "crowd_compass.prompt_queued") {
 		composer.value = false;
 		draft.value = { prompt: "", choice_1: "", choice_2: "", choice_3: "", choice_4: "" };
@@ -906,6 +911,10 @@ async function applyState(state) {
 	gameKey.value = state.game_key || "cuecast";
 	pin.value = state.game_pin;
 	configuration.value = state.configuration || {};
+	if (state.game_key === "common-ground") {
+		router.replace({ name: "RoomHost", params: { session: state.session } });
+		return;
+	}
 	participants.value = state.participants || [];
 	teams.value = (state.teams || []).map((t) => ({
 		...t,
@@ -1026,11 +1035,13 @@ onMounted(async () => {
 		if (!state) state = await gpCall("get_host_state").catch(() => ({}));
 		if (state.session) {
 			await applyState(state);
+			if (state.game_key === "common-ground") return;
 			stopRoom = useSessionRoom(socket, pin.value, onEvent, refresh, "gp");
 		} else if (route.query.session) {
 			const created = await gpCall("get_host_state", { session: route.query.session });
 			if (created.session) {
 				await applyState(created);
+				if (created.game_key === "common-ground") return;
 				stopRoom = useSessionRoom(socket, pin.value, onEvent, refresh, "gp");
 			}
 		} else if (setupGame.value === "doodle-dash") {
