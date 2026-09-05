@@ -30,7 +30,7 @@ def _recover(engine, doctype, job_id):
 			if doc.status != "Active":
 				continue
 			if engine.get_state(name):
-				from quizzly.games.grid_conquest.session import is_board
+				from quizzly.games.board_session import is_board
 
 				if doctype == "GP Session" and is_board(doc):
 					continue

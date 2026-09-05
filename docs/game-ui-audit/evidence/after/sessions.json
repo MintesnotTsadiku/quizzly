@@ -1,0 +1,792 @@
+{
+  "findings": [
+    {
+      "key": "picture-peek",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Name the object in the picture.",
+        "choices": [],
+        "media_url": "/assets/quizzly/game-clues/key.svg",
+        "mechanic": "text",
+        "game_key": "picture-peek",
+        "axis": null,
+        "responses": 2,
+        "answer": "key",
+        "results": [
+          {
+            "participant": "u6sqqfc98u",
+            "correct": true,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "u8stkalhbg",
+            "correct": true,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": null,
+        "configuration": {
+          "pack": "GPG-2026-01017",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "memory-mosaic",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "How many green triangles were there?",
+        "choices": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "media_url": "/assets/quizzly/game-clues/memory.svg",
+        "mechanic": "choice",
+        "game_key": "memory-mosaic",
+        "axis": null,
+        "responses": 2,
+        "answer": "2",
+        "results": [
+          {
+            "participant": "ubiqaj43kb",
+            "correct": false,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "udjbn5avoe",
+            "correct": false,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": null,
+        "configuration": {
+          "pack": "GPG-2026-01018",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "sound-snap",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Listen to the three notes. Which direction does the pitch travel?",
+        "choices": [
+          "Up",
+          "Down",
+          "Same pitch"
+        ],
+        "media_url": "/assets/quizzly/game-clues/steady.wav",
+        "mechanic": "choice",
+        "game_key": "sound-snap",
+        "axis": null,
+        "responses": 2,
+        "answer": "Same pitch",
+        "results": [
+          {
+            "participant": "uhf2e6m5rp",
+            "correct": false,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "ujge06u3ns",
+            "correct": false,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": null,
+        "configuration": {
+          "pack": "GPG-2026-01020",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "signal-spectrum",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Cold → Hot: a freshly poured cup of tea",
+        "choices": [],
+        "media_url": "",
+        "mechanic": "number",
+        "game_key": "signal-spectrum",
+        "axis": [
+          "Cold ",
+          " Hot"
+        ],
+        "responses": 2,
+        "answer": "",
+        "results": [
+          {
+            "participant": "undivr4bt7",
+            "distance": 38,
+            "points": 0,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "upe8uviap2",
+            "distance": 38,
+            "points": 0,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": 88,
+        "configuration": {
+          "pack": "GPG-2026-01021",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "sequence-sprint",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Arrange from earliest to latest.",
+        "choices": [
+          "Chrysalis",
+          "Caterpillar",
+          "Egg",
+          "Butterfly"
+        ],
+        "media_url": "",
+        "mechanic": "order",
+        "game_key": "sequence-sprint",
+        "axis": null,
+        "responses": 2,
+        "answer": "Egg → Caterpillar → Chrysalis → Butterfly",
+        "results": [
+          {
+            "participant": "us9mrads46",
+            "correct": false,
+            "exact": 2,
+            "adjacent": 0,
+            "points": 200,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "uuabgi5fi9",
+            "correct": false,
+            "exact": 2,
+            "adjacent": 0,
+            "points": 200,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": null,
+        "configuration": {
+          "pack": "GPG-2026-01024",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "phrase-forge",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Rebuild the sentence.",
+        "choices": [
+          "work.",
+          "light",
+          "make",
+          "Many hands"
+        ],
+        "media_url": "",
+        "mechanic": "order",
+        "game_key": "phrase-forge",
+        "axis": null,
+        "responses": 2,
+        "answer": "Many hands make light work.",
+        "results": [
+          {
+            "participant": "v2169i5o9j",
+            "correct": false,
+            "exact": 0,
+            "adjacent": 0,
+            "points": 0,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "v428pai94e",
+            "correct": false,
+            "exact": 0,
+            "adjacent": 0,
+            "points": 0,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": null,
+        "configuration": {
+          "pack": "GPG-2026-01025",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "caption-clash",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "A chair has taken up kite flying. What is it thinking?",
+        "choices": [],
+        "media_url": "/assets/quizzly/game-clues/caption.svg",
+        "mechanic": "creative",
+        "game_key": "caption-clash",
+        "axis": null,
+        "responses": 2,
+        "answer": "",
+        "results": [
+          {
+            "participant": "v6mgkvtu2o",
+            "value": "The little door began to sing.",
+            "votes": 1,
+            "points": 750,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "v8n2711afs",
+            "value": "We invited the moon inside.",
+            "votes": 1,
+            "points": 750,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": null,
+        "configuration": {
+          "pack": "GPG-2026-01019",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "story-loom",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 2,
+        "total": 2,
+        "prompt": "We found a tiny door beneath the kitchen table.",
+        "choices": [],
+        "media_url": "",
+        "mechanic": "creative",
+        "game_key": "story-loom",
+        "axis": null,
+        "responses": 2,
+        "answer": "",
+        "results": [
+          {
+            "participant": "vcjbbi6740",
+            "value": "The little door began to sing.",
+            "votes": 1,
+            "points": 750,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "vek6nnbb78",
+            "value": "We invited the moon inside.",
+            "votes": 1,
+            "points": 750,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": null,
+        "selected": "The little door began to sing.",
+        "story": [
+          "We found a tiny door beneath the kitchen table.",
+          "The little door began to sing.",
+          "The little door began to sing."
+        ],
+        "configuration": {
+          "pack": "GPG-2026-01038",
+          "seconds": 60,
+          "rounds": 2,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": true,
+        "presentation_replay": false
+      },
+      "ending": {
+        "story": [
+          "We found a tiny door beneath the kitchen table.",
+          "The little door began to sing.",
+          "The little door began to sing."
+        ],
+        "bracket_history": null,
+        "inventory": null,
+        "stage_passed": null
+      },
+      "completed": true
+    },
+    {
+      "key": "seek-and-show",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Show something round within easy reach. Describe it if moving is difficult.",
+        "choices": [],
+        "media_url": "",
+        "mechanic": "creative",
+        "game_key": "seek-and-show",
+        "axis": null,
+        "responses": 2,
+        "answer": "",
+        "results": [
+          {
+            "participant": "vm7tcggqpk",
+            "value": "The little door began to sing.",
+            "votes": 0,
+            "points": 250,
+            "confirmed": true,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "vo8uspisij",
+            "value": "We invited the moon inside.",
+            "votes": 0,
+            "points": 0,
+            "confirmed": false,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": null,
+        "configuration": {
+          "pack": "GPG-2026-01040",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "one-word-chorus",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 2,
+        "total": 2,
+        "prompt": "One-word clues. Repeated clues disappear. Can your guesser find the secret?",
+        "choices": [],
+        "media_url": "",
+        "mechanic": "text",
+        "game_key": "one-word-chorus",
+        "axis": null,
+        "responses": 1,
+        "answer": "bicycle",
+        "results": [
+          {
+            "participant": "vu2cj4u218",
+            "correct": true,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": null,
+        "chorus_success": true,
+        "clues": [
+          "shelter"
+        ],
+        "configuration": {
+          "pack": "GPG-2026-01039",
+          "seconds": 60,
+          "rounds": 2,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": true,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "common-thread",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Roots, leaves, shade. What connects them?",
+        "choices": [],
+        "media_url": "",
+        "mechanic": "text",
+        "game_key": "common-thread",
+        "axis": null,
+        "responses": 2,
+        "answer": "tree",
+        "results": [
+          {
+            "participant": "05517foqtj",
+            "correct": false,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "076j3vhfvm",
+            "correct": false,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": null,
+        "configuration": {
+          "pack": "GPG-2026-01022",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "closest-call",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "How many hours are in one week?",
+        "choices": [],
+        "media_url": "",
+        "mechanic": "number",
+        "game_key": "closest-call",
+        "axis": null,
+        "responses": 2,
+        "answer": "168",
+        "results": [
+          {
+            "participant": "09pnvsfsh7",
+            "distance": 118,
+            "points": 1000,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "0bqlvev3ob",
+            "distance": 118,
+            "points": 0,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": 168,
+        "configuration": {
+          "pack": "GPG-2026-01023",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "bluffline",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Invent a plausible ending: A stitch in time saves ...",
+        "choices": [],
+        "media_url": "",
+        "mechanic": "creative",
+        "game_key": "bluffline",
+        "axis": null,
+        "responses": 2,
+        "answer": "nine",
+        "results": [
+          {
+            "participant": "0eb5e31itd",
+            "value": "The little door began to sing.",
+            "votes": 1,
+            "points": 750,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "0gd7qdkicl",
+            "value": "We invited the moon inside.",
+            "votes": 1,
+            "points": 750,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": "nine",
+        "target": null,
+        "configuration": {
+          "pack": "GPG-2026-01026",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "ending": null,
+      "completed": true
+    },
+    {
+      "key": "bracket-bash",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 3,
+        "total": 3,
+        "prompt": "Choose the room's favorite. Majority advances; a tie advances the first seeded contender.",
+        "choices": [
+          "Picnic",
+          "Cook together"
+        ],
+        "media_url": "",
+        "mechanic": "choice",
+        "game_key": "bracket-bash",
+        "axis": null,
+        "responses": 2,
+        "answer": "Picnic",
+        "results": [
+          {
+            "value": "Picnic",
+            "votes": 2
+          },
+          {
+            "value": "Cook together",
+            "votes": 0
+          }
+        ],
+        "bracket_history": [
+          {
+            "contenders": [
+              "Picnic",
+              "Games afternoon"
+            ],
+            "winner": "Picnic",
+            "votes": {
+              "Picnic": 2
+            },
+            "tie": false
+          },
+          {
+            "contenders": [
+              "Cook together",
+              "Movie night"
+            ],
+            "winner": "Cook together",
+            "votes": {
+              "Cook together": 2
+            },
+            "tie": false
+          },
+          {
+            "contenders": [
+              "Picnic",
+              "Cook together"
+            ],
+            "winner": "Picnic",
+            "votes": {
+              "Picnic": 2
+            },
+            "tie": false
+          }
+        ],
+        "tie": false,
+        "configuration": {
+          "pack": "GPG-2026-01037",
+          "seconds": 60,
+          "rounds": 3,
+          "entrants": [
+            "Picnic",
+            "Games afternoon",
+            "Cook together",
+            "Movie night"
+          ],
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": true,
+        "presentation_replay": false
+      },
+      "ending": {
+        "story": null,
+        "bracket_history": [
+          {
+            "contenders": [
+              "Picnic",
+              "Games afternoon"
+            ],
+            "winner": "Picnic",
+            "votes": {
+              "Picnic": 2
+            },
+            "tie": false
+          },
+          {
+            "contenders": [
+              "Cook together",
+              "Movie night"
+            ],
+            "winner": "Cook together",
+            "votes": {
+              "Cook together": 2
+            },
+            "tie": false
+          },
+          {
+            "contenders": [
+              "Picnic",
+              "Cook together"
+            ],
+            "winner": "Picnic",
+            "votes": {
+              "Picnic": 2
+            },
+            "tie": false
+          }
+        ],
+        "inventory": null,
+        "stage_passed": null
+      },
+      "completed": true
+    },
+    {
+      "key": "escape-together",
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 3,
+        "total": 3,
+        "prompt": "Shelf 7 holds the lantern key: 2, 4, 6, ?. Enter the next number to open the exit and bring the lantern home.",
+        "choices": [
+          "7",
+          "8",
+          "9",
+          "10"
+        ],
+        "media_url": "",
+        "mechanic": "choice",
+        "game_key": "escape-together",
+        "axis": null,
+        "responses": 2,
+        "answer": "8",
+        "results": [
+          {
+            "participant": "0sgp65spkc",
+            "correct": true,
+            "nickname": "UI QA Hana"
+          },
+          {
+            "participant": "0uhbvmm8lr",
+            "correct": true,
+            "nickname": "UI QA Dawit"
+          }
+        ],
+        "truth": null,
+        "target": null,
+        "stage_passed": true,
+        "inventory": [
+          "430",
+          "7",
+          "8"
+        ],
+        "escape": true,
+        "attempts": 0,
+        "configuration": {
+          "pack": "GPG-2026-01041",
+          "seconds": 60,
+          "rounds": 3,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": true,
+        "presentation_replay": false
+      },
+      "ending": {
+        "story": null,
+        "bracket_history": null,
+        "inventory": [
+          "430",
+          "7",
+          "8"
+        ],
+        "stage_passed": true
+      },
+      "completed": true
+    }
+  ],
+  "errors": []
+}

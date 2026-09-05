@@ -1,5 +1,11 @@
 <template>
 	<div class="flex w-full max-w-lg flex-col items-center gap-5 text-center">
+		<p v-if="error" role="alert" class="rounded-xl bg-red-900 p-3 text-white">
+			{{ error
+			}}<button v-if="view.is_artist" class="ctl" @click="$emit('retry-drawing')">
+				{{ $t("Retry drawing sync") }}
+			</button>
+		</p>
 		<p class="font-mono uppercase tracking-[.24em] text-accent">
 			{{ $t("Round") }} {{ view.round }} / {{ view.total }}
 		</p>
@@ -27,7 +33,7 @@
 			/><button v-if="view.is_artist" class="ctl" @click="$emit('clear')">
 				{{ $t("Clear canvas") }}
 			</button>
-			<form v-else class="flex w-full gap-2" @submit.prevent="sendGuess">
+			<form v-else class="flex w-full gap-2" @submit.stop.prevent="sendGuess">
 				<input
 					v-model="guess"
 					class="field min-w-0 flex-1"
@@ -56,8 +62,9 @@ defineProps({
 	remaining: Number,
 	timerPercent: Number,
 	submitting: Boolean,
+	error: String,
 });
-const emit = defineEmits(["draw", "guess", "clear"]);
+const emit = defineEmits(["draw", "guess", "clear", "retry-drawing"]);
 const guess = ref("");
 const result = ref(null);
 function sendGuess() {

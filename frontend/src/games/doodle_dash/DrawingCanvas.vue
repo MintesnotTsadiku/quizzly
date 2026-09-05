@@ -20,7 +20,10 @@ const emit = defineEmits(["batch"]);
 const canvas = ref(null);
 let active = false,
 	last = null,
-	batch = [];
+	batch = [],
+	optimistic = [],
+	baseline = 0,
+	serverCount = 0;
 function point(e) {
 	const r = canvas.value.getBoundingClientRect();
 	return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
@@ -30,6 +33,7 @@ function start(e) {
 	active = true;
 	last = point(e);
 	batch = [];
+	if (!optimistic.length) baseline = props.strokes.length;
 	canvas.value.setPointerCapture(e.pointerId);
 }
 function move(e) {
@@ -37,13 +41,15 @@ function move(e) {
 	const p = point(e),
 		s = { x1: last.x, y1: last.y, x2: p.x, y2: p.y };
 	batch.push(s);
+	optimistic.push(s);
+	if (batch.length >= 80) emit("batch", batch.splice(0, 80));
 	draw(s);
 	last = p;
 }
 function finish() {
 	if (!active) return;
 	active = false;
-	if (batch.length) emit("batch", batch.splice(0, 80));
+	while (batch.length) emit("batch", batch.splice(0, 80));
 	batch = [];
 }
 function draw(s) {
@@ -58,10 +64,21 @@ function draw(s) {
 	c.stroke();
 }
 function render() {
+	if (props.strokes.length < serverCount) {
+		optimistic = [];
+		baseline = props.strokes.length;
+	}
+	serverCount = props.strokes.length;
 	const c = canvas.value?.getContext("2d");
 	if (!c) return;
 	c.clearRect(0, 0, 960, 600);
 	for (const s of props.strokes) draw(s);
+	const acknowledged = Math.max(0, props.strokes.length - baseline);
+	for (const s of optimistic.slice(acknowledged)) draw(s);
+	if (!active && acknowledged >= optimistic.length) {
+		optimistic = [];
+		baseline = props.strokes.length;
+	}
 }
 watch(() => props.strokes, render, { deep: true });
 onMounted(render);

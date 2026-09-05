@@ -1,3 +1,4 @@
+import { repairedGames, puzzleKeys } from "./repairedGames";
 import { locale, t } from "@/i18n";
 import { gameAm, accessAm } from "@/i18n/games-am";
 // Editorial facets are intentionally separate from the server's playable registry.
@@ -133,6 +134,30 @@ const profiles = {
 		access: "Use the reorder buttons as an alternative to dragging. Shared phones get one score. Choose a pack matched to the group’s language and knowledge.",
 	},
 };
+for (const [key, [description, steps]] of Object.entries(repairedGames)) {
+	profiles[key] = {
+		category: key === "dots-and-boxes" ? "Compete" : "Think",
+		devices: puzzleKeys.includes(key)
+			? ["own", "shared", "host"]
+			: key === "one-word-chorus"
+				? ["own"]
+				: ["own", "shared"],
+		deviceLabel: puzzleKeys.includes(key)
+			? "Player devices or one shared board"
+			: "Own phones or shared by a group",
+		people: puzzleKeys.includes(key) ? "One room · play together" : "2+ playing entries",
+		time: "10 min",
+		color: "lilac",
+		kicker: description,
+		description,
+		sample: steps[0],
+		steps,
+		repaired: true,
+		access: puzzleKeys.includes(key)
+			? "Use touch, mouse or keyboard buttons. No move timer. The host can help place moves."
+			: "Choose a pack in your language. Shared devices submit one collective response.",
+	};
+}
 function originalProfileFor(game) {
 	return (
 		profiles[game?.key] || {
@@ -155,6 +180,15 @@ export function matchesDevice(game, device) {
 export function profileFor(game) {
 	const profile = originalProfileFor(game),
 		copy = gameAm[game?.key];
+	if (profile.repaired)
+		return {
+			...profile,
+			description: t(profile.description),
+			steps: profile.steps.map((step) => t(step)),
+			kicker: t(profile.kicker),
+			sample: t(profile.sample),
+			access: t(profile.access),
+		};
 	return locale.value === "am" && copy
 		? {
 				...profile,

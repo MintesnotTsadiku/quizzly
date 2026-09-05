@@ -59,26 +59,26 @@ quizzly_game_modules = [
 	"quizzly.games.round_games.game.PicturePeekGame",
 	"quizzly.games.round_games.game.SoundSnapGame",
 	"quizzly.games.round_games.game.CaptionClashGame",
-	"quizzly.games.round_games.game.StoryLoomGame",
+	"quizzly.games.round_games.special.StoryLoomGame",
 	"quizzly.games.round_games.game.SignalSpectrumGame",
 	"quizzly.games.round_games.game.MemoryMosaicGame",
 	"quizzly.games.round_games.game.CommonThreadGame",
-	"quizzly.games.round_games.game.EscapeTogetherGame",
-	"quizzly.games.round_games.game.BracketBashGame",
+	"quizzly.games.round_games.special.EscapeTogetherGame",
+	"quizzly.games.round_games.special.BracketBashGame",
 	"quizzly.games.round_games.game.ClosestCallGame",
 	"quizzly.games.round_games.game.PhraseForgeGame",
-	"quizzly.games.round_games.game.SeekAndShowGame",
-	"quizzly.games.round_games.game.OneWordChorusGame",
+	"quizzly.games.round_games.special.SeekAndShowGame",
+	"quizzly.games.round_games.special.OneWordChorusGame",
 	"quizzly.games.grid_conquest.game.GridConquestGame",
-	"quizzly.games.round_games.game.DotsAndBoxesGame",
-	"quizzly.games.round_games.game.HiddenPictureGame",
-	"quizzly.games.round_games.game.PathWeaverGame",
-	"quizzly.games.round_games.game.QuiltPuzzleGame",
-	"quizzly.games.round_games.game.GroupSudokuGame",
+	"quizzly.games.puzzles.game.DotsAndBoxesGame",
+	"quizzly.games.puzzles.game.HiddenPictureGame",
+	"quizzly.games.puzzles.game.PathWeaverGame",
+	"quizzly.games.puzzles.game.QuiltPuzzleGame",
+	"quizzly.games.puzzles.game.GroupSudokuGame",
 ]
 
 # Additive starter content: an existing demo key is never rewritten.
-after_migrate = ["quizzly.demo.amharic.seed_amharic_starters"]
+after_migrate = ["quizzly.demo.amharic.seed_amharic_starters", "quizzly.demo.curated.seed_curated_starters"]
 
 # Recover failed/timed-out game jobs and retire rooms whose temporary state expired.
 scheduler_events = {

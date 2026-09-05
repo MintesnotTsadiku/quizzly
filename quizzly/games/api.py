@@ -18,7 +18,7 @@ from quizzly import access
 from quizzly.api import generate_game_pin, hash_token
 from quizzly.games import GameContext, get_game_module
 from quizzly.games import engine as gpe
-from quizzly.games.grid_conquest.session import is_board
+from quizzly.games.board_session import is_board
 from quizzly.games.round_games.game import PROFILES as ROUND_GAME_PROFILES
 from quizzly.profanity import is_profane
 
@@ -116,6 +116,7 @@ def list_public_decks(game_key: str | None = None, language: str | None = None) 
 		fields=["name", "title", "demo_key", "content_language", preview["metadata_field"]],
 		order_by="title asc",
 	)
+	roster.sort(key=lambda p: (not (p.demo_key or "").startswith("curated-v2-"), p.title))
 	for pack in roster:
 		prompt_fields = [text_field, *choice_fields]
 		rows = frappe.get_all(
@@ -154,8 +155,7 @@ def create_session(game_key: str, configuration: dict | str | None = None) -> di
 	normalized = module.validate_configuration(ctx, configuration)
 	normalized["auto_progress"] = (
 		False
-		if "host_only" in module.manifest.capabilities
-		or (game_key == "grid-conquest" and normalized.get("rules_version") == 2)
+		if "host_only" in module.manifest.capabilities or normalized.get("rules_version") == 2
 		else bool(int(configuration.get("auto_progress", 1)))
 	)
 	session_doc = frappe.get_doc(
@@ -252,12 +252,13 @@ def host_command(session: str, command: str, payload: dict | str | None = None) 
 	payload = as_dict(payload)
 	session_doc = get_host_session(session)
 	if is_board(session_doc) and session_doc.status == "Active":
-		from quizzly.games.grid_conquest.session import command as board_command
+		from quizzly.games.board_session import command as board_command
 
 		return board_command(session_doc, command, payload)
 	if (
 		command
 		not in {
+			"confirm_missions",
 			"previous",
 			"next",
 			"pause",
@@ -391,7 +392,7 @@ def join_session(pin: str, nickname: str, avatar: str | None = None) -> dict:
 			"joined_at": now_datetime(),
 		}
 	).insert(ignore_permissions=True)
-	from quizzly.games.grid_conquest.session import assign_joiner
+	from quizzly.games.board_session import assign_joiner
 
 	assign_joiner(session_doc, participant)
 	publish_lobby_update(session_doc)
@@ -492,7 +493,7 @@ def submit_action(
 		frappe.throw(_("Game is not active"))
 	participant = get_participant_by_token(session_doc, token)
 	if is_board(session_doc):
-		from quizzly.games.grid_conquest.session import command as board_command
+		from quizzly.games.board_session import command as board_command
 
 		return board_command(session_doc, action_type, as_dict(payload), participant)
 	idempotency_key = str(idempotency_key or "").strip()[:64]
@@ -512,13 +513,20 @@ def submit_action(
 	if not decision.accepted:
 		frappe.throw(_(decision.reason or "Action rejected"))
 
+	if session_doc.game_key in ROUND_GAME_KEYS and action_type in {"submit", "vote", "clue"}:
+		# One accepted input per role/round, even when two different client requests race.
+		idempotency_key = f"round:{state['module_state']['round_index']}:{participant.name}:{action_type}"
 	replay_ttl = (state["deadline_ts"] - time.time()) + 300
 	if not gpe.mark_acted(session_doc.name, idempotency_key, ttl=max(replay_ttl, 60)):
 		return decision.result or {"ok": True}
 	if session_doc.game_key == "doodle-dash" and action_type in {"stroke_batch", "clear_canvas"}:
 		# High-frequency drawing data stays in Redis. Persisting every pointer batch
 		# would turn one sketch into hundreds of SQL writes and slow large rooms.
-		module.update_canvas(gpe.context_for(session_doc), state, action_type, payload or {})
+		try:
+			module.update_canvas(gpe.context_for(session_doc), state, action_type, payload or {})
+		except Exception:
+			frappe.cache.delete_value(gpe.acted_key(session_doc.name, idempotency_key))
+			raise
 		gpe.publish_session_event(
 			session_doc,
 			state,
@@ -759,7 +767,27 @@ def advance_room(session: str, expected_version: int) -> dict:
 
 def ending_snapshot(session_doc):
 	# Called only after the existing host/player/public snapshot authorization.
-	if session_doc.status == "Ended" and is_board(session_doc):
+	if session_doc.status == "Ended" and session_doc.game_key in {
+		"story-loom",
+		"bracket-bash",
+		"escape-together",
+	}:
+		resolution = frappe.db.get_value(
+			"GP Round",
+			{"session": session_doc.name, "status": "Resolved"},
+			"resolution",
+			order_by="round_index desc",
+		)
+		value = frappe.parse_json(resolution) or {}
+		return {key: value.get(key) for key in ("story", "bracket_history", "inventory", "stage_passed")}
+	if session_doc.status == "Ended" and is_board(session_doc) and session_doc.game_key != "grid-conquest":
+		resolution = frappe.db.get_value(
+			"GP Round", {"session": session_doc.name}, "resolution", order_by="round_index desc"
+		)
+		snapshot = (frappe.parse_json(resolution) or {}).get("grid_snapshot") or {}
+		return {"puzzle": (snapshot.get("module_state") or {}).get("puzzle")}
+
+	if session_doc.status == "Ended" and session_doc.game_key == "grid-conquest" and is_board(session_doc):
 		rows = frappe.get_all(
 			"GP Round",
 			filters={"session": session_doc.name},

@@ -1,0 +1,6 @@
+{
+  "checks": [
+    "Distinct Amharic answers score correctly through real player controls and survive reload"
+  ],
+  "errors": []
+}

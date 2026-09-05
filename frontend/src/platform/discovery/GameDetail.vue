@@ -23,6 +23,9 @@
 							{{ $t(profile.kicker || "A new way to play together") }}
 						</p>
 						<h1>{{ $t(game.title) }}</h1>
+						<p v-if="game.status === 'Beta'" class="gp-caption">
+							{{ $t("Beta · a complete starter puzzle, with more boards to come.") }}
+						</p>
 						<p>{{ $t(profile.description) }}</p>
 						<div class="gp-detail-tags">
 							<span>{{ $t(profile.people) }}</span
@@ -32,7 +35,10 @@
 					</div>
 				</header>
 				<div class="gp-detail-grid">
-					<TryBoard v-if="boardGame" />
+					<TryBoard v-if="game.key === 'grid-conquest'" /><TryPuzzle
+						v-else-if="boardGame"
+						:game-key="game.key"
+					/>
 					<section v-else class="gp-example" :aria-label="$t('Try an example round')">
 						<a
 							v-if="coverImage"
@@ -172,7 +178,7 @@
 									roomGame
 										? "One host device. Everyone else can put theirs away."
 										: boardGame
-											? "Choose who places the marks. Your lobby opens before the match starts."
+											? "Choose who controls the board. Your lobby opens before the game starts."
 											: "Choose your content and how you’ll play. Your lobby opens before the game starts.",
 								)
 							}}
@@ -187,7 +193,7 @@
 							{{
 								$t(
 									boardGame
-										? "Take turns on a real X/O board. No question pack or timer needed."
+										? "Play on a real shared board. No question pack or move timer needed."
 										: participation === "shared"
 											? "Join once per team or household with a group nickname. Agree on one answer; each device gets one score."
 											: roomGame
@@ -199,23 +205,23 @@
 						<GatherChoices
 							v-if="boardGame"
 							v-model="boardControl"
-							:label="$t('Who places the marks?')"
+							:label="$t('Who controls the board?')"
 							:options="[
 								{
 									value: 'players',
 									label: 'Player devices',
 									description:
-										'Two sides. Players rotate turns on their own or shared devices.',
+										'Players use their own or shared devices to play on the room board.',
 								},
 								{
 									value: 'shared',
 									label: 'One shared board',
 									description:
-										'Use the host device. Pass it between X and O. No joining needed.',
+										'Use the host device and decide moves together. No joining needed.',
 								},
 							]"
 						/>
-						<p v-if="boardGame" class="gp-setup-note">
+						<p v-if="game.key === 'grid-conquest'" class="gp-setup-note">
 							{{
 								$t(
 									"Three boards. First to two wins, or the highest score after three. Draws give neither side a point.",
@@ -376,7 +382,11 @@
 					<details v-if="!roomGame && !boardGame">
 						<summary>{{ $t("Full visual guide and room setup") }}</summary>
 						<p>{{ $t(guide.setup) }}</p>
-						<GameVisualGuide v-if="visual" :game-title="game.title" :visual="visual" />
+						<GameVisualGuide
+							v-if="visual && !repairedGames[game.key]"
+							:game-title="game.title"
+							:visual="visual"
+						/>
 					</details>
 					<details v-if="guideVideo && !boardGame">
 						<summary>{{ $t("Watch a real round") }}</summary>
@@ -407,6 +417,7 @@
 	</div>
 </template>
 <script setup>
+import TryPuzzle from "@/games/puzzles/TryBoard.vue";
 import TryBoard from "@/games/grid_conquest/TryBoard.vue";
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -415,6 +426,7 @@ import GameArtwork from "./GameArtwork.vue";
 import GameVisualGuide from "./GameVisualGuide.vue";
 import PackPreviewDrawer from "./PackPreviewDrawer.vue";
 import { profileFor } from "./collection";
+import { repairedGames } from "./repairedGames";
 import { guideFor } from "./games";
 import { visualFor } from "./gameVisuals";
 import { gpCall, rememberHostedSession } from "@/platform/session/gp";
@@ -441,7 +453,16 @@ const exampleStep = ref(0),
 	sampleChoice = ref(null),
 	samplePrediction = ref(null);
 const guest = !window.session_user || window.session_user === "Guest";
-const boardGame = computed(() => game.value?.key === "grid-conquest");
+const boardGame = computed(() =>
+	[
+		"grid-conquest",
+		"dots-and-boxes",
+		"group-sudoku",
+		"path-weaver",
+		"hidden-picture",
+		"quilt-puzzle",
+	].includes(game.value?.key),
+);
 const boardControl = ref("players");
 const roomGame = computed(() => game.value?.key === "common-ground");
 const profile = computed(() => profileFor(game.value));
@@ -526,7 +547,9 @@ watch(
 		try {
 			const list = await gpCall("list_games");
 			if (id !== loadId) return;
-			game.value = list.find((g) => g.key === key && g.status === "Available");
+			game.value = list.find(
+				(g) => g.key === key && ["Available", "Beta"].includes(g.status),
+			);
 			if (!game.value) return;
 			participation.value = profile.value.devices[0];
 			seconds.value = key === "crowd-compass" ? 20 : 60;

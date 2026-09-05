@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "group-sudoku host-only UI start, move and reload",
+    "dots-and-boxes host-only UI start, move and reload",
+    "path-weaver host-only UI start, move and reload",
+    "hidden-picture host-only UI start, move and reload",
+    "quilt-puzzle host-only UI start, move and reload"
+  ],
+  "errors": []
+}

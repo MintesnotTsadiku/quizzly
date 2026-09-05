@@ -8,12 +8,32 @@
 			class="flex min-h-0 flex-1 flex-col items-center gap-8 overflow-y-auto p-8"
 		>
 			<CrowdEnding v-if="gameKey === 'crowd-compass'" :ending="ending" screen />
-			<GridEnding v-if="ending?.grid" :ending="ending" />
-			<h2 v-if="!ending?.grid" class="font-display text-6xl font-extrabold text-paper">
+			<RoomEnding
+				v-if="ending?.story || ending?.bracket_history || ending?.inventory"
+				:ending="ending"
+			/>
+			<GridEnding v-if="ending?.grid" :ending="ending" /><PuzzleBoard
+				v-if="ending?.puzzle"
+				:view="{ puzzle: ending.puzzle, can_move: false, is_screen: true }"
+			/>
+			<h2
+				v-if="
+					!ending?.grid &&
+					!ending?.puzzle &&
+					!ending?.bracket_history &&
+					!ending?.inventory
+				"
+				class="font-display text-6xl font-extrabold text-paper"
+			>
 				{{ $t("Final results") }}
 			</h2>
 			<ol
-				v-if="!ending?.grid"
+				v-if="
+					!ending?.grid &&
+					!ending?.puzzle &&
+					!ending?.bracket_history &&
+					!ending?.inventory
+				"
 				class="grid w-full max-w-5xl gap-5"
 				:class="podium.length > 2 ? 'sm:grid-cols-2' : ''"
 			>
@@ -189,6 +209,8 @@
 
 <script setup>
 import RoundJourney from "@/platform/ending/RoundJourney.vue";
+import PuzzleBoard from "@/games/puzzles/Board.vue";
+import RoomEnding from "@/games/round_games/Ending.vue";
 import GridEnding from "@/games/grid_conquest/Ending.vue";
 import CrowdEnding from "@/platform/ending/CrowdEnding.vue";
 import LanguageSwitch from "@/components/LanguageSwitch.vue";
@@ -272,6 +294,8 @@ function onEvent(message) {
 		}
 		refresh();
 	} else if (type === "platform.action_progress") {
+		if (["round_open", "vote_open", "chorus_clues"].includes(payload.phase))
+			view.value = { ...view.value, responses: payload.count };
 		view.value = { ...view.value, solved: payload.count };
 	} else if (type === "platform.scoreboard_updated") {
 		view.value = {
@@ -326,6 +350,8 @@ function applyState(state) {
 			"draw_ready",
 			"draw_open",
 			"round_open",
+			"memory_study",
+			"chorus_clues",
 		].includes(state.phase)
 	) {
 		startCountdown(Math.max(0.5, state.remaining_seconds));

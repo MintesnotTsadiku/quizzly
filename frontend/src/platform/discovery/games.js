@@ -1,4 +1,5 @@
-import { locale } from "@/i18n";
+import { repairedGames, puzzleKeys } from "./repairedGames";
+import { locale, t } from "@/i18n";
 import { amGuide } from "@/i18n/games-am";
 import { listGames } from "@/platform/session/gp";
 
@@ -384,6 +385,20 @@ Object.assign(GUIDES["signal-spectrum"], {
 
 export function guideFor(key) {
 	const guide = GUIDES[key] || GUIDES.quiz;
+	if (repairedGames[key]) {
+		const [description, steps] = repairedGames[key];
+		return {
+			...guide,
+			whyGame: t(description),
+			howTo: steps.map((step) => t(step)),
+			setup: t(steps[0]),
+			scoring: t(steps.at(-1)),
+			hostDoes: t(steps[0]),
+			demos: [],
+			playerSees: t(description),
+			roomSees: t(description),
+		};
+	}
 	return locale.value === "am" ? amGuide(key, guide) : guide;
 }
 

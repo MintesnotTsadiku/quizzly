@@ -13,6 +13,7 @@ import frappe
 from frappe.utils import now_datetime, time_diff_in_seconds
 
 from quizzly.games import GameContext, Resolution, Transition, get_game_module
+from quizzly.games.board_session import BOARD_GAME_KEYS
 
 GRACE_SECONDS = 1.0
 ADVANCE_WAIT_CAP = 300
@@ -144,7 +145,7 @@ def maybe_push_progress(session: str, state: dict, session_cache: dict) -> None:
 	key = metric_key(metric)
 	prev = session_cache.setdefault(session, {}).setdefault("progress")
 	now = time.time()
-	if prev:
+	if prev and prev[0] == key:
 		if prev[1] == metric["count"] or now - prev[2] < PROGRESS_THROTTLE:
 			return
 	elif metric["count"] == 0:
@@ -230,13 +231,13 @@ def apply_transition(session_doc, old_state: dict, transition: Transition) -> No
 			frappe.db.set_value("GP Session", session_doc.name, "current_round", round_index)
 		open_round_row(session_doc.name, module_state, next_ts)
 
-	if session_doc.game_key == "grid-conquest" and module_state.get("rules_version") == 2:
-		from quizzly.games.grid_conquest.session import checkpoint
+	if session_doc.game_key in BOARD_GAME_KEYS and module_state.get("rules_version") == 2:
+		from quizzly.games.board_session import checkpoint
 
 		checkpoint(session_doc, new_state)
 
 	payload = {"phase": transition.phase, **(transition.publish or {})}
-	if session_doc.game_key == "grid-conquest" and module_state.get("rules_version") == 2:
+	if session_doc.game_key in BOARD_GAME_KEYS and module_state.get("rules_version") == 2:
 		payload.update(revision=version, paused=bool(new_state.get("paused")))
 	publish_session_event(
 		session_doc,
@@ -370,9 +371,9 @@ def get_state(session: str) -> dict | None:
 	state = frappe.cache.get_value(state_key(session), use_local_cache=False)
 	if state is None or (
 		(state.get("module_state") or {}).get("rules_version") == 2
-		and state.get("game_key") == "grid-conquest"
+		and state.get("game_key") in BOARD_GAME_KEYS
 	):
-		from quizzly.games.grid_conquest.session import restore
+		from quizzly.games.board_session import restore
 
 		return restore(session)
 	return state
@@ -463,9 +464,9 @@ def pop_control(session: str) -> dict | None:
 def mark_acted(session: str, idempotency_key: str, ttl: float) -> bool:
 	"""Fast replay pre-check keyed by the client's idempotency key."""
 	key = acted_key(session, idempotency_key)
-	if frappe.cache.sismember(key, idempotency_key):
+	inserted = frappe.cache.execute_command("SADD", frappe.cache.make_key(key), idempotency_key)
+	if not inserted:
 		return False
-	frappe.cache.sadd(key, idempotency_key)
 	frappe.cache.expire(frappe.cache.make_key(key), int(ttl))
 	return True
 

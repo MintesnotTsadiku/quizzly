@@ -96,6 +96,7 @@
 				@vote="vote"
 				@predict="predict"
 				@draw="draw"
+				@retry-drawing="retryDrawing"
 				@guess="guess"
 				@clear="clearCanvas"
 				@submit="roundSubmit"
@@ -150,14 +151,34 @@
 			<!-- Podium -->
 			<template v-else-if="phase === 'podium'">
 				<CrowdEnding v-if="gameKey === 'crowd-compass'" :ending="ending" />
-				<GridEnding v-if="ending?.grid" :ending="ending" />
+				<RoomEnding
+					v-if="ending?.story || ending?.bracket_history || ending?.inventory"
+					:ending="ending"
+				/>
+				<GridEnding v-if="ending?.grid" :ending="ending" /><PuzzleBoard
+					v-if="ending?.puzzle"
+					:view="{ puzzle: ending.puzzle, can_move: false }"
+				/>
 				<h1
-					v-if="!ending?.grid"
+					v-if="
+						!ending?.grid &&
+						!ending?.puzzle &&
+						!ending?.bracket_history &&
+						!ending?.inventory
+					"
 					class="font-display text-5xl font-extrabold leading-tight text-paper"
 				>
 					{{ headline }}
 				</h1>
-				<ol v-if="!ending?.grid" class="flex w-full max-w-sm flex-col gap-2.5">
+				<ol
+					v-if="
+						!ending?.grid &&
+						!ending?.puzzle &&
+						!ending?.bracket_history &&
+						!ending?.inventory
+					"
+					class="flex w-full max-w-sm flex-col gap-2.5"
+				>
 					<li
 						v-for="row in rankedStandings"
 						:key="row.name"
@@ -207,6 +228,8 @@
 
 <script setup>
 import RoundJourney from "@/platform/ending/RoundJourney.vue";
+import PuzzleBoard from "@/games/puzzles/Board.vue";
+import RoomEnding from "@/games/round_games/Ending.vue";
 import GridEnding from "@/games/grid_conquest/Ending.vue";
 import CrowdEnding from "@/platform/ending/CrowdEnding.vue";
 import { t } from "@/i18n";
@@ -275,21 +298,24 @@ function onEvent(message) {
 	if (!message || typeof message !== "object") return;
 	const type = message.type;
 	const payload = message.payload || {};
-	if (type === "platform.lobby_updated" && gameKey.value === "grid-conquest") refreshPrivate();
+	if (type === "platform.lobby_updated" && view.value.rules_version === 2) refreshPrivate();
 	if (
 		type === "platform.state_changed" ||
-		type.split(".")[0] === gameKey.value.replace("-", "_")
+		type.split(".")[0] === gameKey.value.replaceAll("-", "_")
 	) {
+		if (type === "doodle_dash.canvas_updated" && Array.isArray(payload.strokes)) {
+			view.value = { ...view.value, strokes: payload.strokes };
+			return;
+		}
 		if (!payload.phase) return;
-		view.value = { ...payload };
-		podium.value = null;
-		phase.value = payload.phase;
-		playCue(payload.is_performer ? "correct" : "tick");
-		// the private fetch returns the authoritative deadline for this phase
-		stopCountdown();
-		if (payload.phase === "turn_ready") startCountdown(3);
+		if (view.value.rules_version === 2 && payload.revision > view.value.revision) {
+			view.value = { ...view.value, can_move: false };
+		}
+		// Public events must not replace private roles, locked responses or drawing controls.
 		refreshPrivate();
 	} else if (type === "platform.action_progress") {
+		if (["round_open", "vote_open", "chorus_clues"].includes(payload.phase))
+			view.value = { ...view.value, responses: payload.count };
 		solvedCount.value = payload.count;
 	} else if (type === "platform.scoreboard_updated") {
 		view.value = {
@@ -337,6 +363,7 @@ function applyState(state) {
 		return;
 	}
 	if (state.status !== "Active") return;
+	if (state.view?.revision && state.view.revision < (view.value.revision || 0)) return;
 	view.value = { ...state.view, teams: state.view?.teams || [] };
 	phase.value = state.phase || "lobby";
 	prompt.value = state.view?.prompt || "";
@@ -351,6 +378,8 @@ function applyState(state) {
 			"draw_ready",
 			"draw_open",
 			"round_open",
+			"memory_study",
+			"chorus_clues",
 		].includes(state.phase)
 	) {
 		startCountdown(Math.max(0.5, state.remaining_seconds));
@@ -454,14 +483,14 @@ async function predict(payload) {
 	}
 }
 
-async function gameAction(actionType, payload = {}) {
+async function gameAction(actionType, payload = {}, requestId = crypto.randomUUID()) {
 	submitting.value = true;
 	try {
 		return await call("quizzly.games.api.submit_action", {
 			pin: player.value.pin,
 			token: player.value.token,
 			action_type: actionType,
-			idempotency_key: crypto.randomUUID(),
+			idempotency_key: requestId,
 			payload,
 		});
 	} finally {
@@ -470,15 +499,53 @@ async function gameAction(actionType, payload = {}) {
 	}
 }
 
-async function draw(strokes) {
-	await gameAction("stroke_batch", { strokes });
+let drawingQueue = null;
+const pendingDrawing = [];
+function draw(strokes) {
+	pendingDrawing.push({ strokes, requestId: crypto.randomUUID(), round: view.value.round });
+	return retryDrawing();
+}
+function retryDrawing() {
+	if (drawingQueue) return drawingQueue;
+	actionError.value = "";
+	drawingQueue = (async () => {
+		while (pendingDrawing.length) {
+			const batch = pendingDrawing[0];
+			if (batch.round !== view.value.round || view.value.phase !== "draw_open") {
+				pendingDrawing.shift();
+				continue;
+			}
+			try {
+				await gameAction("stroke_batch", { strokes: batch.strokes }, batch.requestId);
+				pendingDrawing.shift();
+			} catch (e) {
+				actionError.value = readError(e);
+				break;
+			}
+		}
+	})().finally(() => {
+		drawingQueue = null;
+	});
+	return drawingQueue;
 }
 async function clearCanvas() {
-	await gameAction("clear_canvas");
+	if (drawingQueue) await drawingQueue;
+	pendingDrawing.splice(0);
+	try {
+		await gameAction("clear_canvas");
+		actionError.value = "";
+	} catch (e) {
+		actionError.value = readError(e);
+	}
 }
 async function guess(payload) {
-	const result = await gameAction("guess", { guess: payload.guess });
-	payload.done?.(result);
+	try {
+		const result = await gameAction("guess", { guess: payload.guess });
+		payload.done?.(result);
+		actionError.value = "";
+	} catch (e) {
+		actionError.value = readError(e);
+	}
 }
 async function roundSubmit(payload) {
 	const { action_type = "submit", ...value } = payload || {};

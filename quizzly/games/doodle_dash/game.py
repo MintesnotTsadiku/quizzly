@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import random
-import re
 import time
 
 import frappe
@@ -20,6 +19,7 @@ from quizzly.games import (
 	Transition,
 )
 from quizzly.games.engine import accepted_actions
+from quizzly.games.text import normalize_answer
 
 READY_SECONDS = 3
 REVEAL_SECONDS = 8
@@ -140,6 +140,8 @@ class DoodleDashGame(GameModule):
 			strokes = payload.get("strokes") or []
 			if len(strokes) > 80 or any(not self.valid_stroke(s) for s in strokes):
 				return ActionDecision(False, "Invalid drawing batch")
+			if len(self.canvas(ctx, state)) + len(strokes) > 12000:
+				return ActionDecision(False, "The canvas is full. Clear it to keep drawing.")
 			return ActionDecision(True)
 		if action_type == "clear_canvas":
 			return ActionDecision(is_artist, None if is_artist else "Only the artist can clear")
@@ -288,11 +290,14 @@ class DoodleDashGame(GameModule):
 		return frappe.cache.get_value(self.canvas_key(ctx, state)) or []
 
 	def update_canvas(self, ctx, state, action_type, payload):
-		canvas = [] if action_type == "clear_canvas" else self.canvas(ctx, state)
-		if action_type == "stroke_batch":
-			canvas.extend(payload.get("strokes") or [])
-		canvas = canvas[-3000:]
-		frappe.cache.set_value(self.canvas_key(ctx, state), canvas, expires_in_sec=3600)
+		key = self.canvas_key(ctx, state)
+		with frappe.cache.lock(f"{key}:write", timeout=10):
+			canvas = [] if action_type == "clear_canvas" else self.canvas(ctx, state)
+			if action_type == "stroke_batch":
+				canvas.extend(payload.get("strokes") or [])
+				if len(canvas) > 12000:
+					frappe.throw("The canvas is full. Clear it to keep drawing.")
+			frappe.cache.set_value(key, canvas, expires_in_sec=3600)
 		return canvas
 
 	def canvas_key(self, ctx, state):
@@ -307,7 +312,7 @@ class DoodleDashGame(GameModule):
 		}
 
 	def clean(self, value):
-		return re.sub(r"[^a-z0-9 ]+", "", str(value or "").lower()).strip()
+		return normalize_answer(value)
 
 	def valid_stroke(self, s):
 		return isinstance(s, dict) and all(

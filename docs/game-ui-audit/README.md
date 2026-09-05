@@ -1,5 +1,7 @@
 # Gathering-game interface audit — 5 September 2026
 
+Implementation follow-up: [game interface repairs and verification](IMPLEMENTATION.md). This document preserves the findings and before-state evidence.
+
 Reviewed application revision: `3ef474d` (the interactive Grid Conquest fix).
 
 **The Grid Conquest problem is not isolated. Five other board/puzzle games still use text questions and answer buttons instead of playable puzzle surfaces. Several additional games have missing content or incomplete game mechanics.** This is an audit, not a claim that these issues are fixed.

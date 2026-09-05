@@ -41,7 +41,11 @@ def demo_files(game_key: str | None = None) -> list[Path]:
 
 
 def seed_all() -> list[dict]:
-	return [seed_file(path) for path in demo_files()] + seed_round_game_demos()
+	results = [seed_file(path) for path in demo_files()] + seed_round_game_demos()
+	from quizzly.demo.curated import seed_curated_starters
+
+	seed_curated_starters()
+	return results
 
 
 def seed_file(path: Path) -> dict:
@@ -329,7 +333,7 @@ def round_demo_items(game_key: str, title: str, audience: str) -> list[dict]:
 
 
 def _puzzle_choice(game_key: str, number: int):
-	"""Small simultaneous puzzles keep every person active in rooms of 4–100."""
+	"""Small simultaneous puzzles keep every person active in rooms of 4-100."""
 	variants = {
 		"grid-conquest": [
 			("X X · / O O · / · · · — where should X play to complete the top row?", ["Top right", "Middle right", "Bottom left", "Centre"], "Top right"),
@@ -362,10 +366,10 @@ def _puzzle_choice(game_key: str, number: int):
 			("Complete the growing pattern: one dot, two dots, three dots, ___.", ["Four dots", "Two dots", "Five dots", "One dot"], "Four dots"),
 		],
 		"group-sudoku": [
-			("4×4 Sudoku: target row is 1, 2, _, 4; its column has 1, 2, 4. Which value fits?", ["1", "2", "3", "4"], "3"),
-			("4×4 Sudoku: target row is 4, _, 2, 1; its column has 1, 2, 4. Which value fits?", ["3", "1", "2", "4"], "3"),
-			("4×4 Sudoku: target row is _, 1, 4, 3; its column has 1, 3, 4. Which value fits?", ["2", "1", "3", "4"], "2"),
-			("4×4 Sudoku: target row is 3, 4, 1, _; its column has 1, 3, 4. Which value fits?", ["2", "4", "1", "3"], "2"),
+			("4×4 Sudoku: target row is 1, 2, _, 4; its column has 1, 2, 4. Which value fits?", ["1", "2", "3", "4"], "3"),  # noqa: RUF001 - mathematical dimensions in existing content
+			("4×4 Sudoku: target row is 4, _, 2, 1; its column has 1, 2, 4. Which value fits?", ["3", "1", "2", "4"], "3"),  # noqa: RUF001 - mathematical dimensions in existing content
+			("4×4 Sudoku: target row is _, 1, 4, 3; its column has 1, 3, 4. Which value fits?", ["2", "1", "3", "4"], "2"),  # noqa: RUF001 - mathematical dimensions in existing content
+			("4×4 Sudoku: target row is 3, 4, 1, _; its column has 1, 3, 4. Which value fits?", ["2", "4", "1", "3"], "2"),  # noqa: RUF001 - mathematical dimensions in existing content
 		],
 	}
 	game_variants = variants.get(game_key)

@@ -567,12 +567,12 @@
 					class="ctl ctl-go"
 					:disabled="
 						starting ||
-						(gameKey === 'grid-conquest' &&
+						(configuration.rules_version === 2 &&
 							configuration.control_mode === 'players' &&
 							participants.length < 2) ||
 						(!participants.length &&
 							!(
-								gameKey === 'grid-conquest' &&
+								configuration.rules_version === 2 &&
 								configuration.control_mode === 'shared'
 							))
 					"
@@ -581,7 +581,7 @@
 					{{
 						starting
 							? $t("Starting…")
-							: gameKey === "grid-conquest"
+							: configuration.rules_version === 2
 								? $t("Start match")
 								: $t("Start · {count} players", { count: participants.length })
 					}}
@@ -654,14 +654,34 @@
 			<template v-else-if="podium">
 				<LanguageSwitch v-if="gameKey === 'crowd-compass'" />
 				<CrowdEnding v-if="gameKey === 'crowd-compass'" :ending="ending" />
-				<GridEnding v-if="ending?.grid" :ending="ending" />
+				<RoomEnding
+					v-if="ending?.story || ending?.bracket_history || ending?.inventory"
+					:ending="ending"
+				/>
+				<GridEnding v-if="ending?.grid" :ending="ending" /><PuzzleBoard
+					v-if="ending?.puzzle"
+					:view="{ puzzle: ending.puzzle, can_move: false }"
+				/>
 				<h1
-					v-if="!ending?.grid"
+					v-if="
+						!ending?.grid &&
+						!ending?.puzzle &&
+						!ending?.bracket_history &&
+						!ending?.inventory
+					"
 					class="font-display text-5xl font-extrabold text-paper sm:text-6xl"
 				>
 					{{ $t("Final results") }}
 				</h1>
-				<ol v-if="!ending?.grid" class="flex w-full max-w-xl flex-col gap-3">
+				<ol
+					v-if="
+						!ending?.grid &&
+						!ending?.puzzle &&
+						!ending?.bracket_history &&
+						!ending?.inventory
+					"
+					class="flex w-full max-w-xl flex-col gap-3"
+				>
 					<li
 						v-for="team in podium"
 						:key="team.name"
@@ -688,7 +708,7 @@
 				</ol>
 				<div class="mt-2 flex flex-wrap justify-center gap-2">
 					<button
-						v-if="['crowd-compass', 'grid-conquest'].includes(gameKey)"
+						v-if="gameKey"
 						class="ctl ctl-go"
 						:disabled="creating"
 						@click="replayRoom"
@@ -853,6 +873,8 @@
 
 <script setup>
 import RoundJourney from "@/platform/ending/RoundJourney.vue";
+import PuzzleBoard from "@/games/puzzles/Board.vue";
+import RoomEnding from "@/games/round_games/Ending.vue";
 import GridEnding from "@/games/grid_conquest/Ending.vue";
 import CrowdEnding from "@/platform/ending/CrowdEnding.vue";
 import { locale } from "@/i18n";
@@ -1034,7 +1056,7 @@ function onEvent(envelopeMessage) {
 	const type = envelopeMessage.type;
 	const payload = envelopeMessage.payload || envelopeMessage;
 	if (type === "platform.lobby_updated") {
-		if (gameKey.value === "grid-conquest") refresh();
+		if (configuration.value.rules_version === 2) refresh();
 		participants.value = payload.participants || [];
 		teams.value = (payload.teams || []).map((t) => ({ ...t, editName: t.team_name }));
 		lobbyLocked.value = Boolean(payload.lobby_locked);
@@ -1042,30 +1064,15 @@ function onEvent(envelopeMessage) {
 		type === "platform.state_changed" ||
 		type.split(".")[0] === gameKey.value.replace(/-/g, "_")
 	) {
-		if (payload.phase) {
-			view.value = payload;
-			podium.value = null;
-			phase.value = payload.phase;
-			playCue(
-				payload.phase === "turn_open" || payload.phase === "prompt_open"
-					? "submit"
-					: "tick",
-			);
-			stopCountdown();
-			if (
-				[
-					"turn_ready",
-					"prompt_open",
-					"prediction_open",
-					"draw_ready",
-					"draw_open",
-					"round_open",
-				].includes(payload.phase)
-			)
-				startCountdown(5);
+		if (type === "doodle_dash.canvas_updated" && Array.isArray(payload.strokes)) {
+			view.value = { ...view.value, strokes: payload.strokes };
+		} else if (payload.phase) {
+			// Keep host controls and the board mounted until the private snapshot arrives.
 			refresh();
 		}
 	} else if (type === "platform.action_progress") {
+		if (["round_open", "vote_open", "chorus_clues"].includes(payload.phase))
+			view.value = { ...view.value, responses: payload.count };
 		if (payload.phase === "prompt_open") view.value = { ...view.value, voted: payload.count };
 		else if (payload.phase === "prediction_open")
 			view.value = { ...view.value, predicted: payload.count };
@@ -1149,6 +1156,8 @@ async function applyState(state) {
 			"draw_ready",
 			"draw_open",
 			"round_open",
+			"memory_study",
+			"chorus_clues",
 		].includes(state.phase)
 	) {
 		startCountdown(Math.max(0.5, state.remaining_seconds));
@@ -1271,8 +1280,17 @@ onMounted(async () => {
 });
 
 watch(setupGame, (game) => {
-	if (game === "grid-conquest") {
-		router.push("/games/grid-conquest");
+	if (
+		[
+			"grid-conquest",
+			"dots-and-boxes",
+			"group-sudoku",
+			"path-weaver",
+			"hidden-picture",
+			"quilt-puzzle",
+		].includes(game)
+	) {
+		router.push(`/games/${game}`);
 		return;
 	}
 	if (game) loadPacks(game);
@@ -1479,6 +1497,6 @@ async function end() {
 function newRoom() {
 	forgetHostedSession();
 	window.location.href =
-		gameKey.value === "grid-conquest" ? "/play/games/grid-conquest" : "/play/host";
+		configuration.value.rules_version === 2 ? `/play/games/${gameKey.value}` : "/play/host";
 }
 </script>

@@ -111,6 +111,9 @@
 								<span>{{ $t(profileFor(game).category) }}</span
 								><span>{{ $t(profileFor(game).time) }}</span>
 							</div>
+							<span v-if="game.status === 'Beta'" class="gp-caption">{{
+								$t("Beta")
+							}}</span>
 							<h3>{{ $t(game.title) }} <span aria-hidden="true">↗</span></h3>
 							<p>{{ $t(profileFor(game).description) }}</p>
 							<div class="gp-card-meta">{{ $t(profileFor(game).deviceLabel) }}</div>
@@ -181,7 +184,7 @@ const filtered = computed(() =>
 	games.value
 		.filter(
 			(g) =>
-				g.status === "Available" &&
+				["Available", "Beta"].includes(g.status) &&
 				(showAll.value || query.value || featuredKeys.includes(g.key)),
 		)
 		.filter(

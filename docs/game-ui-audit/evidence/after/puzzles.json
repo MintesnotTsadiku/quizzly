@@ -1,0 +1,12 @@
+{
+  "checks": [
+    "group-sudoku two-player full solution, projector, mobile reload and ending",
+    "dots-and-boxes two-player full solution, projector, mobile reload and ending",
+    "path-weaver two-player full solution, projector, mobile reload and ending",
+    "hidden-picture two-player full solution, projector, mobile reload and ending",
+    "quilt-puzzle two-player full solution, projector, mobile reload and ending"
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 417 (EXPECTATION FAILED)"
+  ]
+}

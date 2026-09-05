@@ -121,3 +121,22 @@ GAME_LIVE["grid-conquest"] = {
 	ScreenLive: GridScreenLive,
 };
 GAME_PHASES["grid-conquest"] = ["grid_turn", "grid_round_over", "round_open", "round_reveal"];
+
+import PuzzleHost from "./puzzles/HostLive.vue";
+import PuzzlePlayer from "./puzzles/PlayerLive.vue";
+import PuzzleScreen from "./puzzles/ScreenLive.vue";
+for (const key of [
+	"dots-and-boxes",
+	"group-sudoku",
+	"path-weaver",
+	"hidden-picture",
+	"quilt-puzzle",
+]) {
+	GAME_LIVE[key] = { HostLive: PuzzleHost, PlayerLive: PuzzlePlayer, ScreenLive: PuzzleScreen };
+	GAME_PHASES[key] = ["puzzle_play", "puzzle_complete", "round_open", "round_reveal"];
+}
+
+GAME_PHASES["memory-mosaic"].push("memory_study");
+
+GAME_PHASES["one-word-chorus"].push("chorus_clues");
+GAME_PHASES["seek-and-show"].push("seek_review");

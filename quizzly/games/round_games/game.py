@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import math
 import random
-import re
 import time
 from itertools import pairwise
 
@@ -20,6 +20,7 @@ from quizzly.games import (
 	Transition,
 )
 from quizzly.games.engine import accepted_actions
+from quizzly.games.text import normalize_answer
 
 PROFILES = {
 	"bluffline": (
@@ -48,7 +49,7 @@ PROFILES = {
 	),
 	"sound-snap": (
 		"Sound Snap",
-		"Read a short sound-related clue and identify it from the displayed choices.",
+		"Listen to a short audio clip and identify what you hear.",
 		"choice",
 		("sound-clues", "quiz"),
 		1,
@@ -64,7 +65,7 @@ PROFILES = {
 	),
 	"story-loom": (
 		"Story Loom",
-		"Write a constrained continuation and win votes from the room.",
+		"Write and vote to weave one story, then share your room's finished tale.",
 		"creative",
 		("story", "cooperative"),
 		3,
@@ -80,7 +81,7 @@ PROFILES = {
 	),
 	"memory-mosaic": (
 		"Memory Mosaic",
-		"Study the scene and answer one multiple-choice detail question.",
+		"Study a scene, let it disappear, then answer from memory.",
 		"choice",
 		("memory", "image"),
 		1,
@@ -96,7 +97,7 @@ PROFILES = {
 	),
 	"escape-together": (
 		"Escape Together",
-		"Solve one multiple-choice puzzle in each timed round.",
+		"Solve linked locks, collect clues and escape together.",
 		"choice",
 		("puzzle", "cooperative"),
 		2,
@@ -104,7 +105,7 @@ PROFILES = {
 	),
 	"bracket-bash": (
 		"Bracket Bash",
-		"Choose the predefined winner for each matchup-style prompt.",
+		"Vote favorites through a majority tournament until the room has a champion.",
 		"choice",
 		("voting", "tournament"),
 		2,
@@ -136,7 +137,7 @@ PROFILES = {
 	),
 	"one-word-chorus": (
 		"One Word Chorus",
-		"Read the complete clue prompt and lock one exact word.",
+		"Give unique one-word clues to help a rotating guesser find the secret.",
 		"text",
 		("word", "teams"),
 		3,
@@ -152,7 +153,7 @@ PROFILES = {
 	),
 	"dots-and-boxes": (
 		"Dots and Boxes",
-		"Find the line that completes or protects the most valuable box.",
+		"Tap edges, claim boxes and take another turn when you close a box.",
 		"choice",
 		("grid", "territory", "strategy"),
 		4,
@@ -160,7 +161,7 @@ PROFILES = {
 	),
 	"hidden-picture": (
 		"Hidden Picture",
-		"Use a row clue to identify the one cell pattern that satisfies it.",
+		"Fill a nonogram using row and column clues to reveal a picture.",
 		"choice",
 		("nonogram", "image", "deduction"),
 		4,
@@ -168,7 +169,7 @@ PROFILES = {
 	),
 	"path-weaver": (
 		"Path Weaver",
-		"Use the stated route constraints to choose the next valid move.",
+		"Build a shared path through every checkpoint to reach the exit.",
 		"choice",
 		("path", "logic", "strategy"),
 		4,
@@ -176,7 +177,7 @@ PROFILES = {
 	),
 	"quilt-puzzle": (
 		"Quilt Puzzle",
-		"Inspect a visual sequence and choose the patch that completes its pattern.",
+		"Place and rotate patches to cover a quilt without gaps or overlaps.",
 		"choice",
 		("spatial", "pattern", "deduction"),
 		4,
@@ -224,6 +225,9 @@ class RoundGame(GameModule):
 		pack = cfg.get("pack")
 		if not pack or frappe.db.get_value("GP Game Pack", pack, "game_key") != self.key:
 			frappe.throw(_("Pick a pack for this game"))
+		from .content import validate_items
+
+		validate_items(self.key, frappe.get_doc("GP Game Pack", pack).items)
 		seconds = int(cfg.get("seconds") or 30)
 		if seconds not in (15, 30, 45, 60):
 			frappe.throw(_("Round length must be 15, 30, 45 or 60 seconds"))
@@ -252,8 +256,8 @@ class RoundGame(GameModule):
 		state["item"] = state["items"][state["position"]]
 		state["position"] += 1
 		return Transition(
-			phase="round_open",
-			next_ts=time.time() + ctx.configuration["seconds"],
+			phase="memory_study" if self.key == "memory-mosaic" else "round_open",
+			next_ts=time.time() + (10 if self.key == "memory-mosaic" else ctx.configuration["seconds"]),
 			ttl=ctx.configuration["seconds"] + 60,
 			module_state=state,
 			publish={
@@ -268,6 +272,14 @@ class RoundGame(GameModule):
 	def advance_state(self, ctx, state, trigger):
 		if trigger.get("command") not in ("deadline", "skip_turn", "next"):
 			return None
+		if state["phase"] == "memory_study":
+			return Transition(
+				phase="round_open",
+				next_ts=time.time() + ctx.configuration["seconds"],
+				ttl=ctx.configuration["seconds"] + 60,
+				module_state=dict(state["module_state"]),
+				publish={"type": "memory_mosaic.recall", "phase": "round_open"},
+			)
 		if state["phase"] == "round_open":
 			return self.open_vote(ctx, state) if self.key in VOTE_GAMES else self.reveal(ctx, state)
 		if state["phase"] == "vote_open":
@@ -304,6 +316,14 @@ class RoundGame(GameModule):
 				value = float(value)
 			except (TypeError, ValueError):
 				return ActionDecision(False, "Enter a number")
+			if not math.isfinite(value):
+				return ActionDecision(False, "Enter a finite number")
+			if self.key == "signal-spectrum" and not 0 <= value <= 100:
+				return ActionDecision(False, "Choose a position from 0 to 100")
+		elif mode == "choice":
+			choices = frappe.parse_json(self.item(state["module_state"]["item"]).choices) or []
+			if self.key != "bracket-bash" and value not in choices:
+				return ActionDecision(False, "Choose one of the available answers")
 		elif mode == "order":
 			cards = frappe.parse_json(self.item(state["module_state"]["item"]).choices) or []
 			if not isinstance(value, list) or len(value) != len(cards) or sorted(value) != sorted(cards):
@@ -390,6 +410,8 @@ class RoundGame(GameModule):
 			votes = [a for a in accepted_actions(ctx.session, ms["round_index"]) if a.action_type == "vote"]
 			for a in actions:
 				points = 250 + 500 * sum(1 for vote in votes if vote.payload.get("value") == a.name)
+				if self.key == "seek-and-show":
+					points = 250 if a.participant in ms.get("approved", []) else 0
 				deltas.append(
 					ScoreDelta(
 						"Participant",
@@ -403,7 +425,8 @@ class RoundGame(GameModule):
 					{
 						"participant": a.participant,
 						"value": a.payload.get("value"),
-						"votes": (points - 250) // 500,
+						"votes": sum(1 for vote in votes if vote.payload.get("value") == a.name),
+						"points": points,
 					}
 				)
 			if self.key == "bluffline":
@@ -452,7 +475,7 @@ class RoundGame(GameModule):
 			answer = self.norm(item.answer)
 			for a in actions:
 				value = a.payload.get("value")
-				correct = self.norm(value) == answer
+				correct = bool(answer) and self.norm(value) == answer
 				if correct:
 					deltas.append(
 						ScoreDelta(
@@ -464,12 +487,23 @@ class RoundGame(GameModule):
 						)
 					)
 				results.append({"participant": a.participant, "correct": correct})
+		for result in results:
+			if self.key == "seek-and-show":
+				result["confirmed"] = result["participant"] in ms.get("approved", [])
+			result["nickname"] = frappe.db.get_value("GP Participant", result["participant"], "nickname")
+		ms["reveal"] = {
+			"answer": item.answer,
+			"responses": len(actions),
+			"results": results,
+			"truth": item.answer if self.key == "bluffline" else None,
+			"target": item.target if mode == "number" else None,
+		}
 		return Transition(
 			phase="round_reveal",
 			next_ts=time.time() + 8,
 			ttl=68,
 			module_state=ms,
-			resolution=Resolution({"answer": item.answer, "responses": len(actions)}, deltas),
+			resolution=Resolution(ms["reveal"], deltas),
 			publish={
 				"type": f"{self.key.replace('-', '_')}.round_revealed",
 				"phase": "round_reveal",
@@ -485,37 +519,56 @@ class RoundGame(GameModule):
 		if ms.get("item"):
 			view.update(self.public_item(ms["item"]))
 			view["responses"] = len(
-				[a for a in accepted_actions(ctx.session, ms.get("round_index")) if a.action_type == "submit"]
+				[
+					a
+					for a in accepted_actions(ctx.session, ms.get("round_index"))
+					if a.action_type
+					== (
+						"vote"
+						if state["phase"] == "vote_open"
+						else "clue"
+						if state["phase"] == "chorus_clues"
+						else "submit"
+					)
+				]
 			)
 		if state["phase"] == "vote_open":
 			view["choices"] = self.candidates(ctx, ms)
 		if state["phase"] == "round_reveal":
-			view["answer"] = self.item(ms["item"]).answer
+			view.update(ms.get("reveal") or {"answer": self.item(ms["item"]).answer})
+		if self.key == "memory-mosaic":
+			if state["phase"] == "memory_study":
+				view.update(
+					prompt=_("Study the scene. The picture will disappear before the question."), choices=[]
+				)
+			elif state["phase"] == "round_open":
+				view["media_url"] = None
 		return view
 
 	def serialize_player_state(self, ctx, state, participant):
 		view = self.serialize_public_state(ctx, state)
 		if state["phase"] == "vote_open":
 			view["choices"] = self.candidates(ctx, state["module_state"], participant["name"])
+		action_type = "vote" if state["phase"] == "vote_open" else "submit"
+		view["locked"] = any(
+			a.participant == participant["name"] and a.action_type == action_type
+			for a in accepted_actions(ctx.session, state["module_state"]["round_index"])
+		)
 		return view
 
 	def serialize_host_state(self, ctx, state):
 		return {**self.serialize_public_state(ctx, state), "configuration": ctx.configuration}
 
 	def progress_metric(self, ctx, state):
-		return (
-			{
-				"count": len(
-					[
-						a
-						for a in accepted_actions(ctx.session, state["module_state"].get("round_index"))
-						if a.action_type == "submit"
-					]
-				)
-			}
-			if state["phase"] == "round_open"
-			else None
-		)
+		kind = {"round_open": "submit", "vote_open": "vote", "chorus_clues": "clue"}.get(state["phase"])
+		if not kind:
+			return None
+		index = state["module_state"].get("round_index")
+		return {
+			"phase": state["phase"],
+			"round_index": index,
+			"count": sum(a.action_type == kind for a in accepted_actions(ctx.session, index)),
+		}
 
 	def is_presentation_phase(self, phase):
 		return phase in {"round_reveal", "scoreboard", "podium"}
@@ -532,8 +585,12 @@ class RoundGame(GameModule):
 			fields=["name", "nickname", "avatar", "score"],
 			order_by="score desc, joined_at asc",
 		)
+		last_score, rank = None, 0
 		for i, r in enumerate(rows, 1):
-			r["rank"] = i
+			if r.score != last_score:
+				rank = i
+			last_score = r.score
+			r["rank"] = rank
 			r["team_name"] = r.nickname
 		return [dict(r) for r in rows]
 
@@ -551,10 +608,14 @@ class RoundGame(GameModule):
 			"choices": choices,
 			"media_url": i.media_url,
 			"mechanic": self.profile[2],
+			"game_key": self.key,
+			"axis": i.prompt_text.replace("፦", ":").replace("እስከ", "→").split(":", 1)[0].split("→")
+			if self.key == "signal-spectrum"
+			else None,
 		}
 
 	def norm(self, v):
-		return re.sub(r"[^a-z0-9 ]+", "", str(v or "").lower()).strip()
+		return normalize_answer(v)
 
 
 def _class(name, key):
