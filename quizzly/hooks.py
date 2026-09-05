@@ -79,3 +79,8 @@ quizzly_game_modules = [
 
 # Additive starter content: an existing demo key is never rewritten.
 after_migrate = ["quizzly.demo.amharic.seed_amharic_starters"]
+
+# Recover failed/timed-out game jobs and retire rooms whose temporary state expired.
+scheduler_events = {
+	"cron": {"* * * * *": ["quizzly.recovery.recover_game_loops"]},
+}
