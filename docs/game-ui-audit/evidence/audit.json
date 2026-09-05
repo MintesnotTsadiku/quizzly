@@ -1,0 +1,1458 @@
+{
+  "findings": [
+    {
+      "key": "dots-and-boxes",
+      "guide": "",
+      "pack": "Assembly Territory",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Assembly Territory · 4. The highlighted box already has TOP, LEFT, and RIGHT. Which missing edge claims it?",
+        "choices": [
+          "Bottom edge",
+          "Right edge",
+          "Top edge",
+          "Left edge"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00935",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nAssembly Territory · 4. The highlighted box already has TOP, LEFT, and RIGHT. Which missing edge claims it?\nBottom edge\nRight edge\nTop edge\nLeft edge",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nAssembly Territory · 4. The highlighted box already has TOP, LEFT, and RIGHT. Which missing edge claims it?\nBottom edge\nRight edge\nTop edge\nLeft edge\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nAssembly Territory · 4. The highlighted box already has TOP, LEFT, and RIGHT. Which missing edge claims it?\nBottom edge\nRight edge\nTop edge\nLeft edge\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Assembly Territory · 4. The highlighted box already has TOP, LEFT, and RIGHT. Which missing edge claims it?",
+        "choices": [
+          "Bottom edge",
+          "Right edge",
+          "Top edge",
+          "Left edge"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 2,
+        "answer": "Bottom edge",
+        "configuration": {
+          "pack": "GPG-2026-00935",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "path-weaver",
+      "guide": "",
+      "pack": "Assembly Route Challenge",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Assembly Route Challenge · 1. Ahead is blocked, LEFT revisits a cell, RIGHT is open, and STOP misses the exit. Which move stays legal?",
+        "choices": [
+          "Turn left",
+          "Turn right",
+          "Continue straight",
+          "Stop"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00941",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nAssembly Route Challenge · 1. Ahead is blocked, LEFT revisits a cell, RIGHT is open, and STOP misses the exit. Which move stays legal?\nTurn left\nTurn right\nContinue straight\nStop",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nAssembly Route Challenge · 1. Ahead is blocked, LEFT revisits a cell, RIGHT is open, and STOP misses the exit. Which move stays legal?\nTurn left\nTurn right\nContinue straight\nStop\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nAssembly Route Challenge · 1. Ahead is blocked, LEFT revisits a cell, RIGHT is open, and STOP misses the exit. Which move stays legal?\nTurn left\nTurn right\nContinue straight\nStop\n57\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Assembly Route Challenge · 1. Ahead is blocked, LEFT revisits a cell, RIGHT is open, and STOP misses the exit. Which move stays legal?",
+        "choices": [
+          "Turn left",
+          "Turn right",
+          "Continue straight",
+          "Stop"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 2,
+        "answer": "Turn right",
+        "configuration": {
+          "pack": "GPG-2026-00941",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "quilt-puzzle",
+      "guide": "",
+      "pack": "Big Room Pattern Lab",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Big Room Pattern Lab · 3. Complete the repeating pattern: red, blue, green, red, blue, ___.",
+        "choices": [
+          "Green",
+          "Red",
+          "Blue",
+          "Yellow"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00944",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nBig Room Pattern Lab · 3. Complete the repeating pattern: red, blue, green, red, blue, ___.\nGreen\nRed\nBlue\nYellow",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nBig Room Pattern Lab · 3. Complete the repeating pattern: red, blue, green, red, blue, ___.\nGreen\nRed\nBlue\nYellow\n57\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nBig Room Pattern Lab · 3. Complete the repeating pattern: red, blue, green, red, blue, ___.\nGreen\nRed\nBlue\nYellow\n57\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Big Room Pattern Lab · 3. Complete the repeating pattern: red, blue, green, red, blue, ___.",
+        "choices": [
+          "Green",
+          "Red",
+          "Blue",
+          "Yellow"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 2,
+        "answer": "Green",
+        "configuration": {
+          "pack": "GPG-2026-00944",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "group-sudoku",
+      "guide": "GatherPlay\nExplore\nMy sessions\nCreate a pack\nYour access\nEnglish\nአማርኛ\n🌗\nJoin a game\n↗\nSign out\n← Explore games\nGetting the game ready…",
+      "pack": "Assembly Logic Grid",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Assembly Logic Grid · 3. 4×4 Sudoku: target row is _, 1, 4, 3; its column has 1, 3, 4. Which value fits?",
+        "choices": [
+          "2",
+          "1",
+          "3",
+          "4"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00947",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nAssembly Logic Grid · 3. 4×4 Sudoku: target row is _, 1, 4, 3; its column has 1, 3, 4. Which value fits?\n2\n1\n3\n4",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nAssembly Logic Grid · 3. 4×4 Sudoku: target row is _, 1, 4, 3; its column has 1, 3, 4. Which value fits?\n2\n1\n3\n4\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nAssembly Logic Grid · 3. 4×4 Sudoku: target row is _, 1, 4, 3; its column has 1, 3, 4. Which value fits?\n2\n1\n3\n4\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Assembly Logic Grid · 3. 4×4 Sudoku: target row is _, 1, 4, 3; its column has 1, 3, 4. Which value fits?",
+        "choices": [
+          "2",
+          "1",
+          "3",
+          "4"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 2,
+        "answer": "2",
+        "configuration": {
+          "pack": "GPG-2026-00947",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "hidden-picture",
+      "guide": "",
+      "pack": "Big Screen Pixel Reveal",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Big Screen Pixel Reveal · 1. Row clue 3: which candidate has exactly one uninterrupted group of three filled cells?",
+        "choices": [
+          "■■■··",
+          "■·■■·",
+          "■■·■■",
+          "·■·■·"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00938",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nBig Screen Pixel Reveal · 1. Row clue 3: which candidate has exactly one uninterrupted group of three filled cells?\n■■■··\n■·■■·\n■■·■■\n·■·■·",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nBig Screen Pixel Reveal · 1. Row clue 3: which candidate has exactly one uninterrupted group of three filled cells?\n■■■··\n■·■■·\n■■·■■\n·■·■·\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nBig Screen Pixel Reveal · 1. Row clue 3: which candidate has exactly one uninterrupted group of three filled cells?\n■■■··\n■·■■·\n■■·■■\n·■·■·\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Big Screen Pixel Reveal · 1. Row clue 3: which candidate has exactly one uninterrupted group of three filled cells?",
+        "choices": [
+          "■■■··",
+          "■·■■·",
+          "■■·■■",
+          "·■·■·"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 2,
+        "answer": "■■■··",
+        "configuration": {
+          "pack": "GPG-2026-00938",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "signal-spectrum",
+      "guide": "",
+      "pack": "Journey and Wisdom Scales",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Journey and Wisdom Scales · 5. Where should 'scroll' land from 0 to 100? Lock one shared estimate.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "number",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00631",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nJourney and Wisdom Scales · 5. Where should 'scroll' land from 0 to 100? Lock one shared estimate.\nLock response",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nJourney and Wisdom Scales · 5. Where should 'scroll' land from 0 to 100? Lock one shared estimate.\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nJourney and Wisdom Scales · 5. Where should 'scroll' land from 0 to 100? Lock one shared estimate.\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Journey and Wisdom Scales · 5. Where should 'scroll' land from 0 to 100? Lock one shared estimate.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "number",
+        "responses": 2,
+        "answer": "Reveal the target and compare the distance.",
+        "configuration": {
+          "pack": "GPG-2026-00631",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "picture-peek",
+      "guide": "GatherPlay\nExplore\nMy sessions\nCreate a pack\nYour access\nEnglish\nአማርኛ\n🌗\nJoin a game\n↗\nSign out\n← Explore games\nGetting the game ready…",
+      "pack": "Symbols, Places, and Scenes",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Symbols, Places, and Scenes · 7. The clues point toward courage. Name the common thread as early as you can.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "text",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00619",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nSymbols, Places, and Scenes · 7. The clues point toward courage. Name the common thread as early as you can.\nLock response",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nSymbols, Places, and Scenes · 7. The clues point toward courage. Name the common thread as early as you can.\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nSymbols, Places, and Scenes · 7. The clues point toward courage. Name the common thread as early as you can.\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Symbols, Places, and Scenes · 7. The clues point toward courage. Name the common thread as early as you can.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "text",
+        "responses": 2,
+        "answer": "courage",
+        "configuration": {
+          "pack": "GPG-2026-00619",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "memory-mosaic",
+      "guide": "GatherPlay\nExplore\nMy sessions\nCreate a pack\nYour access\nEnglish\nአማርኛ\n🌗\nJoin a game\n↗\nSign out\n← Explore games\nGetting the game ready…",
+      "pack": "Auditorium Snapshot",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Auditorium Snapshot · 4. Which clue best completes this coffee break challenge?",
+        "choices": [
+          "Observe coffee break",
+          "Ask for a clue",
+          "Work as a team",
+          "Check every detail"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00636",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nAuditorium Snapshot · 4. Which clue best completes this coffee break challenge?\nObserve coffee break\nAsk for a clue\nWork as a team\nCheck every detail",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nAuditorium Snapshot · 4. Which clue best completes this coffee break challenge?\nObserve coffee break\nAsk for a clue\nWork as a team\nCheck every detail\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nAuditorium Snapshot · 4. Which clue best completes this coffee break challenge?\nObserve coffee break\nAsk for a clue\nWork as a team\nCheck every detail\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Auditorium Snapshot · 4. Which clue best completes this coffee break challenge?",
+        "choices": [
+          "Observe coffee break",
+          "Ask for a clue",
+          "Work as a team",
+          "Check every detail"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 2,
+        "answer": "Observe coffee break",
+        "configuration": {
+          "pack": "GPG-2026-00636",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "sound-snap",
+      "guide": "",
+      "pack": "Home and Animal Sounds",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Home and Animal Sounds · 4. Which clue best completes this garden challenge?",
+        "choices": [
+          "Observe garden",
+          "Ask for a clue",
+          "Work as a team",
+          "Check every detail"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00623",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nHome and Animal Sounds · 4. Which clue best completes this garden challenge?\nObserve garden\nAsk for a clue\nWork as a team\nCheck every detail",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nHome and Animal Sounds · 4. Which clue best completes this garden challenge?\nObserve garden\nAsk for a clue\nWork as a team\nCheck every detail\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nHome and Animal Sounds · 4. Which clue best completes this garden challenge?\nObserve garden\nAsk for a clue\nWork as a team\nCheck every detail\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Home and Animal Sounds · 4. Which clue best completes this garden challenge?",
+        "choices": [
+          "Observe garden",
+          "Ask for a clue",
+          "Work as a team",
+          "Check every detail"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 2,
+        "answer": "Observe garden",
+        "configuration": {
+          "pack": "GPG-2026-00623",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "bracket-bash",
+      "guide": "GatherPlay\nExplore\nMy sessions\nCreate a pack\nYour access\nEnglish\nአማርኛ\n🌗\nJoin a game\n↗\nSign out\n← Explore games\nGetting the game ready…",
+      "pack": "Bible Story Bracket",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Bible Story Bracket · 1. Which clue best completes this welcome challenge?",
+        "choices": [
+          "Observe welcome",
+          "Ask for a clue",
+          "Work as a team",
+          "Check every detail"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00643",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nBible Story Bracket · 1. Which clue best completes this welcome challenge?\nObserve welcome\nAsk for a clue\nWork as a team\nCheck every detail",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nBible Story Bracket · 1. Which clue best completes this welcome challenge?\nObserve welcome\nAsk for a clue\nWork as a team\nCheck every detail\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nBible Story Bracket · 1. Which clue best completes this welcome challenge?\nObserve welcome\nAsk for a clue\nWork as a team\nCheck every detail\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Bible Story Bracket · 1. Which clue best completes this welcome challenge?",
+        "choices": [
+          "Observe welcome",
+          "Ask for a clue",
+          "Work as a team",
+          "Check every detail"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 2,
+        "answer": "Ask for a clue",
+        "configuration": {
+          "pack": "GPG-2026-00643",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "escape-together",
+      "guide": "",
+      "pack": "The Assembly Code",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "The Assembly Code · 3. Which clue best completes this workshop challenge?",
+        "choices": [
+          "Observe workshop",
+          "Ask for a clue",
+          "Work as a team",
+          "Check every detail"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00642",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nThe Assembly Code · 3. Which clue best completes this workshop challenge?\nObserve workshop\nAsk for a clue\nWork as a team\nCheck every detail",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nThe Assembly Code · 3. Which clue best completes this workshop challenge?\nObserve workshop\nAsk for a clue\nWork as a team\nCheck every detail\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nThe Assembly Code · 3. Which clue best completes this workshop challenge?\nObserve workshop\nAsk for a clue\nWork as a team\nCheck every detail\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "The Assembly Code · 3. Which clue best completes this workshop challenge?",
+        "choices": [
+          "Observe workshop",
+          "Ask for a clue",
+          "Work as a team",
+          "Check every detail"
+        ],
+        "media_url": null,
+        "mechanic": "choice",
+        "responses": 2,
+        "answer": "Check every detail",
+        "configuration": {
+          "pack": "GPG-2026-00642",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "sequence-sprint",
+      "guide": "",
+      "pack": "Bible Timeline Relay",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Bible Timeline Relay · 8. Rebuild the service sequence.",
+        "choices": [
+          "Act together",
+          "Choose the next step",
+          "Notice service",
+          "Check the result"
+        ],
+        "media_url": null,
+        "mechanic": "order",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00616",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nBible Timeline Relay · 8. Rebuild the service sequence.\n\nTap the cards in the correct order.\n\nAct together\nChoose the next step\nNotice service\nCheck the result\nLock order",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nBible Timeline Relay · 8. Rebuild the service sequence.\nAct together\nChoose the next step\nNotice service\nCheck the result\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nBible Timeline Relay · 8. Rebuild the service sequence.\nAct together\nChoose the next step\nNotice service\nCheck the result\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Bible Timeline Relay · 8. Rebuild the service sequence.",
+        "choices": [
+          "Act together",
+          "Choose the next step",
+          "Notice service",
+          "Check the result"
+        ],
+        "media_url": null,
+        "mechanic": "order",
+        "responses": 2,
+        "answer": "Notice service → Choose the next step → Act together → Check the result",
+        "configuration": {
+          "pack": "GPG-2026-00616",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "phrase-forge",
+      "guide": "",
+      "pack": "Conference Phrase Forge",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Conference Phrase Forge · 10. Rebuild the celebration sequence.",
+        "choices": [
+          "Act together",
+          "Notice celebration",
+          "Choose the next step",
+          "Check the result"
+        ],
+        "media_url": null,
+        "mechanic": "order",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00651",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nConference Phrase Forge · 10. Rebuild the celebration sequence.\n\nTap the cards in the correct order.\n\nAct together\nNotice celebration\nChoose the next step\nCheck the result\nLock order",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nConference Phrase Forge · 10. Rebuild the celebration sequence.\nAct together\nNotice celebration\nChoose the next step\nCheck the result\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nConference Phrase Forge · 10. Rebuild the celebration sequence.\nAct together\nNotice celebration\nChoose the next step\nCheck the result\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Conference Phrase Forge · 10. Rebuild the celebration sequence.",
+        "choices": [
+          "Act together",
+          "Notice celebration",
+          "Choose the next step",
+          "Check the result"
+        ],
+        "media_url": null,
+        "mechanic": "order",
+        "responses": 2,
+        "answer": "Notice celebration → Choose the next step → Act together → Check the result",
+        "configuration": {
+          "pack": "GPG-2026-00651",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "caption-clash",
+      "guide": "",
+      "pack": "Conference Caption Cup",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Conference Caption Cup · 10. Write one warm, surprising caption inspired by 'celebration'.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "creative",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00627",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nConference Caption Cup · 10. Write one warm, surprising caption inspired by 'celebration'.\nLock response",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nConference Caption Cup · 10. Write one warm, surprising caption inspired by 'celebration'.\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nConference Caption Cup · 10. Write one warm, surprising caption inspired by 'celebration'.\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "voted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Conference Caption Cup · 10. Write one warm, surprising caption inspired by 'celebration'.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "creative",
+        "responses": 2,
+        "answer": "celebration",
+        "configuration": {
+          "pack": "GPG-2026-00627",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "story-loom",
+      "guide": "",
+      "pack": "Fifty Voices, One City",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Fifty Voices, One City · 2. Continue the shared story in one vivid sentence inspired by 'stage'.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "creative",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00630",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nFifty Voices, One City · 2. Continue the shared story in one vivid sentence inspired by 'stage'.\nLock response",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nFifty Voices, One City · 2. Continue the shared story in one vivid sentence inspired by 'stage'.\n57\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nFifty Voices, One City · 2. Continue the shared story in one vivid sentence inspired by 'stage'.\n57\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "voted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Fifty Voices, One City · 2. Continue the shared story in one vivid sentence inspired by 'stage'.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "creative",
+        "responses": 2,
+        "answer": "stage",
+        "configuration": {
+          "pack": "GPG-2026-00630",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "seek-and-show",
+      "guide": "",
+      "pack": "Home or Hall Treasure Hunt",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Home or Hall Treasure Hunt · 3. Describe the safe object or team creation you found inspired by 'robot'.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "creative",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00653",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nHome or Hall Treasure Hunt · 3. Describe the safe object or team creation you found inspired by 'robot'.\nLock response",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nHome or Hall Treasure Hunt · 3. Describe the safe object or team creation you found inspired by 'robot'.\n57\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nHome or Hall Treasure Hunt · 3. Describe the safe object or team creation you found inspired by 'robot'.\n57\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Home or Hall Treasure Hunt · 3. Describe the safe object or team creation you found inspired by 'robot'.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "creative",
+        "responses": 2,
+        "answer": "robot",
+        "configuration": {
+          "pack": "GPG-2026-00653",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "one-word-chorus",
+      "guide": "",
+      "pack": "Animals and Everyday Things",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Animals and Everyday Things · 2. The clues point toward picnic. Name the common thread as early as you can.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "text",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00656",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nAnimals and Everyday Things · 2. The clues point toward picnic. Name the common thread as early as you can.\nLock response",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nAnimals and Everyday Things · 2. The clues point toward picnic. Name the common thread as early as you can.\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nAnimals and Everyday Things · 2. The clues point toward picnic. Name the common thread as early as you can.\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Animals and Everyday Things · 2. The clues point toward picnic. Name the common thread as early as you can.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "text",
+        "responses": 2,
+        "answer": "picnic",
+        "configuration": {
+          "pack": "GPG-2026-00656",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "common-thread",
+      "guide": "",
+      "pack": "Big Room Connections",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Big Room Connections · 18. The clues point toward travel. Name the common thread as early as you can.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "text",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00639",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nBig Room Connections · 18. The clues point toward travel. Name the common thread as early as you can.\nLock response",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nBig Room Connections · 18. The clues point toward travel. Name the common thread as early as you can.\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nBig Room Connections · 18. The clues point toward travel. Name the common thread as early as you can.\n58\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Big Room Connections · 18. The clues point toward travel. Name the common thread as early as you can.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "text",
+        "responses": 2,
+        "answer": "travel",
+        "configuration": {
+          "pack": "GPG-2026-00639",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "closest-call",
+      "guide": "",
+      "pack": "Assembly Estimation Arena",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Assembly Estimation Arena · 7. Where should 'innovation' land from 0 to 100? Lock one shared estimate.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "number",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00648",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nAssembly Estimation Arena · 7. Where should 'innovation' land from 0 to 100? Lock one shared estimate.\nLock response",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nAssembly Estimation Arena · 7. Where should 'innovation' land from 0 to 100? Lock one shared estimate.\n57\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nAssembly Estimation Arena · 7. Where should 'innovation' land from 0 to 100? Lock one shared estimate.\n57\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Assembly Estimation Arena · 7. Where should 'innovation' land from 0 to 100? Lock one shared estimate.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "number",
+        "responses": 2,
+        "answer": "Reveal the target and compare the distance.",
+        "configuration": {
+          "pack": "GPG-2026-00648",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    },
+    {
+      "key": "bluffline",
+      "guide": "",
+      "pack": "Curious Bible Context",
+      "view": {
+        "phase": "round_open",
+        "round": 1,
+        "total": 1,
+        "prompt": "Curious Bible Context · 6. Write a believable false definition inspired by 'boat'.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "creative",
+        "responses": 0,
+        "configuration": {
+          "pack": "GPG-2026-00613",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "player": {
+        "text": "UI QA Hana\n🔇\nEnglish\nአማርኛ\n🌗\nLeave\n\nROUND 1 / 1\n\nCurious Bible Context · 6. Write a believable false definition inspired by 'boat'.\nLock response",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "host": {
+        "text": "ROUND 1 / 1\n\nCurious Bible Context · 6. Write a believable false definition inspired by 'boat'.\n58\n\n0\nRESPONSES\n\nSkip stage\nPrevious\nNext\nPause\nEnd game",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "screen": {
+        "text": "English\nአማርኛ\n\nROUND 1 / 1\n\nCurious Bible Context · 6. Write a believable false definition inspired by 'boat'.\n57\n\n0\nRESPONSES",
+        "canvas": 0,
+        "roundImages": 0,
+        "audio": 0,
+        "sliders": 0
+      },
+      "submitted": true,
+      "voted": true,
+      "reveal": {
+        "phase": "round_reveal",
+        "round": 1,
+        "total": 1,
+        "prompt": "Curious Bible Context · 6. Write a believable false definition inspired by 'boat'.",
+        "choices": [],
+        "media_url": null,
+        "mechanic": "creative",
+        "responses": 2,
+        "answer": "boat",
+        "configuration": {
+          "pack": "GPG-2026-00613",
+          "seconds": 60,
+          "rounds": 1,
+          "auto_progress": false
+        },
+        "paused": false,
+        "can_previous": false,
+        "presentation_replay": false
+      },
+      "completed": true
+    }
+  ],
+  "errors": []
+}

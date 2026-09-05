@@ -1,0 +1,35 @@
+{
+  "findings": [
+    {
+      "key": "doodle-dash",
+      "shortStrokeSegments": 12,
+      "longStrokeSegments": 80,
+      "requestedLongSegments": 120,
+      "correctGuess": true,
+      "completed": true
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 417 (EXPECTATION FAILED)"
+  ],
+  "responseLog": [
+    {
+      "action_type": "stroke_batch",
+      "status": 200
+    },
+    {
+      "action_type": "stroke_batch",
+      "status": 200
+    },
+    {
+      "action_type": "submit",
+      "status": 417,
+      "error": "ValidationError",
+      "messages": "[\"{\\\"message\\\":\\\"Unknown action\\\",\\\"as_table\\\":false,\\\"title\\\":\\\"Message\\\",\\\"indicator\\\":\\\"red\\\",\\\"raise_exception\\\":1,\\\"__frappe_exc_id\\\":\\\"4bb2d078bc644c15df208d915ca2b5b337ab0b8fab85b5773135d4ef\\\"}\"]"
+    },
+    {
+      "action_type": "guess",
+      "status": 200
+    }
+  ]
+}

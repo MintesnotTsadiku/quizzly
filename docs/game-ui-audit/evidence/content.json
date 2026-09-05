@@ -1,0 +1,600 @@
+{
+  "demo_packs": [
+    {
+      "game": "group-sudoku",
+      "title": "ትንሽ የቁጥር እንቆቅልሽ",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "quilt-puzzle",
+      "title": "ቅጡን እንቀጥል",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "path-weaver",
+      "title": "መንገዱን እንምረጥ",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "hidden-picture",
+      "title": "የተደበቀው ቅርጽ",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "dots-and-boxes",
+      "title": "የሚጎድለው ጎን",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "grid-conquest",
+      "title": "መስመሩን እናጠናቅቅ",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "signal-spectrum",
+      "title": "በመለኪያው ላይ እንገምት",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "closest-call",
+      "title": "ለቁጥሩ እንቅረብ",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "bracket-bash",
+      "title": "የትኛው ይመረጥ",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "escape-together",
+      "title": "ሦስት ቁልፎች",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "sound-snap",
+      "title": "ድምፁን ከፍንጩ እወቁ",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "memory-mosaic",
+      "title": "የሥዕል ትውስታ",
+      "language": "am",
+      "items": 3,
+      "with_media": 3
+    },
+    {
+      "game": "picture-peek",
+      "title": "ሥዕሉን እንመልከት",
+      "language": "am",
+      "items": 3,
+      "with_media": 3
+    },
+    {
+      "game": "one-word-chorus",
+      "title": "አንድ ቃል እንገምት",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "common-thread",
+      "title": "አንድ የሚያገናኝ ቃል",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "seek-and-show",
+      "title": "በዙሪያችን እንፈልግ",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "story-loom",
+      "title": "አብረን ታሪክ እንፍጠር",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "caption-clash",
+      "title": "ሥዕሉ ምን ይላል",
+      "language": "am",
+      "items": 3,
+      "with_media": 3
+    },
+    {
+      "game": "phrase-forge",
+      "title": "አባባሎችን እናገናኝ",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "sequence-sprint",
+      "title": "የእለት ተእለት ቅደም ተከተል",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "bluffline",
+      "title": "እውነት ወይስ ፈጠራ",
+      "language": "am",
+      "items": 3,
+      "with_media": 0
+    },
+    {
+      "game": "group-sudoku",
+      "title": "Assembly Logic Grid",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "group-sudoku",
+      "title": "Family Mini Sudoku",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "group-sudoku",
+      "title": "Symbol Sudoku",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "quilt-puzzle",
+      "title": "Big Room Pattern Lab",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "quilt-puzzle",
+      "title": "Family Quilt Puzzle",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "quilt-puzzle",
+      "title": "Patterns and Places",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "path-weaver",
+      "title": "Assembly Route Challenge",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "path-weaver",
+      "title": "Family Path Weaver",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "path-weaver",
+      "title": "Journey Paths",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "hidden-picture",
+      "title": "Big Screen Pixel Reveal",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "hidden-picture",
+      "title": "Family Hidden Pictures",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "hidden-picture",
+      "title": "Symbols Revealed",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "dots-and-boxes",
+      "title": "Assembly Territory",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "dots-and-boxes",
+      "title": "Family Box Builders",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "dots-and-boxes",
+      "title": "Community Squares",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "grid-conquest",
+      "title": "Big Room Grid Battle",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "grid-conquest",
+      "title": "Family Grid Conquest",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "grid-conquest",
+      "title": "Connect the Story",
+      "language": "en",
+      "items": 4,
+      "with_media": 0
+    },
+    {
+      "game": "one-word-chorus",
+      "title": "One Word, Big Room",
+      "language": "en",
+      "items": 24,
+      "with_media": 0
+    },
+    {
+      "game": "one-word-chorus",
+      "title": "Animals and Everyday Things",
+      "language": "en",
+      "items": 24,
+      "with_media": 0
+    },
+    {
+      "game": "one-word-chorus",
+      "title": "People, Places, and Symbols",
+      "language": "en",
+      "items": 24,
+      "with_media": 0
+    },
+    {
+      "game": "seek-and-show",
+      "title": "Venue Team Quest",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "seek-and-show",
+      "title": "Home or Hall Treasure Hunt",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "seek-and-show",
+      "title": "Service and Symbols Hunt",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "phrase-forge",
+      "title": "Conference Phrase Forge",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "phrase-forge",
+      "title": "Silly Sentence Factory",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "phrase-forge",
+      "title": "Words of Encouragement",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "closest-call",
+      "title": "Assembly Estimation Arena",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "closest-call",
+      "title": "Family Guess-Off",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "closest-call",
+      "title": "Bible Numbers Duel",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "bracket-bash",
+      "title": "Big Room Championship",
+      "language": "en",
+      "items": 8,
+      "with_media": 0
+    },
+    {
+      "game": "bracket-bash",
+      "title": "Family Favorites Cup",
+      "language": "en",
+      "items": 8,
+      "with_media": 0
+    },
+    {
+      "game": "bracket-bash",
+      "title": "Bible Story Bracket",
+      "language": "en",
+      "items": 8,
+      "with_media": 0
+    },
+    {
+      "game": "escape-together",
+      "title": "The Assembly Code",
+      "language": "en",
+      "items": 6,
+      "with_media": 0
+    },
+    {
+      "game": "escape-together",
+      "title": "The Friendly Castle Escape",
+      "language": "en",
+      "items": 6,
+      "with_media": 0
+    },
+    {
+      "game": "escape-together",
+      "title": "The Lamp and the Locked Library",
+      "language": "en",
+      "items": 6,
+      "with_media": 0
+    },
+    {
+      "game": "common-thread",
+      "title": "Big Room Connections",
+      "language": "en",
+      "items": 24,
+      "with_media": 0
+    },
+    {
+      "game": "common-thread",
+      "title": "Family Connection Box",
+      "language": "en",
+      "items": 24,
+      "with_media": 0
+    },
+    {
+      "game": "common-thread",
+      "title": "Threads Through Scripture",
+      "language": "en",
+      "items": 24,
+      "with_media": 0
+    },
+    {
+      "game": "memory-mosaic",
+      "title": "Auditorium Snapshot",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "memory-mosaic",
+      "title": "Toy Room Memory",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "memory-mosaic",
+      "title": "Objects and Journeys Memory",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "signal-spectrum",
+      "title": "Know Your Room",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "signal-spectrum",
+      "title": "Silly Family Scales",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "signal-spectrum",
+      "title": "Journey and Wisdom Scales",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "story-loom",
+      "title": "Fifty Voices, One City",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "story-loom",
+      "title": "The Bedtime Adventure Machine",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "story-loom",
+      "title": "Journey of Courage",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "caption-clash",
+      "title": "Conference Caption Cup",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "caption-clash",
+      "title": "Family Photo Giggles",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "caption-clash",
+      "title": "Modern Parable Moments",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "sound-snap",
+      "title": "Soundscape Challenge",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "sound-snap",
+      "title": "Home and Animal Sounds",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "sound-snap",
+      "title": "Sounds of the Story",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "picture-peek",
+      "title": "World in Focus",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "picture-peek",
+      "title": "What Is Hiding?",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "picture-peek",
+      "title": "Symbols, Places, and Scenes",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "sequence-sprint",
+      "title": "Process and History Race",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "sequence-sprint",
+      "title": "Put It in Order",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "sequence-sprint",
+      "title": "Bible Timeline Relay",
+      "language": "en",
+      "items": 10,
+      "with_media": 0
+    },
+    {
+      "game": "bluffline",
+      "title": "Unexpected Facts",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "bluffline",
+      "title": "Silly Word Museum",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    },
+    {
+      "game": "bluffline",
+      "title": "Curious Bible Context",
+      "language": "en",
+      "items": 12,
+      "with_media": 0
+    }
+  ],
+  "unicode_normalization_probe": {
+    "first": "",
+    "different": ""
+  },
+  "symbol_normalization_probe": {
+    "first": "",
+    "different": ""
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "findings": [
+    {
+      "key": "doodle-dash",
+      "shortStrokeSegments": 12,
+      "longStrokeSegments": 80,
+      "requestedLongSegments": 120,
+      "correctGuess": true,
+      "completed": true
+    },
+    {
+      "key": "cuecast",
+      "privatePrompt": true,
+      "solvedAndPassed": true,
+      "completed": true
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 417 (EXPECTATION FAILED)"
+  ]
+}
