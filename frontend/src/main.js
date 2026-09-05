@@ -1,6 +1,7 @@
 import "./index.css";
 import "./platform/gather.css";
 import "./theme";
+import { languagePlugin } from "./i18n";
 import { createApp } from "vue";
 import { FrappeUI, setConfig, frappeRequest } from "frappe-ui";
 import { loadSpaBoot } from "./boot";
@@ -12,13 +13,13 @@ async function bootstrap() {
 	) {
 		const suffix = window.location.pathname.slice("/quizzly".length);
 		window.location.replace(
-			`/play/quizzly${suffix}${window.location.search}${window.location.hash}`
+			`/play/quizzly${suffix}${window.location.search}${window.location.hash}`,
 		);
 		return;
 	}
 
 	await loadSpaBoot();
-	const {loadSite} = await import("./platform/site");
+	const { loadSite } = await import("./platform/site");
 	await loadSite();
 
 	const [{ default: router }, { default: App }, { initSocket }] = await Promise.all([
@@ -34,6 +35,7 @@ async function bootstrap() {
 	// the active bench at runtime. Prevent FrappeUI from opening a second socket
 	// with its development default (port 9000).
 	app.use(FrappeUI, { socketio: false });
+	app.use(languagePlugin);
 	app.use(router);
 	app.provide("$socket", initSocket());
 	app.mount("#app");

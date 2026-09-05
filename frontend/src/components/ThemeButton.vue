@@ -1,7 +1,8 @@
 <template>
 	<!-- Unstyled on purpose: the host wears this as a `ctl` pill and the players
 	     as a bare header icon. Only the glyph and the cycling are shared. -->
-	<button v-if="!embedded"
+	<button
+		v-if="!embedded"
 		type="button"
 		:aria-label="`Theme: ${theme}`"
 		:title="`Theme: ${theme}`"

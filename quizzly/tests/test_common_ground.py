@@ -49,9 +49,9 @@ class TestCommonGround(unittest.TestCase):
 
 	def test_pack_validation_and_manual_pacing(self):
 		self.assertFalse(
-			self.game.validate_configuration(self.ctx, {"pack": "imagination", "auto_progress": True})[
-				"auto_progress"
-			]
+			self.game.validate_configuration(
+				self.ctx, {"pack": "imagination", "auto_progress": True, "language": "en"}
+			)["auto_progress"]
 		)
 		with (
 			patch("quizzly.games.common_ground.game._", side_effect=lambda message: message),

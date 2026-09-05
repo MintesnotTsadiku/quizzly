@@ -6,6 +6,8 @@ from frappe.model.document import Document
 
 class GatherPlaySettings(Document):
 	def validate(self):
+		if self.default_language not in ("en", "am"):
+			frappe.throw("Choose English (en) or Amharic (am).")
 		if not re.fullmatch(r"#[0-9a-fA-F]{6}", self.accent_color or ""):
 			frappe.throw("Use a six-digit hexadecimal accent color.")
 		for field in (

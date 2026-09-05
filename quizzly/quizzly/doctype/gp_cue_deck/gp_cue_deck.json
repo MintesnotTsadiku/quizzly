@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
+  "content_language",
   "mode",
   "is_demo",
   "demo_key",
@@ -56,6 +57,14 @@
    "options": "GatherPlay Access",
    "read_only": 1,
    "hidden": 1
+  },
+  {
+   "fieldname": "content_language",
+   "fieldtype": "Select",
+   "label": "Content language",
+   "options": "en\nam",
+   "default": "en",
+   "description": "Language of the questions and accepted answers; independent of each player’s interface language."
   }
  ],
  "index_web_pages_for_search": 1,

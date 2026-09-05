@@ -17,8 +17,9 @@
 					:aria-label="muted ? 'Turn sound on' : 'Turn sound off'"
 					@click="toggleMute"
 				>
-					{{ muted ? "🔇" : "🔊" }}
+					{{ $t(muted ? "🔇" : "🔊") }}
 				</button>
+				<LanguageSwitch />
 				<ThemeButton
 					class="text-lg leading-none opacity-60 transition hover:opacity-100"
 				/>
@@ -28,7 +29,7 @@
 					class="rounded-full border border-haze px-3 py-1 text-xs text-paper/50 transition hover:border-ember hover:text-alert"
 					@click="leave"
 				>
-					Leave
+					{{ $t("Leave") }}
 				</button>
 			</span>
 		</header>
@@ -38,25 +39,27 @@
 		>
 			<template v-if="phase === 'kicked'">
 				<h1 class="font-display text-3xl font-extrabold text-paper">
-					The host removed you
+					{{ $t("The host removed you") }}
 				</h1>
-				<p class="text-paper/50">You can join again with the PIN.</p>
+				<p class="text-paper/50">{{ $t("You can join again with the PIN.") }}</p>
 				<button
 					class="rounded-2xl bg-ember px-7 py-3 font-display text-lg font-extrabold text-sunk"
 					@click="router.replace({ name: 'GpJoin' })"
 				>
-					Back to join
+					{{ $t("Back to join") }}
 				</button>
 			</template>
 
 			<!-- Lobby -->
 			<template v-else-if="phase === 'lobby'">
 				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
-					PIN {{ player.pin }}
+					{{ $t("PIN") }} {{ player.pin }}
 				</p>
-				<h1 class="font-display text-5xl font-extrabold text-paper">You're in</h1>
+				<h1 class="font-display text-5xl font-extrabold text-paper">
+					{{ $t("You're in") }}
+				</h1>
 				<p v-if="myTeam" class="text-xl">
-					<span class="text-paper/60">Team</span>
+					<span class="text-paper/60"> {{ $t("Team") }} </span>
 					<span
 						class="ml-2 inline-block rounded-full px-4 py-1 font-display font-bold"
 						:class="[teamStyle(myTeam.color).fill, teamStyle(myTeam.color).text]"
@@ -64,7 +67,7 @@
 					>
 				</p>
 				<p class="max-w-xs text-paper/50">
-					The host starts when everyone's in. Watch the big screen.
+					{{ $t("The host starts when everyone's in. Watch the big screen.") }}
 				</p>
 			</template>
 
@@ -93,8 +96,12 @@
 			/>
 
 			<!-- Scoreboard -->
-			<template v-else-if="phase !== 'podium' && view.phase === 'scoreboard' && standings.length">
-				<h1 class="font-display text-3xl font-extrabold text-paper">Standings</h1>
+			<template
+				v-else-if="phase !== 'podium' && view.phase === 'scoreboard' && standings.length"
+			>
+				<h1 class="font-display text-3xl font-extrabold text-paper">
+					{{ $t("Standings") }}
+				</h1>
 				<ol class="flex w-full max-w-sm flex-col gap-2.5">
 					<li
 						v-for="row in standings"
@@ -116,7 +123,9 @@
 							:class="row.name === myRowId ? 'text-accent' : 'text-paper'"
 						>
 							{{ row.team_name
-							}}<span v-if="row.name === myRowId" class="ml-1">· you</span>
+							}}<span v-if="row.name === myRowId" class="ml-1">
+								{{ $t("· you") }}
+							</span>
 						</span>
 						<span
 							class="font-display text-xl font-extrabold tabular-nums text-paper"
@@ -128,7 +137,7 @@
 					class="text-sm text-paper/40 underline-offset-4 hover:text-paper hover:underline"
 					@click="goHome"
 				>
-					Back to all games
+					{{ $t("Back to all games") }}
 				</button>
 			</template>
 
@@ -158,7 +167,9 @@
 							:class="row.name === myRowId ? 'text-accent' : 'text-paper'"
 						>
 							{{ row.team_name
-							}}<span v-if="row.name === myRowId" class="ml-1">· you</span>
+							}}<span v-if="row.name === myRowId" class="ml-1">
+								{{ $t("· you") }}
+							</span>
 						</span>
 						<span
 							class="font-display text-xl font-extrabold tabular-nums text-paper"
@@ -167,14 +178,16 @@
 					</li>
 				</ol>
 				<div class="flex flex-wrap justify-center gap-2">
-					<button class="ctl ctl-go" @click="clearPlayerAndGo">Join another game</button>
-					<button class="ctl" @click="goHome">Back to all games</button>
+					<button class="ctl ctl-go" @click="clearPlayerAndGo">
+						{{ $t("Join another game") }}
+					</button>
+					<button class="ctl" @click="goHome">{{ $t("Back to all games") }}</button>
 				</div>
 			</template>
 
 			<template v-else>
 				<p class="font-mono text-sm uppercase tracking-[0.22em] text-paper/40">
-					Hang tight…
+					{{ $t("Hang tight…") }}
 				</p>
 			</template>
 		</main>
@@ -182,6 +195,7 @@
 </template>
 
 <script setup>
+import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { computed, inject, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { call } from "@/api";
@@ -223,13 +237,13 @@ const gameKey = computed(() => player.value?.gameKey || "cuecast");
 const live = computed(() => liveFor(gameKey.value));
 const gamePhases = computed(() => phasesFor(gameKey.value));
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
 );
 const myRowId = computed(() => player.value?.participant);
 const standings = computed(() => view.value.teams || []);
 const rankedStandings = computed(() => podium.value || standings.value);
 const myTeam = computed(() =>
-	(view.value.teams || []).find((t) => t.team_name === view.value.actor_team_name)
+	(view.value.teams || []).find((t) => t.team_name === view.value.actor_team_name),
 );
 const headline = computed(() => {
 	const mine =
@@ -303,7 +317,17 @@ function applyState(state) {
 	prompt.value = state.view?.prompt || "";
 	solvedCount.value = state.view?.solved ?? 0;
 	seqSeen = Math.max(seqSeen, state.state_version ?? 0);
-	if (["turn_ready", "turn_open", "prompt_open", "prediction_open", "draw_ready", "draw_open", "round_open"].includes(state.phase)) {
+	if (
+		[
+			"turn_ready",
+			"turn_open",
+			"prompt_open",
+			"prediction_open",
+			"draw_ready",
+			"draw_open",
+			"round_open",
+		].includes(state.phase)
+	) {
 		startCountdown(Math.max(0.5, state.remaining_seconds));
 	} else {
 		stopCountdown();
@@ -409,8 +433,11 @@ async function gameAction(actionType, payload = {}) {
 	submitting.value = true;
 	try {
 		return await call("quizzly.games.api.submit_action", {
-			pin: player.value.pin, token: player.value.token, action_type: actionType,
-			idempotency_key: crypto.randomUUID(), payload,
+			pin: player.value.pin,
+			token: player.value.token,
+			action_type: actionType,
+			idempotency_key: crypto.randomUUID(),
+			payload,
 		});
 	} finally {
 		submitting.value = false;
@@ -418,8 +445,12 @@ async function gameAction(actionType, payload = {}) {
 	}
 }
 
-async function draw(strokes) { await gameAction("stroke_batch", { strokes }); }
-async function clearCanvas() { await gameAction("clear_canvas"); }
+async function draw(strokes) {
+	await gameAction("stroke_batch", { strokes });
+}
+async function clearCanvas() {
+	await gameAction("clear_canvas");
+}
 async function guess(payload) {
 	const result = await gameAction("guess", { guess: payload.guess });
 	payload.done?.(result);

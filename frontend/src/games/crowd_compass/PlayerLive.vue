@@ -1,24 +1,35 @@
 <template>
 	<div class="flex w-full flex-col items-center gap-6 text-center">
 		<template v-if="view.phase === 'intermission'">
-			<p class="font-mono uppercase tracking-[0.28em] text-accent">Any second now</p>
-			<h1 class="font-display text-4xl font-extrabold text-paper">The host is writing…</h1>
-			<p class="text-paper/50">Keep this open — you'll vote right here.</p>
+			<p class="font-mono uppercase tracking-[0.28em] text-accent">
+				{{ $t("Any second now") }}
+			</p>
+			<h1 class="font-display text-4xl font-extrabold text-paper">
+				{{ $t("The host is writing…") }}
+			</h1>
+			<p class="text-paper/50">{{ $t("Keep this open — you'll vote right here.") }}</p>
 		</template>
 
 		<!-- Voting -->
 		<template v-else-if="view.phase === 'prompt_open'">
 			<div class="flex w-full items-center justify-between px-2">
 				<span class="font-mono text-xs uppercase tracking-[0.22em] text-paper/45">
-					{{ view.voted ?? 0 }} voted
+					{{ view.voted ?? 0 }} {{ $t("voted") }}
 				</span>
-				<DrainRing :percent="timerPercent" :seconds="Math.ceil(remaining)" :size="56" :color="urgentColor" />
+				<DrainRing
+					:percent="timerPercent"
+					:seconds="Math.ceil(remaining)"
+					:size="56"
+					:color="urgentColor"
+				/>
 			</div>
-			<h1 class="mt-1 max-w-md font-display text-3xl font-extrabold leading-tight text-paper sm:text-4xl">
+			<h1
+				class="mt-1 max-w-md font-display text-3xl font-extrabold leading-tight text-paper sm:text-4xl"
+			>
 				{{ view.prompt }}
 			</h1>
 			<p v-if="ranked" class="-mt-2 font-mono uppercase tracking-widest text-paper/35">
-				{{ secondPick ? "Now your second choice" : "Pick your first choice" }}
+				{{ $t(secondPick ? "Now your second choice" : "Pick your first choice") }}
 			</p>
 
 			<div class="grid w-full max-w-md grid-cols-2 gap-3">
@@ -36,22 +47,33 @@
 					{{ choice.text }}
 				</button>
 			</div>
-			<p v-if="voteLocked" class="font-display text-2xl font-extrabold text-ok">Vote locked ✓</p>
-			<p v-if="error" class="text-sm text-alert">{{ error }}</p>
+			<p v-if="voteLocked" class="font-display text-2xl font-extrabold text-ok">
+				{{ $t("Vote locked ✓") }}
+			</p>
+			<p v-if="error" class="text-sm text-alert">{{ $t(error) }}</p>
 		</template>
 
 		<!-- Prediction -->
 		<template v-else-if="view.phase === 'prediction_open'">
 			<div class="flex w-full items-center justify-between px-2">
 				<span class="font-mono text-xs uppercase tracking-[0.22em] text-paper/45">
-					{{ view.predicted ?? 0 }} predicted
+					{{ view.predicted ?? 0 }} {{ $t("predicted") }}
 				</span>
-				<DrainRing :percent="timerPercent" :seconds="Math.ceil(remaining)" :size="56" :color="urgentColor" />
+				<DrainRing
+					:percent="timerPercent"
+					:seconds="Math.ceil(remaining)"
+					:size="56"
+					:color="urgentColor"
+				/>
 			</div>
-			<h1 class="mt-1 max-w-md font-display text-3xl font-extrabold leading-tight text-paper sm:text-4xl">
+			<h1
+				class="mt-1 max-w-md font-display text-3xl font-extrabold leading-tight text-paper sm:text-4xl"
+			>
 				{{ view.prompt }}
 			</h1>
-			<p class="-mt-2 font-mono uppercase tracking-widest text-accent">Predict the room 👑</p>
+			<p class="-mt-2 font-mono uppercase tracking-widest text-accent">
+				{{ $t("Predict the room 👑") }}
+			</p>
 
 			<template v-if="!predictLocked">
 				<div class="grid w-full max-w-md grid-cols-2 gap-3">
@@ -70,12 +92,19 @@
 					</button>
 				</div>
 
-				<div v-if="view.estimation" class="w-full max-w-md rounded-3xl border border-haze bg-dusk p-5">
+				<div
+					v-if="view.estimation"
+					class="w-full max-w-md rounded-3xl border border-haze bg-dusk p-5"
+				>
 					<div class="flex items-baseline justify-between">
-						<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
-							"{{ predictedLabel }}" will take…
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
+							"{{ predictedLabel }} {{ $t('" will take…') }}
 						</span>
-						<span class="font-display text-2xl font-extrabold tabular-nums text-accent">{{ estimate }}%</span>
+						<span class="font-display text-2xl font-extrabold tabular-nums text-accent"
+							>{{ estimate }}%</span
+						>
 					</div>
 					<input
 						v-model.number="estimate"
@@ -86,7 +115,7 @@
 						class="mt-3 w-full accent-[rgb(var(--accent))]"
 					/>
 					<p class="mt-1 text-left text-xs text-paper/40">
-						Within 3 points scores +300 · 7 → +150 · 12 → +50
+						{{ $t("Within 3 points scores +300 · 7 → +150 · 12 → +50") }}
 					</p>
 				</div>
 
@@ -96,24 +125,30 @@
 					:disabled="!predictionPick || submitting"
 					@click="submitPrediction"
 				>
-					Lock prediction
+					{{ $t("Lock prediction") }}
 				</button>
 			</template>
 			<template v-else>
-				<p class="font-display text-2xl font-extrabold text-ok">Prediction locked ✓</p>
+				<p class="font-display text-2xl font-extrabold text-ok">
+					{{ $t("Prediction locked ✓") }}
+				</p>
 				<p class="text-sm text-paper/40">
-					You said <b>{{ predictedLabel }}</b>
+					{{ $t("You said") }} <b>{{ predictedLabel }}</b>
 					<template v-if="view.estimation"> · {{ myEstimate ?? estimate }}%</template>
 				</p>
 			</template>
-			<p v-if="error" class="text-sm text-alert">{{ error }}</p>
+			<p v-if="error" class="text-sm text-alert">{{ $t(error) }}</p>
 		</template>
 
 		<!-- Reveal -->
 		<template v-else-if="view.phase === 'reveal'">
 			<h1 class="font-display text-4xl font-extrabold text-paper">{{ headline }}</h1>
-			<p v-if="myPoints" class="font-display text-3xl font-bold text-accent">+{{ myPoints }} pts</p>
-			<p v-else class="text-paper/50">No points this round — get the next one.</p>
+			<p v-if="myPoints" class="font-display text-3xl font-bold text-accent">
+				+{{ myPoints }} {{ $t("pts") }}
+			</p>
+			<p v-else class="text-paper/50">
+				{{ $t("No points this round — get the next one.") }}
+			</p>
 			<div class="flex w-full max-w-md flex-col gap-2">
 				<div
 					v-for="choice in view.choices || []"
@@ -125,15 +160,19 @@
 						class="text-left"
 						:class="myVote === choice.id ? 'font-bold text-paper' : 'text-paper/60'"
 					>
-						{{ isPlurality(choice.id) ? "👑 " : "" }}{{ choice.text }}
-						<span v-if="myVote === choice.id" class="ml-1 text-xs text-paper/40">· you</span>
+						{{ $t(isPlurality(choice.id) ? "👑 " : "") }}{{ choice.text }}
+						<span v-if="myVote === choice.id" class="ml-1 text-xs text-paper/40">
+							{{ $t("· you") }}
+						</span>
 					</span>
 					<span class="font-mono tabular-nums text-paper/60">
 						{{ (view.distribution || {})[choice.id] || 0 }}
 					</span>
 				</div>
 			</div>
-			<p class="text-sm text-paper/40">Scoreboard next — watch the big screen.</p>
+			<p class="text-sm text-paper/40">
+				{{ $t("Scoreboard next — watch the big screen.") }}
+			</p>
 		</template>
 	</div>
 </template>
@@ -166,13 +205,18 @@ const estimate = ref(50);
 const voteLocked = ref(false);
 const predictLocked = ref(false);
 
-const urgentColor = computed(() => (props.remaining <= 5 ? "rgb(var(--alert))" : "rgb(var(--ok))"));
+const urgentColor = computed(() =>
+	props.remaining <= 5 ? "rgb(var(--alert))" : "rgb(var(--ok))",
+);
 const predictedLabel = computed(() => {
-	const choice = (props.view.choices || []).find((c) => c.id === (props.myPrediction || predictionPick.value));
+	const choice = (props.view.choices || []).find(
+		(c) => c.id === (props.myPrediction || predictionPick.value),
+	);
 	return choice?.text || "";
 });
 const headline = computed(() => {
-	const correct = props.myPrediction && (props.view.plurality || []).includes(props.myPrediction);
+	const correct =
+		props.myPrediction && (props.view.plurality || []).includes(props.myPrediction);
 	if (correct) return "You read the room!";
 	if (props.myPrediction) return "The room disagreed";
 	return "You sat this one out";
@@ -186,7 +230,8 @@ function voteClasses(choiceId) {
 	const shape = shapeFor(choiceId);
 	if (props.myVote === choiceId || voteLocked.value) return [shape.fill, "text-sunk"];
 	if (firstPick.value === choiceId) return ["border-2 border-accent", "text-paper"];
-	if (secondPick.value === choiceId) return ["border-2 border-dashed border-accent", "text-paper/80"];
+	if (secondPick.value === choiceId)
+		return ["border-2 border-dashed border-accent", "text-paper/80"];
 	return ["border-2 border-haze", "text-paper/85", "hover:border-paper"];
 }
 
@@ -243,6 +288,6 @@ watch(
 		voteLocked.value = false;
 		predictLocked.value = false;
 		error.value = "";
-	}
+	},
 );
 </script>

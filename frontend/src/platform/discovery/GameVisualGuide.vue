@@ -3,10 +3,10 @@
 		<div class="mb-4 flex flex-wrap items-end justify-between gap-3">
 			<div>
 				<p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ok">
-					How it works
+					{{ $t("How it works") }}
 				</p>
 				<h2 id="game-visual-title" class="mt-1 font-display text-2xl font-bold text-paper">
-					See a round at a glance
+					{{ $t("See a round at a glance") }}
 				</h2>
 			</div>
 			<p class="max-w-xl text-sm leading-relaxed text-paper/55">{{ visual.summary }}</p>
@@ -28,13 +28,15 @@
 				fetchpriority="high"
 				class="aspect-video w-full object-cover"
 			/>
-			<span class="flex items-center justify-between gap-4 border-t border-haze px-5 py-4 sm:px-7">
+			<span
+				class="flex items-center justify-between gap-4 border-t border-haze px-5 py-4 sm:px-7"
+			>
 				<span>
 					<span class="block font-display text-lg font-bold text-paper sm:text-xl">
-						See a worked example
+						{{ $t("See a worked example") }}
 					</span>
 					<span class="mt-0.5 hidden text-sm text-paper/60 sm:block">
-						Follow one prompt all the way to the score.
+						{{ $t("Follow one prompt all the way to the score.") }}
 					</span>
 				</span>
 				<span
@@ -45,6 +47,9 @@
 			</span>
 		</button>
 
+		<p v-if="locale === 'am'" class="mt-3 text-sm">
+			{{ $t("Illustration in English. Follow the Amharic steps below.") }}
+		</p>
 		<ol class="mt-4 grid gap-3 sm:grid-cols-3">
 			<li
 				v-for="(step, index) in visual.steps"
@@ -52,9 +57,9 @@
 				class="rounded-2xl border border-haze bg-dusk/65 p-4"
 			>
 				<p class="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-					{{ String(index + 1).padStart(2, "0") }} · {{ step.title }}
+					{{ $t(String(index + 1).padStart(2, "0")) }} · {{ $t(step.title) }}
 				</p>
-				<p class="mt-2 text-sm leading-relaxed text-paper/65">{{ step.detail }}</p>
+				<p class="mt-2 text-sm leading-relaxed text-paper/65">{{ $t(step.detail) }}</p>
 			</li>
 		</ol>
 
@@ -70,13 +75,18 @@
 			>
 				<div class="min-w-0 flex-1">
 					<p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ok">
-						Worked example
+						{{ $t("Worked example") }}
 					</p>
-					<h2 id="game-example-title" class="mt-1 truncate font-display text-xl font-bold">
-						{{ gameTitle }} · one complete round
+					<h2
+						id="game-example-title"
+						class="mt-1 truncate font-display text-xl font-bold"
+					>
+						{{ gameTitle }} {{ $t("· one complete round") }}
 					</h2>
 				</div>
-				<button type="button" class="ctl shrink-0" @click="closeExample">Close</button>
+				<button type="button" class="ctl shrink-0" @click="closeExample">
+					{{ $t("Close") }}
+				</button>
 			</header>
 			<div class="max-h-[calc(100vh-7rem)] overflow-y-auto p-3 sm:p-5">
 				<img
@@ -96,8 +106,10 @@
 						:key="step"
 						class="rounded-xl border border-haze bg-dusk px-4 py-3 text-sm leading-relaxed text-paper/65"
 					>
-						<span class="mr-2 font-mono text-xs font-bold text-accent">{{ index + 1 }}</span>
-						{{ step }}
+						<span class="mr-2 font-mono text-xs font-bold text-accent">{{
+							index + 1
+						}}</span>
+						{{ $t(step) }}
 					</li>
 				</ol>
 			</div>
@@ -106,6 +118,7 @@
 </template>
 
 <script setup>
+import { locale } from "@/i18n";
 import { ref } from "vue";
 
 defineProps({

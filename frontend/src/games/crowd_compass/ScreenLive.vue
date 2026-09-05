@@ -1,16 +1,22 @@
 <template>
 	<div class="flex w-full flex-col items-center gap-10 text-center">
 		<template v-if="view.phase === 'intermission'">
-			<p class="font-mono text-sm uppercase tracking-[0.3em] text-accent">The floor is open</p>
-			<h2 class="font-display text-6xl font-extrabold text-paper">Waiting for the host</h2>
-			<p class="text-paper/50">The first prompt lands any second.</p>
+			<p class="font-mono text-sm uppercase tracking-[0.3em] text-accent">
+				{{ $t("The floor is open") }}
+			</p>
+			<h2 class="font-display text-6xl font-extrabold text-paper">
+				{{ $t("Waiting for the host") }}
+			</h2>
+			<p class="text-paper/50">{{ $t("The first prompt lands any second.") }}</p>
 		</template>
 
 		<template v-else-if="view.phase === 'prompt_open' || view.phase === 'prediction_open'">
 			<p class="font-mono text-sm uppercase tracking-[0.3em] text-paper/40">
-				{{ view.phase === "prediction_open" ? "Predictions locked in" : "Votes in" }}
+				{{ $t(view.phase === "prediction_open" ? "Predictions locked in" : "Votes in") }}
 			</p>
-			<h2 class="max-w-6xl font-display text-6xl font-extrabold leading-tight text-paper sm:text-7xl">
+			<h2
+				class="max-w-6xl font-display text-6xl font-extrabold leading-tight text-paper sm:text-7xl"
+			>
 				{{ view.prompt }}
 			</h2>
 			<div class="flex max-w-6xl flex-wrap justify-center gap-4">
@@ -25,11 +31,19 @@
 			</div>
 			<div class="flex items-center gap-16">
 				<div class="text-center">
-					<p class="font-display text-8xl font-extrabold leading-none tabular-nums text-accent">
-						{{ view.phase === "prompt_open" ? view.voted ?? 0 : view.predicted ?? 0 }}
+					<p
+						class="font-display text-8xl font-extrabold leading-none tabular-nums text-accent"
+					>
+						{{
+							$t(
+								view.phase === "prompt_open"
+									? (view.voted ?? 0)
+									: (view.predicted ?? 0),
+							)
+						}}
 					</p>
 					<p class="mt-1 font-mono text-xs uppercase tracking-[0.3em] text-paper/40">
-						{{ view.phase === "prompt_open" ? "voted" : "predicted" }}
+						{{ $t(view.phase === "prompt_open" ? "voted" : "predicted") }}
 					</p>
 				</div>
 				<DrainRing
@@ -43,7 +57,7 @@
 
 		<template v-else-if="view.phase === 'reveal'">
 			<h2 class="font-display text-6xl font-extrabold text-paper">
-				{{ view.quorum_met ? "The room said:" : "Not enough votes to score" }}
+				{{ $t(view.quorum_met ? "The room said:" : "Not enough votes to score") }}
 			</h2>
 			<div class="w-full max-w-5xl">
 				<div v-for="choice in view.choices || []" :key="choice.id" class="mb-5">
@@ -52,7 +66,7 @@
 							class="font-display text-3xl font-bold"
 							:class="isPlurality(choice.id) ? 'text-accent' : 'text-paper/70'"
 						>
-							{{ isPlurality(choice.id) ? "👑 " : "" }}{{ choice.text }}
+							{{ $t(isPlurality(choice.id) ? "👑 " : "") }}{{ choice.text }}
 						</span>
 						<span class="font-mono text-2xl tabular-nums text-paper/50">
 							{{ (view.distribution || {})[choice.id] || 0 }}
@@ -68,7 +82,8 @@
 				</div>
 			</div>
 			<p class="font-mono text-sm uppercase tracking-[0.3em] text-paper/40">
-				{{ view.votes ?? 0 }} votes · {{ view.predictions ?? 0 }} predictions
+				{{ view.votes ?? 0 }} {{ $t("votes ·") }} {{ view.predictions ?? 0 }}
+				{{ $t("predictions") }}
 			</p>
 		</template>
 	</div>
@@ -92,7 +107,7 @@ function isPlurality(choiceId) {
 }
 
 function barWidth(choiceId) {
-	return Math.max(3, ((props.view.distribution || {})[choiceId] || 0) / maxCount.value * 100);
+	return Math.max(3, (((props.view.distribution || {})[choiceId] || 0) / maxCount.value) * 100);
 }
 
 function choiceFill(choiceId) {

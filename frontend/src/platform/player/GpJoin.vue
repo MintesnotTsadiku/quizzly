@@ -4,8 +4,9 @@
 			class="absolute left-4 top-4 font-mono text-xs uppercase tracking-wider text-paper/40 transition hover:text-paper"
 			:to="{ name: 'Catalog' }"
 		>
-			← All games
+			{{ $t("← All games") }}
 		</RouterLink>
+		<LanguageSwitch class="absolute right-12 top-3" />
 		<ThemeButton
 			class="absolute right-4 top-4 text-lg leading-none opacity-60 transition hover:opacity-100"
 		/>
@@ -16,20 +17,24 @@
 				<svg class="h-3 w-3 fill-gold" viewBox="0 0 24 24">
 					<path :d="ICON" />
 				</svg>
-				GatherPlay
+				{{ $t("GatherPlay") }}
 			</p>
 			<h1 class="font-display text-5xl font-extrabold leading-none text-paper">
-				Play along
+				{{ $t("Play along") }}
 			</h1>
 			<p class="mt-3 text-paper/50">
-				Use the code from your host. Join as yourself, or use a group name when sharing a device.
+				{{
+					$t(
+						"Use the code from your host. Join as yourself, or use a group name when sharing a device.",
+					)
+				}}
 			</p>
 
 			<form class="mt-9 flex flex-col gap-6" @submit.prevent="join">
 				<label class="flex flex-col gap-2">
-					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>Game PIN</span
-					>
+					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
+						{{ $t("Game PIN") }}
+					</span>
 					<input
 						v-model="pin"
 						class="w-full rounded-2xl border border-haze bg-dusk py-4 text-center font-mono text-4xl font-bold tracking-[0.18em] text-paper placeholder:text-paper/20 focus:border-ember"
@@ -41,13 +46,13 @@
 				</label>
 
 				<label class="flex flex-col gap-2">
-					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>Your name or group name</span
-					>
+					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
+						{{ $t("Your name or group name") }}
+					</span>
 					<input
 						v-model="nickname"
 						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember"
-						placeholder="Your name"
+						:placeholder="$t('Your name')"
 						maxlength="20"
 						autocomplete="off"
 					/>
@@ -66,15 +71,15 @@
 							class="rounded-full border border-haze px-3 py-1 text-sm text-paper/45 transition hover:border-paper hover:text-paper"
 							@click="suggestions = suggestNicknames()"
 						>
-							↻ More
+							{{ $t("↻ More") }}
 						</button>
 					</span>
 				</label>
 
 				<div class="flex flex-col gap-3">
-					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>Your face</span
-					>
+					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
+						{{ $t("Your face") }}
+					</span>
 					<div class="-mx-5">
 						<div
 							ref="scroller"
@@ -106,14 +111,14 @@
 					</div>
 				</div>
 
-				<p v-if="error" class="text-center text-sm text-alert">{{ error }}</p>
+				<p v-if="error" class="text-center text-sm text-alert">{{ $t(error) }}</p>
 				<button
 					type="submit"
 					class="rounded-2xl bg-ember py-4 font-display text-xl font-extrabold text-sunk transition active:scale-[0.98]"
 					:class="!pin || !nickname || joining ? 'opacity-50' : ''"
 					:disabled="joining"
 				>
-					{{ joining ? "Joining…" : "Join the room" }}
+					{{ $t(joining ? "Joining…" : "Join the room") }}
 				</button>
 			</form>
 		</div>
@@ -121,6 +126,7 @@
 </template>
 
 <script setup>
+import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { inject, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import AvatarPic from "@/components/AvatarPic.vue";

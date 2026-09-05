@@ -6,7 +6,7 @@
 			v-if="reviewing"
 			class="pointer-events-none fixed inset-x-0 top-0 z-10 bg-dusk/90 py-2 text-center font-mono text-[11px] uppercase tracking-[0.28em] text-accent"
 		>
-			Looking back · press → to return to the game
+			{{ $t("Looking back · press → to return to the game") }}
 		</p>
 		<!-- A live game owns the projector; nav on it is something the room looks at instead of the PIN. -->
 		<template v-if="!session">
@@ -16,13 +16,13 @@
 			>
 				<div>
 					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
-						Host
+						{{ $t("Host") }}
 					</p>
 					<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">
-						Pick a quiz
+						{{ $t("Pick a quiz") }}
 					</h1>
 				</div>
-				<p v-if="error" class="text-alert">{{ error }}</p>
+				<p v-if="error" class="text-alert">{{ $t(error) }}</p>
 				<div v-if="quizzes.length" class="flex flex-col gap-2">
 					<button
 						v-for="(quiz, index) in quizzes"
@@ -31,7 +31,7 @@
 						@click="createSession(quiz.name)"
 					>
 						<span class="font-mono text-xs tabular-nums text-paper/35">
-							{{ String(index + 1).padStart(2, "0") }}
+							{{ $t(String(index + 1).padStart(2, "0")) }}
 						</span>
 						<span class="flex-1 font-display text-xl font-bold text-paper">
 							{{ quiz.title }}
@@ -40,10 +40,10 @@
 					</button>
 				</div>
 				<p v-else-if="loaded" class="text-paper/50">
-					No quizzes yet. Write your first one.
+					{{ $t("No quizzes yet. Write your first one.") }}
 				</p>
 				<RouterLink v-if="!quizzes.length" class="ctl self-start" to="/host/quizzes/new">
-					New quiz
+					{{ $t("New quiz") }}
 				</RouterLink>
 			</div>
 		</template>
@@ -58,7 +58,7 @@
 						<p
 							class="break-all font-mono text-xs tracking-wide text-accent sm:text-sm"
 						>
-							Join at {{ joinUrl }}
+							{{ $t("Join at") }} {{ joinUrl }}
 							<button
 								class="ml-1 inline-block translate-y-1 rounded-md p-1 text-paper/30 transition hover:bg-dusk hover:text-paper"
 								:title="copied ? 'Copied' : `Copy ${joinUrl}`"
@@ -90,19 +90,19 @@
 							{{ session.game_pin }}
 						</p>
 						<p class="mt-3 text-sm text-paper/45 sm:text-base">
-							or point a phone camera at the code
+							{{ $t("or point a phone camera at the code") }}
 						</p>
 					</div>
 					<button v-if="qrDataUrl" class="group" @click="qrFullscreen = true">
 						<img
 							:src="qrDataUrl"
-							alt="Join QR code"
+							:alt="$t('Join QR code')"
 							class="size-40 rounded-2xl bg-card p-2 transition group-hover:scale-105 sm:size-48"
 						/>
 						<span
 							class="mt-2 block font-mono text-[11px] uppercase tracking-wider text-paper/35 transition group-hover:text-paper/70"
 						>
-							Click to enlarge
+							{{ $t("Click to enlarge") }}
 						</span>
 					</button>
 				</div>
@@ -113,7 +113,7 @@
 						class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40"
 					>
 						{{ participants.length }}
-						{{ participants.length === 1 ? "player" : "players" }} in
+						{{ $t(participants.length === 1 ? "player" : "players") }} {{ $t("in") }}
 					</p>
 					<!-- only a sample of the room gets a chip: a full lobby of names reads as
 					     noise on a projector and pushes Start off the screen. -->
@@ -146,35 +146,36 @@
 							v-if="overflowCount"
 							class="flex items-center rounded-full border border-haze bg-dusk px-4 py-2.5 text-base font-medium text-paper/50 sm:px-5 sm:text-xl"
 						>
-							+{{ overflowCount }} more
+							+{{ overflowCount }} {{ $t("more") }}
 						</div>
 					</div>
 					<p v-if="!participants.length" class="text-paper/35">
-						Waiting for the first player…
+						{{ $t("Waiting for the first player…") }}
 					</p>
 				</div>
 
 				<div class="flex flex-wrap items-center justify-center gap-3">
 					<button class="ctl" :data-on="lobbyLocked" @click="toggleLock">
-						{{ lobbyLocked ? "Lobby locked" : "Lock lobby" }}
+						{{ $t(lobbyLocked ? "Lobby locked" : "Lock lobby") }}
 					</button>
 					<button class="ctl" :data-on="autoAdvance" @click="toggleAutoAdvance">
-						Auto-advance {{ autoAdvance ? "on" : "off" }}
+						{{ $t("Auto-advance") }} {{ $t(autoAdvance ? "on" : "off") }}
 					</button>
 					<button class="ctl" @click="toggleMute">
-						{{ muted ? "Sound off" : "Sound on" }}
+						{{ $t(muted ? "Sound off" : "Sound on") }}
 					</button>
+					<LanguageSwitch />
 					<ThemeButton class="ctl" />
-					<button class="ctl" @click="end">Exit</button>
+					<button class="ctl" @click="end">{{ $t("Exit") }}</button>
 					<button
 						class="ctl ctl-go"
 						:disabled="starting || !participants.length"
 						@click="start"
 					>
-						{{ starting ? "Starting…" : "Start game" }}
+						{{ $t(starting ? "Starting…" : "Start game") }}
 					</button>
 				</div>
-				<p v-if="error" class="text-center text-alert">{{ error }}</p>
+				<p v-if="error" class="text-center text-alert">{{ $t(error) }}</p>
 			</div>
 
 			<dialog
@@ -185,7 +186,7 @@
 			>
 				<img
 					:src="qrDataUrl"
-					alt="Join QR code"
+					:alt="$t('Join QR code')"
 					class="size-[min(78vh,88vw)] rounded-3xl bg-card p-4"
 				/>
 				<p class="mt-4 text-center font-mono text-2xl tracking-[0.08em] text-paper">
@@ -200,7 +201,7 @@
 				class="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 p-5 sm:gap-10 sm:p-8"
 			>
 				<h1 class="font-display text-4xl font-extrabold text-paper sm:text-6xl">
-					Final results
+					{{ $t("Final results") }}
 				</h1>
 				<div class="flex items-end justify-center gap-2 sm:gap-4">
 					<div
@@ -249,9 +250,13 @@
 					</li>
 				</ol>
 				<div v-if="!reviewing" class="flex flex-wrap justify-center gap-2">
-					<button class="ctl ctl-go" @click="reset">New game</button>
-					<RouterLink class="ctl" :to="{ name: 'HostDashboard' }">Dashboard</RouterLink>
-					<RouterLink class="ctl" :to="{ name: 'Catalog' }">All games</RouterLink>
+					<button class="ctl ctl-go" @click="reset">{{ $t("New game") }}</button>
+					<RouterLink class="ctl" :to="{ name: 'HostDashboard' }">
+						{{ $t("Dashboard") }}
+					</RouterLink>
+					<RouterLink class="ctl" :to="{ name: 'Catalog' }">
+						{{ $t("All games") }}
+					</RouterLink>
 				</div>
 			</div>
 		</template>
@@ -263,11 +268,11 @@
 			>
 				<div class="text-center">
 					<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
-						After question {{ (scoreboard?.q_index ?? 0) + 1 }} of
-						{{ scoreboard?.total }}
+						{{ $t("After question") }} {{ (scoreboard?.q_index ?? 0) + 1 }}
+						{{ $t("of") }} {{ scoreboard?.total }}
 					</p>
 					<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-6xl">
-						Scoreboard
+						{{ $t("Scoreboard") }}
 					</h1>
 				</div>
 
@@ -318,22 +323,25 @@
 						class="flex items-center gap-2"
 					>
 						<AvatarPic :id="entry.avatar" :nickname="entry.nickname" :size="28" />
-						🔥 {{ entry.nickname }} is on a {{ entry.streak }} answer streak
+						🔥 {{ entry.nickname }} {{ $t("is on a") }} {{ entry.streak }}
+						{{ $t("answer streak") }}
 					</li>
 				</ul>
 
 				<div v-if="!reviewing" class="flex flex-wrap items-center justify-center gap-3">
-					<button class="ctl ctl-go" @click="next">Next question</button>
+					<button class="ctl ctl-go" @click="next">{{ $t("Next question") }}</button>
 					<button
 						v-if="showHostControls"
 						class="ctl"
 						:data-on="autoAdvance"
 						@click="toggleAutoAdvance"
 					>
-						Auto-advance {{ autoAdvance ? "on" : "off" }}
+						{{ $t("Auto-advance") }} {{ $t(autoAdvance ? "on" : "off") }}
 					</button>
-					<button v-if="showHostControls" class="ctl" @click="end">End game</button>
-					<p v-if="error" class="text-alert">{{ error }}</p>
+					<button v-if="showHostControls" class="ctl" @click="end">
+						{{ $t("End game") }}
+					</button>
+					<p v-if="error" class="text-alert">{{ $t(error) }}</p>
 				</div>
 			</div>
 		</template>
@@ -344,7 +352,8 @@
 				class="flex flex-1 flex-col items-center justify-center gap-8 p-5 text-center sm:gap-10 sm:p-8"
 			>
 				<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
-					Question {{ (question?.q_index ?? 0) + 1 }} of {{ question?.total }}
+					{{ $t("Question") }} {{ (question?.q_index ?? 0) + 1 }} {{ $t("of") }}
+					{{ question?.total }}
 				</p>
 				<h1
 					class="max-w-4xl font-display text-3xl font-extrabold leading-tight text-paper sm:text-6xl"
@@ -367,7 +376,8 @@
 					class="m-auto flex w-full max-w-4xl flex-col items-center gap-4 text-center sm:gap-6"
 				>
 					<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
-						Question {{ (question?.q_index ?? 0) + 1 }} of {{ question?.total }}
+						{{ $t("Question") }} {{ (question?.q_index ?? 0) + 1 }} {{ $t("of") }}
+						{{ question?.total }}
 					</p>
 					<img
 						v-if="explanation?.image_url"
@@ -393,7 +403,9 @@
 						class="flex flex-wrap items-center justify-center gap-3"
 					>
 						<button class="ctl ctl-go" @click="next">
-							{{ explanation?.before_stats ? "Show results" : afterQuestionLabel }}
+							{{
+								$t(explanation?.before_stats ? "Show results" : afterQuestionLabel)
+							}}
 						</button>
 						<button
 							v-if="showHostControls"
@@ -401,10 +413,12 @@
 							:data-on="autoAdvance"
 							@click="toggleAutoAdvance"
 						>
-							Auto-advance {{ autoAdvance ? "on" : "off" }}
+							{{ $t("Auto-advance") }} {{ $t(autoAdvance ? "on" : "off") }}
 						</button>
-						<button v-if="showHostControls" class="ctl" @click="end">End game</button>
-						<p v-if="error" class="text-alert">{{ error }}</p>
+						<button v-if="showHostControls" class="ctl" @click="end">
+							{{ $t("End game") }}
+						</button>
+						<p v-if="error" class="text-alert">{{ $t(error) }}</p>
 					</div>
 				</div>
 			</div>
@@ -427,8 +441,8 @@
 						/>
 						<div class="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
 							<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
-								Question {{ (question?.q_index ?? 0) + 1 }} of
-								{{ question?.total }}
+								{{ $t("Question") }} {{ (question?.q_index ?? 0) + 1 }}
+								{{ $t("of") }} {{ question?.total }}
 							</p>
 							<h1
 								class="mt-2 font-display text-2xl font-extrabold leading-tight text-paper sm:text-4xl"
@@ -440,7 +454,7 @@
 							v-if="phase === 'question'"
 							class="ml-auto shrink-0 font-mono text-sm tabular-nums text-paper/40 sm:ml-0"
 						>
-							{{ answerCount }} answered
+							{{ answerCount }} {{ $t("answered") }}
 						</p>
 					</div>
 
@@ -485,10 +499,10 @@
 							class="ctl"
 							@click="skip"
 						>
-							Skip
+							{{ $t("Skip") }}
 						</button>
 						<button v-if="phase === 'closed'" class="ctl ctl-go" @click="next">
-							{{ explanationNext ? "Show explanation" : afterQuestionLabel }}
+							{{ $t(explanationNext ? "Show explanation" : afterQuestionLabel) }}
 						</button>
 						<button
 							v-if="showHostControls"
@@ -496,10 +510,12 @@
 							:data-on="autoAdvance"
 							@click="toggleAutoAdvance"
 						>
-							Auto-advance {{ autoAdvance ? "on" : "off" }}
+							{{ $t("Auto-advance") }} {{ $t(autoAdvance ? "on" : "off") }}
 						</button>
-						<button v-if="showHostControls" class="ctl" @click="end">End game</button>
-						<p v-if="error" class="text-alert">{{ error }}</p>
+						<button v-if="showHostControls" class="ctl" @click="end">
+							{{ $t("End game") }}
+						</button>
+						<p v-if="error" class="text-alert">{{ $t(error) }}</p>
 					</div>
 				</div>
 			</div>
@@ -508,6 +524,8 @@
 </template>
 
 <script setup>
+import { locale } from "@/i18n";
+import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { computed, inject, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import QRCode from "qrcode";
@@ -572,7 +590,7 @@ let liveFrame = null;
 watch(qrFullscreen, (open) => (open ? qrDialog.value.showModal() : qrDialog.value.close()));
 
 const joinUrl = computed(
-	() => `${window.location.origin}/play/quizzly/join?pin=${session.value.game_pin}`
+	() => `${window.location.origin}/play/quizzly/join?pin=${session.value.game_pin}`,
 );
 
 const LOBBY_CHIP_LIMIT = 10;
@@ -583,18 +601,18 @@ const overflowCount = computed(() => Math.max(0, participants.value.length - LOB
 
 // The projector shows where to go, not the whole query string.
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
 );
 
 const visibleShapes = computed(() =>
-	SHAPES.filter((shape) => question.value?.options[Number(shape.id) - 1])
+	SHAPES.filter((shape) => question.value?.options[Number(shape.id) - 1]),
 );
 
 watch(
 	() => Math.ceil(remaining.value),
 	(secondsLeft) => {
 		if (phase.value === "question" && secondsLeft > 0 && secondsLeft <= 5) playCue("tick");
-	}
+	},
 );
 
 // tallest bar fills the chart; the rest scale against it
@@ -609,14 +627,14 @@ const barHeight = (optionId) => {
 const afterQuestionLabel = computed(() =>
 	(question.value?.q_index ?? 0) >= (question.value?.total ?? 1) - 1
 		? "Final results"
-		: "Show scores"
+		: "Show scores",
 );
 
 const reviewing = computed(() => reviewAt.value !== null);
 
 // 2nd, 1st, 3rd — the winner stands in the middle
 const podiumOrder = computed(() =>
-	[leaderboard.value[1], leaderboard.value[0], leaderboard.value[2]].filter(Boolean)
+	[leaderboard.value[1], leaderboard.value[0], leaderboard.value[2]].filter(Boolean),
 );
 
 function onSessionEvent(message) {
@@ -682,7 +700,7 @@ function showScoreboard(message, animate = true) {
 	standings.value = byRank(entries, animate ? "previous_rank" : "rank");
 	shownScores.value = scoresAt(
 		entries,
-		animate ? (entry) => entry.score - entry.gained : (entry) => entry.score
+		animate ? (entry) => entry.score - entry.gained : (entry) => entry.score,
 	);
 	settled.value = !animate;
 	phase.value = "scoreboard";
@@ -704,7 +722,7 @@ function tallyScores(entries) {
 		const progress = Math.min(1, (now - start) / TALLY_MS);
 		const eased = 1 - Math.pow(1 - progress, 3);
 		shownScores.value = scoresAt(entries, (entry) =>
-			Math.round(entry.score - entry.gained * (1 - eased))
+			Math.round(entry.score - entry.gained * (1 - eased)),
 		);
 		if (progress < 1) requestAnimationFrame(step);
 		else settled.value = true;
@@ -863,7 +881,7 @@ async function hostCall(method, params = {}) {
 
 async function toggleLock() {
 	const lobby = await hostCall(
-		lobbyLocked.value ? "quizzly.api.unlock_lobby" : "quizzly.api.lock_lobby"
+		lobbyLocked.value ? "quizzly.api.unlock_lobby" : "quizzly.api.lock_lobby",
 	);
 	if (lobby) lobbyLocked.value = Boolean(lobby.lobby_locked);
 }

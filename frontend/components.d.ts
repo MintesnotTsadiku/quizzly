@@ -15,6 +15,7 @@ declare module 'vue' {
     GatherChoices: typeof import('./src/components/GatherChoices.vue')['default']
     GatherSelect: typeof import('./src/components/GatherSelect.vue')['default']
     HostBar: typeof import('./src/components/HostBar.vue')['default']
+    LanguageSwitch: typeof import('./src/components/LanguageSwitch.vue')['default']
     QuizPreview: typeof import('./src/components/QuizPreview.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

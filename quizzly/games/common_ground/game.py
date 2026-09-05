@@ -91,11 +91,25 @@ class CommonGroundGame(GameModule):
 		pack = configuration.get("pack", "everyday")
 		if pack not in PACKS:
 			frappe.throw(_("Choose a Common Ground pack"))
-		return {"pack": pack, "auto_progress": False, "participation": "host_only"}
+		from quizzly.localization import content_language
+
+		return {
+			"pack": pack,
+			"language": content_language(configuration.get("language")),
+			"auto_progress": False,
+			"participation": "host_only",
+		}
 
 	def start_game(self, ctx, participants):
 		# Snapshot content: replay draws fresh prompts; an active room stays stable.
-		prompts = random.sample(PACKS[ctx.configuration["pack"]]["prompts"], 3)
+		from quizzly.localization import COMMON_GROUND_AM
+
+		source = (
+			COMMON_GROUND_AM[ctx.configuration["pack"]]
+			if ctx.configuration.get("language") == "am"
+			else PACKS[ctx.configuration["pack"]]["prompts"]
+		)
+		prompts = random.sample(source, 3)
 		return self._step({"prompts": prompts, "position": 0}, "room_prompt")
 
 	def _step(self, state, phase, resolution=None):

@@ -1,73 +1,107 @@
 <template>
 	<div class="gather-ui gp-stage" :class="{ 'gp-stage-screen': screen }">
 		<header class="gp-stage-top">
+			<LanguageSwitch />
 			<RouterLink class="gp-brand" to="/">✳ {{ site.product_name }}</RouterLink
-			><span>Common Ground · {{ screen ? "Shared screen" : "Host view" }}</span
+			><span>
+				{{ $t("Common Ground ·") }} {{ $t(screen ? "Shared screen" : "Host view") }}</span
 			><a
 				v-if="!screen && snapshot.game_pin"
 				class="gp-button gp-button-secondary gp-button-small"
 				:href="screenUrl"
 				target="_blank"
 				rel="noopener"
-				>Open shared screen ↗</a
 			>
+				{{ $t("Open shared screen ↗") }}
+			</a>
 		</header>
 		<main class="gp-stage-main">
-			<p v-if="error" class="gp-error" role="alert">{{ error }}</p>
+			<p v-if="error" class="gp-error" role="alert">{{ $t(error) }}</p>
 			<template v-if="!snapshot.status"
 				><p role="status">
-					{{ error ? "Your room will reconnect automatically." : "Opening your room…" }}
+					{{
+						$t(
+							error
+								? "Your room will reconnect automatically."
+								: "Opening your room…",
+						)
+					}}
 				</p>
-				<RouterLink v-if="error" class="gp-button gp-button-secondary" to="/"
-					>Explore games</RouterLink
-				></template
+				<RouterLink v-if="error" class="gp-button gp-button-secondary" to="/">
+					{{ $t("Explore games") }}
+				</RouterLink></template
 			>
 			<template
 				v-else-if="snapshot.status === 'Unknown' || snapshot.game_key !== 'common-ground'"
-				><h1>This room isn’t available.</h1>
-				<p>Check the shared-screen link with your host.</p>
-				<RouterLink class="gp-button" to="/">Explore games</RouterLink></template
+				><h1>{{ $t("This room isn’t available.") }}</h1>
+				<p>{{ $t("Check the shared-screen link with your host.") }}</p>
+				<RouterLink class="gp-button" to="/">
+					{{ $t("Explore games") }}
+				</RouterLink></template
 			>
 			<template v-else-if="snapshot.status === 'Lobby'">
 				<GameArtwork game-key="common-ground" color="peach" />
-				<p class="gp-eyebrow">Everyone’s already invited</p>
-				<h1>Put the phones down.<br />Pull your people closer.</h1>
+				<p class="gp-eyebrow">{{ $t("Everyone’s already invited") }}</p>
+				<h1>
+					{{ $t("Put the phones down.") }} <br />
+					{{ $t("Pull your people closer.") }}
+				</h1>
 				<p>
-					Make little groups of 2–5. You’ll find surprising things you share, one playful
-					prompt at a time.
+					{{
+						$t(
+							"Make little groups of 2–5. You’ll find surprising things you share, one playful prompt at a time.",
+						)
+					}}
 				</p>
 				<p class="gp-stage-support">
-					Sit, stand, speak or gesture. Anyone can pass. No sign-ups for players.
+					{{
+						$t(
+							"Sit, stand, speak or gesture. Anyone can pass. No sign-ups for players.",
+						)
+					}}
 				</p>
 				<div v-if="!screen" class="gp-stage-actions">
 					<button class="gp-button" :disabled="busy || !!error" @click="start">
-						{{ busy ? "Getting started…" : "Everyone’s ready · Let’s play" }} →
+						{{ $t(busy ? "Getting started…" : "Everyone’s ready · Let’s play") }} →
 					</button>
 				</div>
-				<p v-else class="gp-caption">Your host will start when the room is ready.</p>
+				<p v-else class="gp-caption">
+					{{ $t("Your host will start when the room is ready.") }}
+				</p>
 			</template>
 			<template v-else-if="snapshot.status === 'Ended'">
 				<GameArtwork game-key="common-ground" color="lime" />
-				<p class="gp-eyebrow">Good company wins</p>
-				<h1>A little more<br />in common.</h1>
-				<p>Before you go: tell someone one thing you’re glad you discovered about them.</p>
+				<p class="gp-eyebrow">{{ $t("Good company wins") }}</p>
+				<h1>
+					{{ $t("A little more") }} <br />
+					{{ $t("in common.") }}
+				</h1>
+				<p>
+					{{
+						$t(
+							"Before you go: tell someone one thing you’re glad you discovered about them.",
+						)
+					}}
+				</p>
 				<div v-if="!screen" class="gp-stage-actions">
 					<button class="gp-button" :disabled="busy" @click="replay">
-						{{ busy ? "Opening…" : "Play another round" }} ↻</button
-					><RouterLink class="gp-button gp-button-secondary" to="/"
-						>Find our next game →</RouterLink
-					>
+						{{ $t(busy ? "Opening…" : "Play another round") }} ↻</button
+					><RouterLink class="gp-button gp-button-secondary" to="/">
+						{{ $t("Find our next game →") }}
+					</RouterLink>
 				</div>
-				<p v-else class="gp-caption">Thanks for playing together.</p>
+				<p v-else class="gp-caption">{{ $t("Thanks for playing together.") }}</p>
 			</template>
 			<template v-else-if="snapshot.view">
 				<p class="gp-eyebrow">
 					{{
-						snapshot.phase === "room_share"
-							? "Share a little surprise"
-							: "Talk it through together"
+						$t(
+							snapshot.phase === "room_share"
+								? "Share a little surprise"
+								: "Talk it through together",
+						)
 					}}
-					· {{ snapshot.view.round }} of {{ snapshot.view.rounds }}
+					· {{ snapshot.view.round }} {{ $t("of") }} {{ snapshot.view.rounds }}
 				</p>
 				<div class="gp-stage-progress" aria-hidden="true">
 					<span
@@ -86,54 +120,60 @@
 				<p>
 					{{
 						snapshot.phase === "room_share"
-							? "Invite a few groups to share. Listening counts as joining in."
+							? $t("Invite a few groups to share. Listening counts as joining in.")
 							: snapshot.view.instruction
 					}}
 				</p>
 				<p class="gp-stage-support">
 					{{
-						snapshot.phase === "room_share"
-							? "In a big room, hear from two or three groups. Save time for everyone to keep playing."
-							: "Take turns. Make space for quieter voices. Anyone can pass."
+						$t(
+							snapshot.phase === "room_share"
+								? "In a big room, hear from two or three groups. Save time for everyone to keep playing."
+								: "Take turns. Make space for quieter voices. Anyone can pass.",
+						)
 					}}
 				</p>
 				<div v-if="!screen" class="gp-stage-actions">
 					<button class="gp-button" :disabled="busy || !!error" @click="advance">
 						{{
-							busy
-								? "Moving on…"
-								: snapshot.phase === "room_prompt"
-									? "We’re ready to share"
-									: snapshot.view.round === snapshot.view.rounds
-										? "Finish together"
-										: "Next conversation"
+							$t(
+								busy
+									? "Moving on…"
+									: snapshot.phase === "room_prompt"
+										? "We’re ready to share"
+										: snapshot.view.round === snapshot.view.rounds
+											? "Finish together"
+											: "Next conversation",
+							)
 						}}
 						→
 					</button>
 				</div>
 			</template>
-			<p v-else role="status">Getting your next prompt…</p>
+			<p v-else role="status">{{ $t("Getting your next prompt…") }}</p>
 		</main>
 		<footer class="gp-stage-foot">
-			<template v-if="snapshot.status === 'Active'"
-				>No countdown. Take the time your people need.</template
-			><template v-else>One room. Many ways to belong.</template
+			<template v-if="snapshot.status === 'Active'">
+				{{ $t("No countdown. Take the time your people need.") }} </template
+			><template v-else> {{ $t("One room. Many ways to belong.") }} </template
 			><button
 				v-if="!screen && ['Lobby', 'Active'].includes(snapshot.status)"
 				class="gp-example-next"
 				style="margin-left: 20px"
 				@click="ending = true"
 			>
-				End game
+				{{ $t("End game") }}
 			</button>
 		</footer>
 		<dialog ref="endDialog" @cancel="ending = false" class="gp-end-dialog">
-			<h2>Finish this game?</h2>
-			<p>You can choose another game or start a fresh round afterwards.</p>
+			<h2>{{ $t("Finish this game?") }}</h2>
+			<p>{{ $t("You can choose another game or start a fresh round afterwards.") }}</p>
 			<div class="gp-stage-actions">
 				<button class="gp-button gp-button-secondary" @click="ending = false">
-					Keep playing</button
-				><button class="gp-button" :disabled="busy" @click="end">Finish game</button>
+					{{ $t("Keep playing") }}</button
+				><button class="gp-button" :disabled="busy" @click="end">
+					{{ $t("Finish game") }}
+				</button>
 			</div>
 		</dialog>
 	</div>
@@ -141,6 +181,8 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import LanguageSwitch from "@/components/LanguageSwitch.vue";
+import { languageUrl, locale } from "@/i18n";
 import GameArtwork from "@/platform/discovery/GameArtwork.vue";
 import { gpCall, rememberHostedSession, forgetHostedSession } from "@/platform/session/gp";
 import { site } from "@/platform/site";
@@ -153,8 +195,10 @@ const snapshot = ref({}),
 	busy = ref(false),
 	ending = ref(false),
 	endDialog = ref(null);
-const screenUrl = computed(
-	() => router.resolve({ name: "RoomScreen", params: { pin: snapshot.value.game_pin } }).href,
+const screenUrl = computed(() =>
+	languageUrl(
+		router.resolve({ name: "RoomScreen", params: { pin: snapshot.value.game_pin } }).href,
+	),
 );
 let timer,
 	stopped = false,
@@ -226,7 +270,10 @@ async function replay() {
 	try {
 		const created = await gpCall("create_session", {
 			game_key: "common-ground",
-			configuration: { pack: snapshot.value.configuration?.pack || "everyday" },
+			configuration: {
+				pack: snapshot.value.configuration?.pack || "everyday",
+				language: snapshot.value.configuration?.language || locale.value,
+			},
 		});
 		rememberHostedSession(created.session);
 		await router.push({ name: "RoomHost", params: { session: created.session } });

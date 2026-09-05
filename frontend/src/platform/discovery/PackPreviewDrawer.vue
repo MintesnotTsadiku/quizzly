@@ -4,7 +4,7 @@
 			<div v-if="pack" class="fixed inset-0 z-50 flex justify-end" role="presentation">
 				<button
 					class="absolute inset-0 cursor-default bg-night/80 backdrop-blur-sm"
-					aria-label="Close prompt preview"
+					:aria-label="$t('Close prompt preview')"
 					@click="$emit('close')"
 				/>
 				<aside
@@ -20,7 +20,7 @@
 								<p
 									class="font-mono text-[10px] uppercase tracking-[0.24em] text-ok"
 								>
-									Inside this pack
+									{{ $t("Inside this pack") }}
 								</p>
 								<h2
 									id="pack-preview-title"
@@ -29,13 +29,14 @@
 									{{ pack.title }}
 								</h2>
 								<p class="mt-2 text-sm text-paper/50">
-									{{ pack.prompt_count }} prompts · shown in play order
+									{{ pack.prompt_count }}
+									{{ $t("prompts · shown in play order") }}
 								</p>
 							</div>
 							<button
 								ref="closeButton"
 								class="drawer-close"
-								aria-label="Close prompt preview"
+								:aria-label="$t('Close prompt preview')"
 								@click="$emit('close')"
 							>
 								<svg
@@ -57,7 +58,7 @@
 						>
 							<div class="flex gap-4">
 								<span class="prompt-number">{{
-									String(index + 1).padStart(2, "0")
+									$t(String(index + 1).padStart(2, "0"))
 								}}</span>
 								<div class="min-w-0 flex-1">
 									<p
@@ -85,7 +86,7 @@
 
 					<footer class="border-t border-haze bg-dusk/70 px-6 py-5 sm:px-8">
 						<button class="ctl ctl-go w-full" @click="$emit('choose', pack)">
-							Choose this pack
+							{{ $t("Choose this pack") }}
 						</button>
 					</footer>
 				</aside>
@@ -112,7 +113,7 @@ function onKeydown(event) {
 	}
 	if (event.key !== "Tab") return;
 	const focusable = drawerPanel.value?.querySelectorAll(
-		'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+		'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
 	);
 	if (!focusable?.length) return;
 	const first = focusable[0];
@@ -138,7 +139,7 @@ watch(
 			returnFocus?.focus?.();
 			returnFocus = null;
 		}
-	}
+	},
 );
 document.addEventListener("keydown", onKeydown);
 onBeforeUnmount(() => {

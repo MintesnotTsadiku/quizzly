@@ -21,6 +21,7 @@ def manifest():
 				"description": p.tagline,
 				"start_url": "/play/",
 				"scope": "/play/",
+				"lang": p.default_language or "en",
 				"display": "standalone",
 				"background_color": "#faf8f2",
 				"theme_color": p.accent_color,

@@ -1,4 +1,5 @@
 import { ref, watch } from 'vue'
+import { inheritLanguage } from './i18n'
 import { acceptsAppearance, channels, configurationTokens, TOKEN_MAP } from './appearance'
 
 const STORAGE_KEY = 'gatherplay-theme'
@@ -47,8 +48,7 @@ if (embedded) {
     inherited = true
     theme.value = event.data.mode
     apply(event.data.tokens, event.data.mode, event.data.branding)
-    // Game copy currently remains English; do not mislabel it for screen readers.
-    root.lang = 'en'
+    inheritLanguage(event.data.language)
   })
   window.parent.postMessage({ type: 'quizzly:ready', version: 1 }, location.origin)
 }

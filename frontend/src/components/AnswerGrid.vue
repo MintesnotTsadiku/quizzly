@@ -29,7 +29,7 @@ const props = defineProps({
 });
 
 const visibleShapes = computed(() =>
-	SHAPES.filter((shape) => props.options[Number(shape.id) - 1])
+	SHAPES.filter((shape) => props.options[Number(shape.id) - 1]),
 );
 
 const revealed = (optionId) => optionId === String(props.correctOption);

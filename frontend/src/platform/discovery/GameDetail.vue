@@ -2,33 +2,37 @@
 	<div class="gather-ui gp-page">
 		<HostBar />
 		<main class="gp-container">
-			<RouterLink class="gp-breadcrumb" :to="{ name: 'Catalog' }"
-				>← Explore games</RouterLink
-			>
-			<div v-if="loading" role="status" class="gp-state">Getting the game ready…</div>
+			<RouterLink class="gp-breadcrumb" :to="{ name: 'Catalog' }">
+				{{ $t("← Explore games") }}
+			</RouterLink>
+			<div v-if="loading" role="status" class="gp-state">
+				{{ $t("Getting the game ready…") }}
+			</div>
 			<div v-else-if="!game" class="gp-state">
-				<h1>We couldn’t find that game.</h1>
-				<p>{{ error || "Choose another game from the collection." }}</p>
-				<RouterLink class="gp-button" :to="{ name: 'Catalog' }">Explore games</RouterLink>
+				<h1>{{ $t("We couldn’t find that game.") }}</h1>
+				<p>{{ $t(error || "Choose another game from the collection.") }}</p>
+				<RouterLink class="gp-button" :to="{ name: 'Catalog' }">
+					{{ $t("Explore games") }}
+				</RouterLink>
 			</div>
 			<template v-else>
 				<header class="gp-detail-header">
 					<div>
 						<p class="gp-eyebrow">
-							{{ profile.category }} ·
-							{{ profile.kicker || "A new way to play together" }}
+							{{ $t(profile.category) }} ·
+							{{ $t(profile.kicker || "A new way to play together") }}
 						</p>
-						<h1>{{ game.title }}</h1>
-						<p>{{ profile.description }}</p>
+						<h1>{{ $t(game.title) }}</h1>
+						<p>{{ $t(profile.description) }}</p>
 						<div class="gp-detail-tags">
-							<span>{{ profile.people }}</span
-							><span>About {{ profile.time }}</span
-							><span>{{ profile.deviceLabel }}</span>
+							<span>{{ $t(profile.people) }}</span
+							><span> {{ $t("About") }} {{ $t(profile.time) }}</span
+							><span>{{ $t(profile.deviceLabel) }}</span>
 						</div>
 					</div>
 				</header>
 				<div class="gp-detail-grid">
-					<section class="gp-example" aria-label="Try an example round">
+					<section class="gp-example" :aria-label="$t('Try an example round')">
 						<a
 							v-if="coverImage"
 							class="gp-game-illustration"
@@ -44,23 +48,32 @@
 								:height="roomGame ? 1024 : 941"
 								fetchpriority="high"
 							/>
-							<span>Open illustration <span aria-hidden="true">↗</span></span>
+							<span>
+								{{ $t("Open illustration") }}
+								<span aria-hidden="true">↗</span></span
+							>
 						</a>
 						<GameArtwork v-else :game-key="game.key" :color="profile.color" />
 						<div class="gp-example-content">
 							<p class="gp-eyebrow">
 								{{
-									exampleStep ? "Here’s what happens next" : "Try a little round"
+									$t(
+										exampleStep
+											? "Here’s what happens next"
+											: "Try a little round",
+									)
 								}}
-								· Example only
+								{{ $t("· Example only") }}
 							</p>
-							<h2>{{ profile.sample || game.summary }}</h2>
+							<h2>{{ $t(profile.sample || game.summary) }}</h2>
 							<template v-if="game.key === 'crowd-compass'">
 								<p class="gp-caption">
 									{{
-										exampleStep
-											? "Now predict the group’s favourite. These are sample results, not a live vote."
-											: "First, pick the answer that sounds like you."
+										$t(
+											exampleStep
+												? "Now predict the group’s favourite. These are sample results, not a live vote."
+												: "First, pick the answer that sounds like you.",
+										)
 									}}
 								</p>
 								<div class="gp-example-choices">
@@ -78,12 +91,16 @@
 									class="gp-example-result"
 									role="status"
 								>
-									<strong>Outside: 6 votes · Inside: 4 votes</strong><br />{{
-										samplePrediction === 0
-											? "You read this sample room!"
-											: "A surprise! Outside wins this sample room."
+									<strong>
+										{{ $t("Outside: 6 votes · Inside: 4 votes") }} </strong
+									><br />{{
+										$t(
+											samplePrediction === 0
+												? "You read this sample room!"
+												: "A surprise! Outside wins this sample room.",
+										)
 									}}
-									In a real game, the reveal starts the conversation.
+									{{ $t("In a real game, the reveal starts the conversation.") }}
 								</div>
 							</template>
 							<template v-else-if="game.key === 'quiz'">
@@ -102,9 +119,13 @@
 								</div>
 								<div v-if="exampleStep" class="gp-example-result" role="status">
 									<strong>{{
-										sampleChoice === 1 ? "That’s it!" : "Good try! It’s Mars."
+										$t(
+											sampleChoice === 1
+												? "That’s it!"
+												: "Good try! It’s Mars.",
+										)
 									}}</strong>
-									Iron-rich dust gives Mars its reddish colour.
+									{{ $t("Iron-rich dust gives Mars its reddish colour.") }}
 								</div>
 							</template>
 							<template v-else>
@@ -113,9 +134,11 @@
 									@click="exampleStep = exampleStep ? 0 : 1"
 								>
 									{{
-										exampleStep
-											? "Try the prompt again"
-											: "Show me how it feels"
+										$t(
+											exampleStep
+												? "Try the prompt again"
+												: "Show me how it feels",
+										)
 									}}
 									<span aria-hidden="true">→</span>
 								</button>
@@ -128,35 +151,43 @@
 								class="gp-example-next"
 								@click="resetExample"
 							>
-								Try again
+								{{ $t("Try again") }}
 							</button>
 							<p class="gp-caption">
-								No account needed to explore. Your example answers aren’t saved.
+								{{
+									$t(
+										"No account needed to explore. Your example answers aren’t saved.",
+									)
+								}}
 							</p>
 						</div>
 					</section>
 					<section class="gp-setup" aria-labelledby="setup-title">
-						<p class="gp-eyebrow">Bring your people</p>
-						<h2 id="setup-title">Make it your game</h2>
+						<p class="gp-eyebrow">{{ $t("Bring your people") }}</p>
+						<h2 id="setup-title">{{ $t("Make it your game") }}</h2>
 						<p>
 							{{
-								roomGame
-									? "One host device. Everyone else can put theirs away."
-									: "Choose your content and how you’ll play. Your lobby opens before the game starts."
+								$t(
+									roomGame
+										? "One host device. Everyone else can put theirs away."
+										: "Choose your content and how you’ll play. Your lobby opens before the game starts.",
+								)
 							}}
 						</p>
 						<GatherChoices
 							v-model="participation"
-							label="How will you play?"
+							:label="$t('How will you play?')"
 							:options="modes"
 						/>
 						<p class="gp-setup-note">
 							{{
-								participation === "shared"
-									? "Join once per team or household with a group nickname. Agree on one answer; each device gets one score."
-									: roomGame
-										? "Make small groups of 2–5. Read the prompt aloud, or open it on a shared screen. No one needs to join online."
-										: "Players join with a code. Keep private prompts on the right person’s device. A shared screen is optional."
+								$t(
+									participation === "shared"
+										? "Join once per team or household with a group nickname. Agree on one answer; each device gets one score."
+										: roomGame
+											? "Make small groups of 2–5. Read the prompt aloud, or open it on a shared screen. No one needs to join online."
+											: "Players join with a code. Keep private prompts on the right person’s device. A shared screen is optional.",
+								)
 							}}
 						</p>
 						<GatherSelect
@@ -171,7 +202,9 @@
 									value: p.name,
 									label: p.title,
 									description: p.prompt_count
-										? p.prompt_count + ' prompts · ready to play'
+										? $t('{count} prompts · ready to play', {
+												count: p.prompt_count,
+											})
 										: 'Three conversations · no timer',
 								}))
 							"
@@ -182,7 +215,7 @@
 							class="gp-example-next"
 							@click="preview = packs.find((p) => p.name === selectedPack)"
 						>
-							Preview the prompts →
+							{{ $t("Preview the prompts →") }}
 						</button>
 						<template v-if="!roomGame && game.key !== 'quiz'">
 							<GatherChoices
@@ -193,12 +226,17 @@
 										: 'Round length'
 								"
 								compact
-								:options="times.map((n) => ({ value: n, label: n + ' sec' }))"
+								:options="
+									times.map((n) => ({
+										value: n,
+										label: $t('{count} sec', { count: n }),
+									}))
+								"
 							/>
 							<GatherChoices
 								v-if="game.key === 'crowd-compass'"
 								v-model="pace"
-								label="Between rounds"
+								:label="$t('Between rounds')"
 								:options="[
 									{
 										value: 'manual',
@@ -214,7 +252,8 @@
 							/>
 						</template>
 						<p v-if="error" role="alert" class="gp-error">
-							{{ error }} <RouterLink to="/access">Your access →</RouterLink>
+							{{ $t(error) }}
+							<RouterLink to="/access"> {{ $t("Your access →") }} </RouterLink>
 						</p>
 						<button
 							class="gp-button"
@@ -222,64 +261,74 @@
 							@click="host"
 						>
 							{{
-								creating
-									? "Opening your room…"
-									: guest
-										? site.allow_guest_host
-											? "Try hosting a game"
-											: "Sign in to host"
-										: roomGame
-											? "Set up our room"
-											: "Open the lobby"
+								$t(
+									creating
+										? "Opening your room…"
+										: guest
+											? site.allow_guest_host
+												? "Try hosting a game"
+												: "Sign in to host"
+											: roomGame
+												? "Set up our room"
+												: "Open the lobby",
+								)
 							}}
 							<span aria-hidden="true">→</span>
 						</button>
 						<p class="gp-setup-note">
 							{{
-								roomGame
-									? "Three playful prompts. No countdown. Passing is welcome."
-									: "Your site’s allowance applies. Visit Your access to see what’s included."
+								$t(
+									roomGame
+										? "Three playful prompts. No countdown. Passing is welcome."
+										: "Your site’s allowance applies. Visit Your access to see what’s included.",
+								)
 							}}
 						</p>
 						<RouterLink
 							v-if="!packs.length && game.key === 'quiz'"
 							class="gp-example-next"
 							:to="{ name: 'Quizzes' }"
-							>Create your own quiz →</RouterLink
 						>
+							{{ $t("Create your own quiz →") }}
+						</RouterLink>
 					</section>
 				</div>
+				<p v-if="locale === 'am' && coverImage" class="gp-setup-note">
+					{{ $t("Illustration in English. Follow the Amharic steps below.") }}
+				</p>
 				<section class="gp-steps">
-					<h2>How to play</h2>
+					<h2>{{ $t("How to play") }}</h2>
 					<ol>
 						<li v-for="(step, i) in steps" :key="step">
 							<span>{{ i + 1 }}</span
-							>{{ step }}
+							>{{ $t(step) }}
 						</li>
 					</ol>
 				</section>
 				<div class="gp-disclosures">
 					<details>
-						<summary>Make room for everyone</summary>
-						<p>{{ profile.access }}</p>
+						<summary>{{ $t("Make room for everyone") }}</summary>
+						<p>{{ $t(profile.access) }}</p>
 						<p v-if="roomGame">
-							In a large gathering, let everyone talk in parallel groups. Invite two
-							or three groups to share instead of asking every person. New arrivals
-							can join any conversation; people can step away at any time.
+							{{
+								$t(
+									"In a large gathering, let everyone talk in parallel groups. Invite two or three groups to share instead of asking every person. New arrivals can join any conversation; people can step away at any time.",
+								)
+							}}
 						</p>
 					</details>
 					<details v-if="!roomGame">
-						<summary>Scoring and facilitation</summary>
-						<p>{{ guide.scoring }}</p>
-						<p>{{ guide.hostDoes }}</p>
+						<summary>{{ $t("Scoring and facilitation") }}</summary>
+						<p>{{ $t(guide.scoring) }}</p>
+						<p>{{ $t(guide.hostDoes) }}</p>
 					</details>
 					<details v-if="!roomGame">
-						<summary>Full visual guide and room setup</summary>
-						<p>{{ guide.setup }}</p>
+						<summary>{{ $t("Full visual guide and room setup") }}</summary>
+						<p>{{ $t(guide.setup) }}</p>
 						<GameVisualGuide v-if="visual" :game-title="game.title" :visual="visual" />
 					</details>
 					<details v-if="guideVideo">
-						<summary>Watch a real round</summary>
+						<summary>{{ $t("Watch a real round") }}</summary>
 						<video
 							controls
 							preload="none"
@@ -287,16 +336,17 @@
 							style="width: 100%; max-width: 900px; margin-top: 16px"
 							:src="guideVideo.video"
 						>
-							Use the full visual guide above to follow each step.
+							{{ $t("Use the full visual guide above to follow each step.") }}
 						</video>
 					</details>
 					<details v-if="roomGame">
-						<summary>Connection and privacy</summary>
+						<summary>{{ $t("Connection and privacy") }}</summary>
 						<p>
-							Internet is needed to open and advance the session. If the connection
-							drops, keep talking about the visible prompt; reconnect before
-							continuing. No attendee names or spoken answers are recorded. The
-							public screen contains only prompts.
+							{{
+								$t(
+									"Internet is needed to open and advance the session. If the connection drops, keep talking about the visible prompt; reconnect before continuing. No attendee names or spoken answers are recorded. The public screen contains only prompts.",
+								)
+							}}
 						</p>
 					</details>
 				</div>
@@ -321,6 +371,7 @@ import { site, refreshAccess } from "@/platform/site";
 import GatherSelect from "@/components/GatherSelect.vue";
 import GatherChoices from "@/components/GatherChoices.vue";
 import { readError } from "@/api";
+import { locale, languageUrl } from "@/i18n";
 const route = useRoute(),
 	router = useRouter(),
 	game = ref(null),
@@ -344,8 +395,10 @@ const guideVideo = computed(() => guide.value.demos?.find((demo) => demo.video))
 const visual = computed(() => visualFor(game.value?.key));
 const coverImage = computed(() =>
 	roomGame.value
-		? "/assets/quizzly/images/games/common-ground/gathering-v1.png"
-		: visual.value?.hero,
+		? "/assets/quizzly/images/games/common-ground/how-to-ethiopian-v2.png"
+		: game.value?.key === "bluffline"
+			? "/assets/quizzly/images/games/bluffline/how-to-ethiopian-v1.png"
+			: visual.value?.hero,
 );
 const coverAlt = computed(() =>
 	roomGame.value
@@ -372,18 +425,19 @@ const modes = computed(() =>
 		}[value],
 	})),
 );
-const exampleReveal = computed(
-	() =>
-		({
-			"common-ground":
-				"“We all like the smell of rain, a quiet walk, and making someone laugh.” Now ask: which answer surprised you?",
-			cuecast:
-				"One person takes slow, giant steps. A teammate shouts “walking on the moon!” Mark it correct, and try the next prompt.",
-			"doodle-dash":
-				"Two wobbly circles, a triangle, and handlebars. Someone guesses “bicycle!” The imperfect drawing is half the fun.",
-			"sequence-sprint":
-				"Talk through what has to happen first, then arrange seed, sprout, plant, flower. Each shared device submits one order.",
-		})[game.value?.key] || game.value?.summary,
+const exampleReveal = computed(() =>
+	locale.value === "am"
+		? profile.value.steps.join(" ")
+		: {
+				"common-ground":
+					"“We all like the smell of rain, a quiet walk, and making someone laugh.” Now ask: which answer surprised you?",
+				cuecast:
+					"One person takes slow, giant steps. A teammate shouts “walking on the moon!” Mark it correct, and try the next prompt.",
+				"doodle-dash":
+					"Two wobbly circles, a triangle, and handlebars. Someone guesses “bicycle!” The imperfect drawing is half the fun.",
+				"sequence-sprint":
+					"Talk through what has to happen first, then arrange seed, sprout, plant, flower. Each shared device submits one order.",
+			}[game.value?.key] || game.value?.summary,
 );
 function resetExample() {
 	exampleStep.value = 0;
@@ -405,8 +459,8 @@ function choosePack(pack) {
 }
 let loadId = 0;
 watch(
-	() => route.params.game,
-	async (key) => {
+	() => [route.params.game, locale.value],
+	async ([key]) => {
 		const id = ++loadId;
 		loading.value = true;
 		error.value = "";
@@ -427,7 +481,7 @@ watch(
 							{ name: "everyday", title: "Little things, big connections" },
 							{ name: "imagination", title: "A little imagination" },
 						]
-					: await gpCall("list_public_decks", { game_key: key });
+					: await gpCall("list_public_decks", { game_key: key, language: locale.value });
 			if (id !== loadId) return;
 			packs.value = result.sort(
 				(a, b) =>
@@ -454,11 +508,13 @@ async function host() {
 			return;
 		}
 		if (game.value.key === "quiz") {
-			window.location.href = `/play/quizzly/host?quiz=${encodeURIComponent(selectedPack.value)}`;
+			window.location.href = languageUrl(
+				`/play/quizzly/host?quiz=${encodeURIComponent(selectedPack.value)}`,
+			);
 			return;
 		}
 		const configuration = roomGame.value
-			? { pack: selectedPack.value }
+			? { pack: selectedPack.value, language: locale.value }
 			: {
 					[guide.value.contentKey || "pack"]: selectedPack.value,
 					seconds: seconds.value,

@@ -1,0 +1,3 @@
+PASS: 25 Amharic packs; English packs remain available; repeat seed changes nothing
+PASS: site default, explicit override and language validation
+PASS: Amharic host-only game snapshots prompts, reaches shared screen and finishes

@@ -14,12 +14,12 @@
 				class="flex shrink-0 items-center gap-4 border-b border-haze px-4 py-3 sm:px-6"
 			>
 				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
-					Preview
+					{{ $t("Preview") }}
 				</p>
 				<p class="ml-auto font-mono text-xs tabular-nums text-paper/40">
 					{{ index + 1 }} / {{ beats.length }}
 				</p>
-				<button class="ctl" @click="emit('close')">Close</button>
+				<button class="ctl" @click="emit('close')">{{ $t("Close") }}</button>
 			</header>
 
 			<div v-if="beat" class="flex flex-1 flex-col overflow-y-auto p-4 sm:p-8">
@@ -29,7 +29,8 @@
 					class="m-auto flex flex-col items-center gap-8 text-center sm:gap-10"
 				>
 					<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
-						Question {{ beat.number }} of {{ questions.length }}
+						{{ $t("Question") }} {{ beat.number }} {{ $t("of") }}
+						{{ questions.length }}
 					</p>
 					<h1
 						class="max-w-4xl font-display text-3xl font-extrabold leading-tight text-paper sm:text-6xl"
@@ -49,7 +50,8 @@
 					class="m-auto flex w-full max-w-4xl flex-col items-center gap-4 text-center sm:gap-6"
 				>
 					<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
-						Question {{ beat.number }} of {{ questions.length }}
+						{{ $t("Question") }} {{ beat.number }} {{ $t("of") }}
+						{{ questions.length }}
 					</p>
 					<img
 						v-if="beat.question.explanation_image"
@@ -82,7 +84,8 @@
 						/>
 						<div class="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
 							<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
-								Question {{ beat.number }} of {{ questions.length }}
+								{{ $t("Question") }} {{ beat.number }} {{ $t("of") }}
+								{{ questions.length }}
 							</p>
 							<h1
 								class="mt-2 font-display text-2xl font-extrabold leading-tight text-paper sm:text-4xl"
@@ -109,19 +112,21 @@
 			</div>
 
 			<p v-else class="m-auto text-paper/50">
-				Nothing to preview yet. Write a question first.
+				{{ $t("Nothing to preview yet. Write a question first.") }}
 			</p>
 
 			<footer
 				class="flex shrink-0 items-center justify-center gap-3 border-t border-haze px-4 py-3"
 			>
 				<button class="ctl" :disabled="index === 0" @click="show(index - 1)">
-					← Back
+					{{ $t("← Back") }}
 				</button>
 				<button class="ctl ctl-go" @click="togglePlay">
-					{{ playing ? "Pause" : atEnd ? "Replay" : "Play" }}
+					{{ $t(playing ? "Pause" : atEnd ? "Replay" : "Play") }}
 				</button>
-				<button class="ctl" :disabled="atEnd" @click="show(index + 1)">Next →</button>
+				<button class="ctl" :disabled="atEnd" @click="show(index + 1)">
+					{{ $t("Next →") }}
+				</button>
 			</footer>
 		</div>
 	</dialog>
@@ -168,7 +173,7 @@ const beats = computed(() =>
 		screens.push(beat("answer", STATS_SECONDS));
 		if (explains && props.explanationPosition === "After Stats") screens.push(explanation);
 		return screens;
-	})
+	}),
 );
 
 const beat = computed(() => beats.value[index.value]);
@@ -189,7 +194,7 @@ watch(
 		dialog.value.showModal();
 		playing.value = true;
 		show(0);
-	}
+	},
 );
 
 // The clock is what advances the game; the buttons only jump the queue.

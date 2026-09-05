@@ -1,20 +1,29 @@
 <template>
 	<div class="flex w-full flex-col items-center gap-8 text-center">
 		<template v-if="view.phase === 'intermission'">
-			<p class="font-mono uppercase tracking-[0.28em] text-accent">The floor is open</p>
-			<h2 class="font-display text-4xl font-extrabold text-paper">Waiting for the first prompt</h2>
-			<p class="max-w-md text-paper/50">
-				Compose one below — the room starts the moment you push it.
+			<p class="font-mono uppercase tracking-[0.28em] text-accent">
+				{{ $t("The floor is open") }}
 			</p>
-			<button class="ctl ctl-go" @click="$emit('compose')">Compose a prompt</button>
+			<h2 class="font-display text-4xl font-extrabold text-paper">
+				{{ $t("Waiting for the first prompt") }}
+			</h2>
+			<p class="max-w-md text-paper/50">
+				{{ $t("Compose one below — the room starts the moment you push it.") }}
+			</p>
+			<button class="ctl ctl-go" @click="$emit('compose')">
+				{{ $t("Compose a prompt") }}
+			</button>
 		</template>
 
 		<template v-else-if="view.phase === 'prompt_open' || view.phase === 'prediction_open'">
 			<p class="font-mono text-xs uppercase tracking-[0.28em] text-paper/40">
-				Prompt {{ (view.turn ?? 0) + 1 }} of {{ view.total || "?" }}
-				{{ view.phase === "prediction_open" ? "· predictions" : "· voting" }}
+				{{ $t("Prompt") }} {{ (view.turn ?? 0) + 1 }} {{ $t("of") }}
+				{{ $t(view.total || "?") }}
+				{{ $t(view.phase === "prediction_open" ? "· predictions" : "· voting") }}
 			</p>
-			<h2 class="max-w-4xl font-display text-4xl font-extrabold leading-tight text-paper sm:text-5xl">
+			<h2
+				class="max-w-4xl font-display text-4xl font-extrabold leading-tight text-paper sm:text-5xl"
+			>
 				{{ view.prompt }}
 			</h2>
 			<div class="flex max-w-4xl flex-wrap justify-center gap-3">
@@ -30,10 +39,16 @@
 			<div class="flex items-center gap-10">
 				<div class="text-center">
 					<p class="font-display text-5xl font-extrabold tabular-nums text-paper">
-						{{ view.phase === "prompt_open" ? view.voted ?? 0 : view.predicted ?? 0 }}
+						{{
+							$t(
+								view.phase === "prompt_open"
+									? (view.voted ?? 0)
+									: (view.predicted ?? 0),
+							)
+						}}
 					</p>
 					<p class="font-mono text-[11px] uppercase tracking-[0.25em] text-paper/40">
-						{{ view.phase === "prompt_open" ? "voted" : "predicted" }}
+						{{ $t(view.phase === "prompt_open" ? "voted" : "predicted") }}
 					</p>
 				</div>
 				<DrainRing
@@ -44,25 +59,28 @@
 				/>
 			</div>
 			<p class="max-w-md text-sm text-paper/40">
-				{{ view.phase === "prediction_open"
-					? "The distribution stays sealed until everyone locks in."
-					: "Phones out — the reveal stays a surprise." }}
+				{{
+					$t(
+						view.phase === "prediction_open"
+							? "The distribution stays sealed until everyone locks in."
+							: "Phones out — the reveal stays a surprise.",
+					)
+				}}
 			</p>
 		</template>
 
 		<template v-else-if="view.phase === 'reveal'">
 			<h2 class="font-display text-4xl font-extrabold text-paper sm:text-5xl">
-				{{ view.quorum_met ? "The room said:" : "Not enough votes to score" }}
+				{{ $t(view.quorum_met ? "The room said:" : "Not enough votes to score") }}
 			</h2>
 			<div class="w-full max-w-3xl">
-				<div
-					v-for="choice in view.choices || []"
-					:key="choice.id"
-					class="mb-3"
-				>
+				<div v-for="choice in view.choices || []" :key="choice.id" class="mb-3">
 					<div class="mb-1 flex items-baseline justify-between text-left">
-						<span class="font-display text-lg font-bold" :class="isPlurality(choice.id) ? 'text-accent' : 'text-paper/70'">
-							{{ isPlurality(choice.id) ? "👑 " : "" }}{{ choice.text }}
+						<span
+							class="font-display text-lg font-bold"
+							:class="isPlurality(choice.id) ? 'text-accent' : 'text-paper/70'"
+						>
+							{{ $t(isPlurality(choice.id) ? "👑 " : "") }}{{ choice.text }}
 						</span>
 						<span class="font-mono text-sm tabular-nums text-paper/50">
 							{{ (view.distribution || {})[choice.id] || 0 }}
@@ -78,7 +96,8 @@
 				</div>
 			</div>
 			<p class="font-mono text-xs uppercase tracking-[0.25em] text-paper/40">
-				{{ view.votes ?? 0 }} votes · {{ view.predictions ?? 0 }} predictions
+				{{ view.votes ?? 0 }} {{ $t("votes ·") }} {{ view.predictions ?? 0 }}
+				{{ $t("predictions") }}
 			</p>
 		</template>
 	</div>
@@ -98,16 +117,14 @@ const props = defineProps({
 defineEmits(["compose"]);
 
 const plurality = computed(() => props.view.plurality || []);
-const maxCount = computed(() =>
-	Math.max(1, ...Object.values(props.view.distribution || {}))
-);
+const maxCount = computed(() => Math.max(1, ...Object.values(props.view.distribution || {})));
 
 function isPlurality(choiceId) {
 	return plurality.value.includes(choiceId);
 }
 
 function barWidth(choiceId) {
-	return Math.max(3, ((props.view.distribution || {})[choiceId] || 0) / maxCount.value * 100);
+	return Math.max(3, (((props.view.distribution || {})[choiceId] || 0) / maxCount.value) * 100);
 }
 
 function choiceFill(choiceId) {

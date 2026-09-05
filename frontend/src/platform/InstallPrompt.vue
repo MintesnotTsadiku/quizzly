@@ -1,19 +1,22 @@
 <template>
-	<aside v-if="visible" class="gather-ui gp-install" aria-label="Install GatherPlay">
+	<aside v-if="visible" class="gather-ui gp-install" :aria-label="$t('Install GatherPlay')">
 		<div>
-			<strong>A little more play, one tap away.</strong>
+			<strong> {{ $t("A little more play, one tap away.") }} </strong>
 			<p>
 				{{
-					ios
-						? "In Safari, tap Share, then Add to Home Screen."
-						: "Add " + site.product_name + " to your home screen."
+					$t(
+						ios
+							? "In Safari, tap Share, then Add to Home Screen."
+							: $t("Add {name} to your home screen.", { name: site.product_name }),
+					)
 				}}
 			</p>
 		</div>
-		<button v-if="prompt" class="gp-button gp-button-small" @click="install">Install</button
+		<button v-if="prompt" class="gp-button gp-button-small" @click="install">
+			{{ $t("Install") }}</button
 		><button
 			class="gp-install-dismiss"
-			aria-label="Dismiss installation suggestion"
+			:aria-label="$t('Dismiss installation suggestion')"
 			@click="dismiss"
 		>
 			×

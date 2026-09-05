@@ -76,3 +76,6 @@ quizzly_game_modules = [
 	"quizzly.games.round_games.game.QuiltPuzzleGame",
 	"quizzly.games.round_games.game.GroupSudokuGame",
 ]
+
+# Additive starter content: an existing demo key is never rewritten.
+after_migrate = ["quizzly.demo.amharic.seed_amharic_starters"]

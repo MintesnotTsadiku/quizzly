@@ -1,6 +1,6 @@
 <template>
 	<fieldset class="gp-choice-field">
-		<legend>{{ label }}</legend>
+		<legend>{{ $t(label) }}</legend>
 		<div class="gp-choice-grid" :class="{ compact }">
 			<label
 				v-for="option in options"
@@ -13,8 +13,8 @@
 					:value="option.value"
 					:checked="modelValue === option.value"
 					@change="$emit('update:modelValue', option.value)" /><span
-					><strong>{{ option.label }}</strong
-					><small v-if="option.description">{{ option.description }}</small></span
+					><strong>{{ $t(option.label) }}</strong
+					><small v-if="option.description">{{ $t(option.description) }}</small></span
 				><span v-if="!compact" class="gp-choice-dot" aria-hidden="true"></span
 			></label>
 		</div>

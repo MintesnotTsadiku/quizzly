@@ -4,7 +4,7 @@
 		<div class="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-5 sm:p-8">
 			<div class="flex flex-col gap-2">
 				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
-					{{ isNew ? "New quiz" : "Editing" }}
+					{{ $t(isNew ? "New quiz" : "Editing") }}
 				</p>
 				<!-- title and actions on one line: bottom-aligned pills read as dropped
 				     against a field this tall -->
@@ -12,19 +12,21 @@
 					<input
 						v-model="title"
 						class="field min-w-0 flex-1 font-display text-2xl font-extrabold sm:text-3xl"
-						placeholder="Quiz title"
+						:placeholder="$t('Quiz title')"
 					/>
 					<div class="flex shrink-0 items-center gap-2">
-						<span v-if="saved" class="font-mono text-xs text-ok">Saved</span>
+						<span v-if="saved" class="font-mono text-xs text-ok">
+							{{ $t("Saved") }}
+						</span>
 						<button
 							class="ctl"
 							:disabled="!questions.length"
 							@click="previewing = true"
 						>
-							Preview
+							{{ $t("Preview") }}
 						</button>
 						<button class="ctl ctl-go" :disabled="saving" @click="save">
-							{{ saving ? "Saving…" : "Save" }}
+							{{ $t(saving ? "Saving…" : "Save") }}
 						</button>
 					</div>
 				</div>
@@ -34,12 +36,12 @@
 				v-model="description"
 				rows="2"
 				class="field"
-				placeholder="Description (optional)"
+				:placeholder="$t('Description (optional)')"
 			/>
 
 			<div class="flex flex-col gap-4">
 				<label class="flex items-center gap-2 self-start font-mono text-xs text-paper/50">
-					<span class="w-52 whitespace-nowrap">Seconds per question</span>
+					<span class="w-52 whitespace-nowrap"> {{ $t("Seconds per question") }} </span>
 					<input
 						v-model.number="defaultTimeLimit"
 						type="number"
@@ -55,13 +57,15 @@
 						:data-on="showExplanation"
 						@click="showExplanation = !showExplanation"
 					>
-						Explanations {{ showExplanation ? "on" : "off" }}
+						{{ $t("Explanations") }} {{ $t(showExplanation ? "on" : "off") }}
 					</button>
 					<button v-if="showExplanation" class="ctl" @click="togglePosition">
 						{{
-							explanationPosition === "After Stats"
-								? "After results"
-								: "Before results"
+							$t(
+								explanationPosition === "After Stats"
+									? "After results"
+									: "Before results",
+							)
 						}}
 					</button>
 					<button
@@ -69,7 +73,7 @@
 						:data-on="showHostControls"
 						@click="showHostControls = !showHostControls"
 					>
-						Host controls {{ showHostControls ? "on" : "off" }}
+						{{ $t("Host controls") }} {{ $t(showHostControls ? "on" : "off") }}
 					</button>
 				</div>
 
@@ -77,7 +81,9 @@
 					v-if="showExplanation"
 					class="flex items-center gap-2 self-start font-mono text-xs text-paper/50"
 				>
-					<span class="w-52 whitespace-nowrap">Seconds per explanation</span>
+					<span class="w-52 whitespace-nowrap">
+						{{ $t("Seconds per explanation") }}
+					</span>
 					<input
 						v-model.number="explanationTimeLimit"
 						type="number"
@@ -88,7 +94,7 @@
 				</label>
 			</div>
 
-			<p v-if="error" class="text-alert">{{ error }}</p>
+			<p v-if="error" class="text-alert">{{ $t(error) }}</p>
 
 			<div
 				v-for="(question, index) in questions"
@@ -99,7 +105,7 @@
 					<span
 						class="w-full font-mono text-xs uppercase tracking-[0.2em] text-paper/40 sm:w-auto"
 					>
-						Question {{ index + 1 }}
+						{{ $t("Question") }} {{ index + 1 }}
 					</span>
 					<span class="flex-1" />
 					<button class="ctl" :disabled="index === 0" @click="move(index, -1)">↑</button>
@@ -110,14 +116,16 @@
 					>
 						↓
 					</button>
-					<button class="ctl" @click="questions.splice(index, 1)">Remove</button>
+					<button class="ctl" @click="questions.splice(index, 1)">
+						{{ $t("Remove") }}
+					</button>
 				</div>
 
 				<textarea
 					v-model="question.question_text"
 					rows="3"
 					class="field font-display text-xl font-bold"
-					placeholder="What do you want to ask?"
+					:placeholder="$t('What do you want to ask?')"
 				/>
 
 				<div class="flex flex-wrap items-center gap-4">
@@ -135,17 +143,19 @@
 						<template #default="{ openFileSelector, uploading, progress }">
 							<button class="ctl" @click="openFileSelector">
 								{{
-									uploading
-										? `Uploading ${progress}%`
-										: question.image
-										? "Replace image"
-										: "Add image"
+									$t(
+										uploading
+											? `Uploading ${progress}%`
+											: question.image
+												? "Replace image"
+												: "Add image",
+									)
 								}}
 							</button>
 						</template>
 					</FileUploader>
 					<button v-if="question.image" class="ctl" @click="question.image = null">
-						Remove image
+						{{ $t("Remove image") }}
 					</button>
 				</div>
 
@@ -177,7 +187,7 @@
 						v-model="question.explanation"
 						rows="2"
 						class="field"
-						placeholder="Why is that the answer? Shown before the scoreboard."
+						:placeholder="$t('Why is that the answer? Shown before the scoreboard.')"
 					/>
 					<div class="flex flex-wrap items-center gap-4">
 						<img
@@ -194,11 +204,13 @@
 							<template #default="{ openFileSelector, uploading, progress }">
 								<button class="ctl" @click="openFileSelector">
 									{{
-										uploading
-											? `Uploading ${progress}%`
-											: question.explanation_image
-											? "Replace explanation image"
-											: "Add explanation image"
+										$t(
+											uploading
+												? `Uploading ${progress}%`
+												: question.explanation_image
+													? "Replace explanation image"
+													: "Add explanation image",
+										)
 									}}
 								</button>
 							</template>
@@ -208,7 +220,7 @@
 							class="ctl"
 							@click="question.explanation_image = null"
 						>
-							Remove image
+							{{ $t("Remove image") }}
 						</button>
 					</div>
 				</div>
@@ -217,7 +229,7 @@
 					<label
 						class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
 					>
-						Time limit
+						{{ $t("Time limit") }}
 						<input
 							v-model.number="question.time_limit"
 							type="number"
@@ -230,18 +242,20 @@
 					<label
 						class="flex items-center gap-2 whitespace-nowrap font-mono text-xs text-paper/50"
 					>
-						Points
+						{{ $t("Points") }}
 						<select v-model="question.points_multiplier" class="field w-32">
-							<option value="0">No points</option>
-							<option value="1">Normal</option>
-							<option value="2">Double</option>
+							<option value="0">{{ $t("No points") }}</option>
+							<option value="1">{{ $t("Normal") }}</option>
+							<option value="2">{{ $t("Double") }}</option>
 						</select>
 					</label>
 				</div>
 			</div>
 
 			<div class="flex items-center gap-3">
-				<button class="ctl" @click="questions.push(blankQuestion())">Add question</button>
+				<button class="ctl" @click="questions.push(blankQuestion())">
+					{{ $t("Add question") }}
+				</button>
 			</div>
 		</div>
 
@@ -258,6 +272,7 @@
 </template>
 
 <script setup>
+import { locale } from "@/i18n";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { FileUploader } from "frappe-ui";
@@ -291,6 +306,7 @@ const router = useRouter();
 const isNew = computed(() => route.params.name === "new");
 const quizName = ref(isNew.value ? null : route.params.name);
 const loadedDoc = ref(null);
+const contentLanguage = ref(locale.value);
 const title = ref("");
 const description = ref("");
 const defaultTimeLimit = ref(DEFAULT_TIME_LIMIT);
@@ -309,7 +325,7 @@ watch(
 	() => (saved.value = false),
 	{
 		deep: true,
-	}
+	},
 );
 
 onMounted(async () => {
@@ -374,6 +390,7 @@ async function save() {
 		const doc = {
 			...loadedDoc.value,
 			doctype: "QZ Quiz",
+			content_language: loadedDoc.value?.content_language || contentLanguage.value,
 			title: title.value,
 			description: description.value,
 			default_time_limit: clampSeconds(defaultTimeLimit.value) || DEFAULT_TIME_LIMIT,

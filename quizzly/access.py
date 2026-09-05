@@ -276,8 +276,11 @@ def configuration() -> dict:
 	p = settings()
 	keys = (
 		"product_name",
+		"default_language",
 		"tagline",
+		"tagline_am",
 		"intro",
+		"intro_am",
 		"accent_color",
 		"logo",
 		"enable_install",
@@ -292,6 +295,7 @@ def configuration() -> dict:
 		"price",
 		"currency",
 		"payment_instructions",
+		"payment_instructions_am",
 		"paid_host_limit",
 		"paid_pack_limit",
 		"plan_days",
@@ -375,7 +379,7 @@ def create_guest_session(api, args):
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=60, seconds=3600)
-def save_pack(title: str, prompts: list | str, name: str | None = None) -> dict:
+def save_pack(title: str, prompts: list | str, name: str | None = None, language: str | None = None) -> dict:
 	same_origin()
 	a = get_access(create=True)
 	if is_guest() and (
@@ -413,6 +417,10 @@ def save_pack(title: str, prompts: list | str, name: str | None = None) -> dict:
 			frappe.throw("This pack belongs to another author.", frappe.PermissionError)
 	else:
 		doc = frappe.new_doc("GP Crowd Pack")
+	if not name:
+		from quizzly.localization import content_language
+
+		doc.content_language = content_language(language)
 	doc.title = clean(title, 100)
 	if not doc.title:
 		frappe.throw("Give your pack a title.")

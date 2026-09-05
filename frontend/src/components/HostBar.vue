@@ -1,6 +1,6 @@
 <template>
 	<header class="gp-nav" :class="{ 'gp-nav-embedded': embedded }">
-		<RouterLink class="gp-brand" to="/" aria-label="GatherPlay home">
+		<RouterLink class="gp-brand" to="/" :aria-label="$t('GatherPlay home')">
 			<img v-if="site.logo" :src="site.logo" alt="" width="32" height="32" /><svg
 				v-else
 				width="32"
@@ -14,32 +14,43 @@
 			<span
 				>{{ site.product_name
 				}}<span v-if="embedded" class="gp-tenant">{{
-					brand.short_name !== "GatherPlay"
-						? brand.short_name
-						: "Games for your community"
+					$t(
+						brand.short_name !== "GatherPlay"
+							? brand.short_name
+							: "Games for your community",
+					)
 				}}</span></span
 			>
 		</RouterLink>
-		<nav aria-label="GatherPlay navigation">
-			<RouterLink to="/explore" :aria-current="route.name === 'Catalog' ? 'page' : undefined"
-				>Explore</RouterLink
+		<nav :aria-label="$t('GatherPlay navigation')">
+			<RouterLink
+				to="/explore"
+				:aria-current="route.name === 'Catalog' ? 'page' : undefined"
 			>
+				{{ $t("Explore") }}
+			</RouterLink>
 			<RouterLink
 				v-if="!guest"
 				to="/host/dashboard"
 				:aria-current="route.name === 'HostDashboard' ? 'page' : undefined"
-				>My sessions</RouterLink
 			>
-			<RouterLink class="gp-nav-content" to="/create">Create a pack</RouterLink>
-			<RouterLink to="/access">Your access</RouterLink>
+				{{ $t("My sessions") }}
+			</RouterLink>
+			<RouterLink class="gp-nav-content" to="/create">
+				{{ $t("Create a pack") }}
+			</RouterLink>
+			<RouterLink to="/access"> {{ $t("Your access") }} </RouterLink>
 		</nav>
 		<div class="gp-nav-actions">
+			<LanguageSwitch />
 			<ThemeButton v-if="!embedded" class="gp-theme" />
-			<RouterLink class="gp-button gp-button-small" to="/join"
-				>Join a game <span aria-hidden="true">↗</span></RouterLink
+			<RouterLink class="gp-button gp-button-small" to="/join">
+				{{ $t("Join a game") }} <span aria-hidden="true">↗</span></RouterLink
 			>
-			<button v-if="guest" class="gp-login" @click="login">Sign in</button>
-			<button v-else-if="!embedded" class="gp-login" @click="logout">Sign out</button>
+			<button v-if="guest" class="gp-login" @click="login">{{ $t("Sign in") }}</button>
+			<button v-else-if="!embedded" class="gp-login" @click="logout">
+				{{ $t("Sign out") }}
+			</button>
 		</div>
 	</header>
 </template>
@@ -48,6 +59,7 @@ import { useRoute } from "vue-router";
 import { call } from "@/api";
 import { redirectGuestToLogin } from "@/auth";
 import { brand, embedded } from "@/theme";
+import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import ThemeButton from "@/components/ThemeButton.vue";
 import { site } from "@/platform/site";
 const route = useRoute();

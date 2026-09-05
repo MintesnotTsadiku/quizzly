@@ -8,9 +8,11 @@
 			class="quizzly-host-setup mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-8"
 		>
 			<template v-if="!setupGame">
-				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">Host</p>
+				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
+					{{ $t("Host") }}
+				</p>
 				<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">
-					Start a room
+					{{ $t("Start a room") }}
 				</h1>
 				<div class="mt-8 grid gap-5 sm:grid-cols-2">
 					<button
@@ -20,15 +22,15 @@
 						@click="setupGame = game.key"
 					>
 						<span class="font-display text-2xl font-bold text-paper">{{
-							game.title
+							$t(game.title)
 						}}</span>
 						<span class="mt-2 text-sm leading-relaxed text-paper/60">{{
-							game.summary
+							$t(game.summary)
 						}}</span>
 						<span
 							class="mt-4 flex items-center gap-2 font-display text-sm font-bold text-accent transition group-hover:gap-3"
 						>
-							Set up <span aria-hidden="true">→</span>
+							{{ $t("Set up") }} <span aria-hidden="true">→</span>
 						</span>
 					</button>
 				</div>
@@ -36,7 +38,7 @@
 					class="mt-8 inline-block font-mono text-xs uppercase tracking-[0.22em] text-paper/40 transition hover:text-paper"
 					:to="{ name: 'CrowdPackEditor' }"
 				>
-					Author Crowd Compass packs →
+					{{ $t("Author Crowd Compass packs →") }}
 				</RouterLink>
 			</template>
 
@@ -45,7 +47,7 @@
 					class="font-mono text-xs uppercase tracking-[0.22em] text-paper/40 transition hover:text-paper"
 					@click="setupGame = null"
 				>
-					← Games
+					{{ $t("← Games") }}
 				</button>
 				<h1 class="mt-6 font-display text-4xl font-extrabold text-paper">
 					{{ setupTitle }}
@@ -56,8 +58,9 @@
 					<div class="flex flex-col gap-2">
 						<span
 							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-							>Deck</span
 						>
+							{{ $t("Deck") }}
+						</span>
 						<PackPicker
 							v-model="setup.deck"
 							:packs="packs"
@@ -68,8 +71,9 @@
 						<div class="flex flex-col gap-2">
 							<span
 								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-								>Round</span
 							>
+								{{ $t("Round") }}
+							</span>
 							<div class="flex gap-2">
 								<button
 									v-for="s in [30, 60, 90]"
@@ -86,8 +90,9 @@
 						<div class="flex flex-col gap-2">
 							<span
 								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-								>Teams</span
 							>
+								{{ $t("Teams") }}
+							</span>
 							<div class="flex gap-2">
 								<button
 									v-for="n in [2, 3, 4]"
@@ -104,7 +109,7 @@
 						<PremiumToggle
 							class="col-span-2 self-end sm:col-span-1"
 							v-model="setup.sudden_death"
-							label="Sudden death"
+							:label="$t('Sudden death')"
 							hint="Break a tied game"
 						/>
 					</div>
@@ -112,12 +117,48 @@
 				<!-- Doodle Dash setup -->
 				<div v-else-if="setupGame === 'doodle-dash'" class="mt-8 flex flex-col gap-6">
 					<div class="flex flex-col gap-2">
-						<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Drawing pack</span>
-						<PackPicker v-model="setup.pack" :packs="packs" @preview="previewPack = $event" />
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
+							{{ $t("Drawing pack") }}
+						</span>
+						<PackPicker
+							v-model="setup.pack"
+							:packs="packs"
+							@preview="previewPack = $event"
+						/>
 					</div>
 					<div class="grid grid-cols-2 gap-5">
-						<div class="flex flex-col gap-2"><span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Draw time</span><div class="flex gap-2"><button v-for="s in [30,60,90]" :key="s" class="ctl flex-1" :data-on="setup.seconds===s" @click="setup.seconds=s">{{s}}s</button></div></div>
-						<label class="flex flex-col gap-2"><span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Rounds</span><input v-model.number="setup.rounds" type="number" min="1" max="30" class="field"/></label>
+						<div class="flex flex-col gap-2">
+							<span
+								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+							>
+								{{ $t("Draw time") }}
+							</span>
+							<div class="flex gap-2">
+								<button
+									v-for="s in [30, 60, 90]"
+									:key="s"
+									class="ctl flex-1"
+									:data-on="setup.seconds === s"
+									@click="setup.seconds = s"
+								>
+									{{ s }}s
+								</button>
+							</div>
+						</div>
+						<label class="flex flex-col gap-2"
+							><span
+								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+							>
+								{{ $t("Rounds") }} </span
+							><input
+								v-model.number="setup.rounds"
+								type="number"
+								min="1"
+								max="30"
+								class="field"
+						/></label>
 					</div>
 				</div>
 
@@ -126,8 +167,9 @@
 					<div class="flex flex-col gap-2">
 						<span
 							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-							>Pack</span
 						>
+							{{ $t("Pack") }}
+						</span>
 						<PackPicker
 							v-model="setup.pack"
 							:packs="packs"
@@ -138,19 +180,23 @@
 							:data-on="!setup.pack"
 							@click="setup.pack = ''"
 						>
-							Blank room · compose prompts live
+							{{ $t("Blank room · compose prompts live") }}
 						</button>
 					</div>
 					<p v-if="selectedPackRanked" class="-mt-3 text-sm text-ok">
-						Ranked pack: players pick a first and second choice; the room tally is
-						weighted 2/1.
+						{{
+							$t(
+								"Ranked pack: players pick a first and second choice; the room tally is weighted 2/1.",
+							)
+						}}
 					</p>
 					<div class="grid grid-cols-2 gap-5 sm:grid-cols-3">
 						<div class="flex flex-col gap-2">
 							<span
 								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-								>Vote time</span
 							>
+								{{ $t("Vote time") }}
+							</span>
 							<div class="flex gap-2">
 								<button
 									v-for="s in [10, 15, 20]"
@@ -167,8 +213,9 @@
 						<div class="flex flex-col gap-2">
 							<span
 								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-								>Predict time</span
 							>
+								{{ $t("Predict time") }}
+							</span>
 							<div class="flex gap-2">
 								<button
 									v-for="s in [10, 15, 20]"
@@ -185,8 +232,9 @@
 						<div class="flex flex-col gap-2">
 							<span
 								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-								>Scoring</span
 							>
+								{{ $t("Scoring") }}
+							</span>
 							<div class="flex gap-2">
 								<button
 									type="button"
@@ -194,7 +242,7 @@
 									:data-on="setup.scoring_mode === 'Individual'"
 									@click="setup.scoring_mode = 'Individual'"
 								>
-									Solo
+									{{ $t("Solo") }}
 								</button>
 								<button
 									type="button"
@@ -202,7 +250,7 @@
 									:data-on="setup.scoring_mode === 'Team average'"
 									@click="setup.scoring_mode = 'Team average'"
 								>
-									Teams
+									{{ $t("Teams") }}
 								</button>
 							</div>
 						</div>
@@ -210,18 +258,18 @@
 					<div class="grid gap-2 sm:grid-cols-2">
 						<PremiumToggle
 							v-model="setup.estimation"
-							label="Share-estimation bonus"
+							:label="$t('Share-estimation bonus')"
 							hint="Reward close percentage guesses"
 						/>
 						<PremiumToggle
 							v-model="setup.room_match"
-							label="Match-the-room +100"
+							:label="$t('Match-the-room +100')"
 							hint="Reward voting with the majority"
 						/>
 						<PremiumToggle
 							v-if="setup.scoring_mode === 'Team average'"
 							v-model="setup.team_match"
-							label="Match-your-team +100"
+							:label="$t('Match-your-team +100')"
 							hint="Reward reading your own team"
 						/>
 					</div>
@@ -230,7 +278,7 @@
 							<span
 								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
 							>
-								Rounds
+								{{ $t("Rounds") }}
 							</span>
 							<input
 								v-model.number="setup.rounds"
@@ -238,15 +286,17 @@
 								min="0"
 								max="50"
 								class="field"
-								placeholder="All prompts"
+								:placeholder="$t('All prompts')"
 							/>
-							<span class="text-xs text-paper/35">0 plays the whole pack</span>
+							<span class="text-xs text-paper/35">
+								{{ $t("0 plays the whole pack") }}
+							</span>
 						</label>
 						<label class="flex flex-col gap-2">
 							<span
 								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
 							>
-								Vote quorum
+								{{ $t("Vote quorum") }}
 							</span>
 							<input
 								v-model.number="setup.quorum"
@@ -255,16 +305,17 @@
 								max="100"
 								class="field"
 							/>
-							<span class="text-xs text-paper/35"
-								>Below this, the prompt scores nothing</span
-							>
+							<span class="text-xs text-paper/35">
+								{{ $t("Below this, the prompt scores nothing") }}
+							</span>
 						</label>
 					</div>
 					<div v-if="setup.scoring_mode === 'Team average'" class="flex flex-col gap-2">
 						<span
 							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-							>Teams</span
 						>
+							{{ $t("Teams") }}
+						</span>
 						<div class="flex gap-2">
 							<button
 								v-for="n in [2, 3, 4]"
@@ -282,18 +333,59 @@
 						class="w-fit font-mono text-xs uppercase tracking-[0.22em] text-paper/40 transition hover:text-paper"
 						:to="{ name: 'CrowdPackEditor' }"
 					>
-						Author packs →
+						{{ $t("Author packs →") }}
 					</RouterLink>
 				</div>
 
 				<div v-else class="mt-8 flex flex-col gap-6">
-					<div class="flex flex-col gap-2"><span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Content pack</span><PackPicker v-model="setup.pack" :packs="packs" @preview="previewPack=$event" /></div>
-					<div class="grid grid-cols-2 gap-5"><div class="flex flex-col gap-2"><span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Round time</span><div class="flex gap-2"><button v-for="s in [15,30,45,60]" :key="s" class="ctl flex-1" :data-on="setup.seconds===s" @click="setup.seconds=s">{{s}}s</button></div></div><label class="flex flex-col gap-2"><span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Rounds</span><input v-model.number="setup.rounds" type="number" min="1" max="30" class="field"/></label></div>
+					<div class="flex flex-col gap-2">
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
+							{{ $t("Content pack") }} </span
+						><PackPicker
+							v-model="setup.pack"
+							:packs="packs"
+							@preview="previewPack = $event"
+						/>
+					</div>
+					<div class="grid grid-cols-2 gap-5">
+						<div class="flex flex-col gap-2">
+							<span
+								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+							>
+								{{ $t("Round time") }}
+							</span>
+							<div class="flex gap-2">
+								<button
+									v-for="s in [15, 30, 45, 60]"
+									:key="s"
+									class="ctl flex-1"
+									:data-on="setup.seconds === s"
+									@click="setup.seconds = s"
+								>
+									{{ s }}s
+								</button>
+							</div>
+						</div>
+						<label class="flex flex-col gap-2"
+							><span
+								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+							>
+								{{ $t("Rounds") }} </span
+							><input
+								v-model.number="setup.rounds"
+								type="number"
+								min="1"
+								max="30"
+								class="field"
+						/></label>
+					</div>
 				</div>
 				<PremiumToggle
 					class="mt-6"
 					v-model="setup.auto_progress"
-					label="Automatic presentation"
+					:label="$t('Automatic presentation')"
 					hint="Advance settled results automatically; turn this off to hold them until Next."
 				/>
 
@@ -302,9 +394,9 @@
 					:disabled="creating"
 					@click="createSession"
 				>
-					{{ creating ? "Opening…" : "Open the lobby" }}
+					{{ $t(creating ? "Opening…" : "Open the lobby") }}
 				</button>
-				<p v-if="error" class="mt-4 text-alert">{{ error }}</p>
+				<p v-if="error" class="mt-4 text-alert">{{ $t(error) }}</p>
 			</template>
 		</div>
 		<!-- Lobby -->
@@ -315,7 +407,7 @@
 			<div class="flex flex-wrap items-center justify-center gap-10">
 				<div class="text-center sm:text-left">
 					<p class="break-all font-mono text-sm text-accent">
-						Join at {{ joinUrl() }}
+						{{ $t("Join at") }} {{ joinUrl() }}
 						<button
 							class="ml-1 inline-flex translate-y-1 rounded-md p-1 text-paper/35 transition hover:bg-dusk hover:text-paper"
 							:title="copied ? 'Copied' : `Copy ${joinUrl()}`"
@@ -345,13 +437,13 @@
 						{{ pin }}
 					</p>
 					<button class="ctl mt-5" :data-on="lobbyLocked" @click="toggleLock">
-						{{ lobbyLocked ? "Lobby locked" : "Lock lobby" }}
+						{{ $t(lobbyLocked ? "Lobby locked" : "Lock lobby") }}
 					</button>
 				</div>
 				<button v-if="qrDataUrl" @click="qrFullscreen = true">
 					<img
 						:src="qrDataUrl"
-						alt="Join QR code"
+						:alt="$t('Join QR code')"
 						class="size-44 rounded-2xl bg-card p-2 transition hover:scale-105"
 					/>
 				</button>
@@ -381,7 +473,7 @@
 						v-if="teamCapable"
 						class="font-mono text-xs uppercase tracking-wider text-paper/40"
 					>
-						pick teams below to sort them
+						{{ $t("pick teams below to sort them") }}
 					</span>
 				</div>
 
@@ -402,7 +494,7 @@
 								{{ teamMembers(team.name).length }}
 							</span>
 						</div>
-						<div class="mt-3 flex gap-2" aria-label="Team color">
+						<div class="mt-3 flex gap-2" :aria-label="$t('Team color')">
 							<button
 								v-for="color in teamColors"
 								:key="color"
@@ -436,13 +528,16 @@
 							<span
 								v-if="!teamMembers(team.name).length"
 								class="text-sm italic text-paper/35"
-								>waiting…</span
 							>
+								{{ $t("waiting…") }}
+							</span>
 						</div>
 					</div>
 				</div>
 			</div>
-			<p v-else class="text-center text-paper/35">Waiting for the first player…</p>
+			<p v-else class="text-center text-paper/35">
+				{{ $t("Waiting for the first player…") }}
+			</p>
 
 			<div class="flex flex-wrap items-center justify-center gap-3">
 				<button
@@ -451,22 +546,27 @@
 					class="ctl"
 					@click="balanceTeams(n)"
 				>
-					{{ n }} teams
+					{{ n }} {{ $t("teams") }}
 				</button>
 				<button class="ctl" @click="toggleMute">
-					{{ muted ? "Sound off" : "Sound on" }}
+					{{ $t(muted ? "Sound off" : "Sound on") }}
 				</button>
+				<LanguageSwitch />
 				<ThemeButton class="ctl" />
-				<button class="ctl" @click="end">Exit</button>
+				<button class="ctl" @click="end">{{ $t("Exit") }}</button>
 				<button
 					class="ctl ctl-go"
 					:disabled="starting || !participants.length"
 					@click="startGame"
 				>
-					{{ starting ? "Starting…" : `Start · ${participants.length} players` }}
+					{{
+						starting
+							? $t("Starting…")
+							: $t("Start · {count} players", { count: participants.length })
+					}}
 				</button>
 			</div>
-			<p v-if="error" class="text-center text-alert">{{ error }}</p>
+			<p v-if="error" class="text-center text-alert">{{ $t(error) }}</p>
 		</div>
 
 		<!-- Live console -->
@@ -489,12 +589,12 @@
 
 			<template v-else-if="!podium && view.phase === 'scoreboard'">
 				<h2 class="font-display text-3xl font-extrabold text-paper">
-					Scoreboard
+					{{ $t("Scoreboard") }}
 					<span
 						v-if="view.last_voided"
 						class="ml-3 font-mono text-sm font-normal uppercase tracking-widest text-alert"
 					>
-						last prompt voided
+						{{ $t("last prompt voided") }}
 					</span>
 				</h2>
 				<ol class="flex w-full max-w-xl flex-col gap-3">
@@ -526,7 +626,7 @@
 
 			<template v-else-if="podium">
 				<h1 class="font-display text-5xl font-extrabold text-paper sm:text-6xl">
-					Final results
+					{{ $t("Final results") }}
 				</h1>
 				<ol class="flex w-full max-w-xl flex-col gap-3">
 					<li
@@ -554,14 +654,20 @@
 					</li>
 				</ol>
 				<div class="mt-2 flex flex-wrap justify-center gap-2">
-					<button class="ctl ctl-go" @click="newRoom">New room</button>
-					<RouterLink class="ctl" :to="{ name: 'HostDashboard' }">Dashboard</RouterLink>
-					<RouterLink class="ctl" :to="{ name: 'Catalog' }">All games</RouterLink>
+					<button class="ctl ctl-go" @click="newRoom">{{ $t("New room") }}</button>
+					<RouterLink class="ctl" :to="{ name: 'HostDashboard' }">
+						{{ $t("Dashboard") }}
+					</RouterLink>
+					<RouterLink class="ctl" :to="{ name: 'Catalog' }">
+						{{ $t("All games") }}
+					</RouterLink>
 				</div>
 			</template>
 
 			<template v-else>
-				<p class="font-mono uppercase tracking-[0.28em] text-paper/40">Get ready…</p>
+				<p class="font-mono uppercase tracking-[0.28em] text-paper/40">
+					{{ $t("Get ready…") }}
+				</p>
 			</template>
 
 			<div
@@ -569,19 +675,21 @@
 				class="flex flex-wrap items-center justify-center gap-3"
 			>
 				<button v-if="view.phase !== 'scoreboard'" class="ctl" @click="skipTurn">
-					Skip stage
+					{{ $t("Skip stage") }}
 				</button>
-				<button class="ctl" :disabled="!canPrevious" @click="previousPresentation">Previous</button>
-				<button class="ctl ctl-go" @click="nextPresentation">Next</button>
+				<button class="ctl" :disabled="!canPrevious" @click="previousPresentation">
+					{{ $t("Previous") }}
+				</button>
+				<button class="ctl ctl-go" @click="nextPresentation">{{ $t("Next") }}</button>
 				<button class="ctl" @click="togglePause">
-					{{ paused ? "Resume" : "Pause" }}
+					{{ $t(paused ? "Resume" : "Pause") }}
 				</button>
 				<button
 					v-if="gameKey === 'cuecast' && view.phase === 'turn_open'"
 					class="ctl"
 					@click="reassignPerformer"
 				>
-					Reassign performer
+					{{ $t("Reassign performer") }}
 				</button>
 				<button
 					v-if="
@@ -592,17 +700,17 @@
 					class="ctl ctl-danger"
 					@click="voidPrompt"
 				>
-					Void prompt
+					{{ $t("Void prompt") }}
 				</button>
 				<button
 					v-if="gameKey === 'crowd-compass'"
 					class="ctl ctl-go"
 					@click="composer = true"
 				>
-					+ Live prompt
+					{{ $t("+ Live prompt") }}
 				</button>
-				<button class="ctl ctl-danger" @click="end">End game</button>
-				<p v-if="error" class="text-alert">{{ error }}</p>
+				<button class="ctl ctl-danger" @click="end">{{ $t("End game") }}</button>
+				<p v-if="error" class="text-alert">{{ $t(error) }}</p>
 			</div>
 		</div>
 
@@ -619,16 +727,18 @@
 			@cancel.prevent="composer = false"
 			@click.self="composer = false"
 		>
-			<h2 class="font-display text-2xl font-extrabold text-paper">Compose a live prompt</h2>
+			<h2 class="font-display text-2xl font-extrabold text-paper">
+				{{ $t("Compose a live prompt") }}
+			</h2>
 			<div class="mt-5 flex flex-col gap-4">
 				<label class="flex flex-col gap-2">
-					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-						>Prompt</span
-					>
+					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
+						{{ $t("Prompt") }}
+					</span>
 					<input
 						v-model="draft.prompt"
 						class="field"
-						placeholder="Ask the room anything…"
+						:placeholder="$t('Ask the room anything…')"
 						maxlength="140"
 					/>
 				</label>
@@ -636,36 +746,40 @@
 					<input
 						v-model="draft.choice_1"
 						class="field"
-						placeholder="Choice 1 *"
+						:placeholder="$t('Choice 1 *')"
 						maxlength="60"
 					/>
 					<input
 						v-model="draft.choice_2"
 						class="field"
-						placeholder="Choice 2 *"
+						:placeholder="$t('Choice 2 *')"
 						maxlength="60"
 					/>
 					<input
 						v-model="draft.choice_3"
 						class="field"
-						placeholder="Choice 3"
+						:placeholder="$t('Choice 3')"
 						maxlength="60"
 					/>
 					<input
 						v-model="draft.choice_4"
 						class="field"
-						placeholder="Choice 4"
+						:placeholder="$t('Choice 4')"
 						maxlength="60"
 					/>
 				</div>
 				<p class="text-sm text-paper/50">
-					It joins the queue after the current prompt. Blank rooms start with these.
+					{{
+						$t(
+							"It joins the queue after the current prompt. Blank rooms start with these.",
+						)
+					}}
 				</p>
-				<p v-if="error" class="text-alert">{{ error }}</p>
+				<p v-if="error" class="text-alert">{{ $t(error) }}</p>
 				<div class="mt-2 flex justify-end gap-3">
-					<button class="ctl" @click="composer = false">Cancel</button>
+					<button class="ctl" @click="composer = false">{{ $t("Cancel") }}</button>
 					<button class="ctl ctl-go" :disabled="pushing" @click="pushPrompt">
-						{{ pushing ? "Pushing…" : "Push to the room" }}
+						{{ $t(pushing ? "Pushing…" : "Push to the room") }}
 					</button>
 				</div>
 			</div>
@@ -680,7 +794,7 @@
 			<img
 				v-if="qrDataUrl"
 				:src="qrDataUrl"
-				alt="Join QR code"
+				:alt="$t('Join QR code')"
 				class="size-[min(78vh,88vw)] rounded-3xl bg-card p-4"
 			/>
 			<p class="mt-4 text-center font-mono text-2xl tracking-[0.08em] text-paper">
@@ -691,6 +805,8 @@
 </template>
 
 <script setup>
+import { locale } from "@/i18n";
+import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import QRCode from "qrcode";
@@ -754,7 +870,7 @@ onBeforeUnmount(() => stopRoom?.());
 let seqSeen = -1;
 
 watch(composer, (open) =>
-	open ? composerDialog.value?.showModal() : composerDialog.value?.close()
+	open ? composerDialog.value?.showModal() : composerDialog.value?.close(),
 );
 
 const setup = ref({
@@ -794,13 +910,32 @@ const hostableGames = [
 	},
 ];
 hostableGames.push(
-	...["bluffline|Bluffline","sequence-sprint|Sequence Sprint","picture-peek|Picture Peek","sound-snap|Sound Snap","caption-clash|Caption Clash","story-loom|Story Loom","signal-spectrum|Signal Spectrum","memory-mosaic|Memory Mosaic","common-thread|Common Thread","escape-together|Escape Together","bracket-bash|Bracket Bash","closest-call|Closest Call","phrase-forge|Phrase Forge","seek-and-show|Seek & Show","one-word-chorus|One Word Chorus"].map((entry)=>{const[key,title]=entry.split("|");return{key,title,summary:"Live rounds, scoring, reconnects, and a final podium."};})
+	...[
+		"bluffline|Bluffline",
+		"sequence-sprint|Sequence Sprint",
+		"picture-peek|Picture Peek",
+		"sound-snap|Sound Snap",
+		"caption-clash|Caption Clash",
+		"story-loom|Story Loom",
+		"signal-spectrum|Signal Spectrum",
+		"memory-mosaic|Memory Mosaic",
+		"common-thread|Common Thread",
+		"escape-together|Escape Together",
+		"bracket-bash|Bracket Bash",
+		"closest-call|Closest Call",
+		"phrase-forge|Phrase Forge",
+		"seek-and-show|Seek & Show",
+		"one-word-chorus|One Word Chorus",
+	].map((entry) => {
+		const [key, title] = entry.split("|");
+		return { key, title, summary: "Live rounds, scoring, reconnects, and a final podium." };
+	}),
 );
 
 const inLiveSession = computed(() => Boolean(session.value));
 const copied = ref(false);
 const setupTitle = computed(
-	() => hostableGames.find((g) => g.key === setupGame.value)?.title || ""
+	() => hostableGames.find((g) => g.key === setupGame.value)?.title || "",
 );
 const live = computed(() => liveFor(gameKey.value));
 const gamePhases = computed(() => phasesFor(gameKey.value));
@@ -811,7 +946,7 @@ const totalTurns = computed(() => {
 });
 const solvedCount = computed(() => view.value.solved ?? 0);
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
 );
 const teamCols = computed(() => {
 	const count = Math.max(1, teams.value.length);
@@ -820,10 +955,10 @@ const teamCols = computed(() => {
 const teamCapable = computed(
 	() =>
 		gameKey.value === "cuecast" ||
-		(gameKey.value === "crowd-compass" && configuration.value.scoring_mode === "Team average")
+		(gameKey.value === "crowd-compass" && configuration.value.scoring_mode === "Team average"),
 );
 const selectedPackRanked = computed(() =>
-	Boolean(packs.value.find((p) => p.name === setup.value.pack)?.ranked)
+	Boolean(packs.value.find((p) => p.name === setup.value.pack)?.ranked),
 );
 const unassigned = computed(() => participants.value.filter((p) => !p.team));
 const paused = computed(() => Boolean(view.value.paused));
@@ -851,7 +986,7 @@ function onEvent(envelopeMessage) {
 		lobbyLocked.value = Boolean(payload.lobby_locked);
 	} else if (
 		type === "platform.state_changed" ||
-			type.split(".")[0] === gameKey.value.replace(/-/g, "_")
+		type.split(".")[0] === gameKey.value.replace(/-/g, "_")
 	) {
 		if (payload.phase) {
 			view.value = payload;
@@ -860,10 +995,19 @@ function onEvent(envelopeMessage) {
 			playCue(
 				payload.phase === "turn_open" || payload.phase === "prompt_open"
 					? "submit"
-					: "tick"
+					: "tick",
 			);
 			stopCountdown();
-			if (["turn_ready", "prompt_open", "prediction_open", "draw_ready", "draw_open", "round_open"].includes(payload.phase))
+			if (
+				[
+					"turn_ready",
+					"prompt_open",
+					"prediction_open",
+					"draw_ready",
+					"draw_open",
+					"round_open",
+				].includes(payload.phase)
+			)
 				startCountdown(5);
 			refresh();
 		}
@@ -894,7 +1038,7 @@ function onEvent(envelopeMessage) {
 async function refresh() {
 	try {
 		await applyState(
-			await gpCall("get_host_state", session.value ? { session: session.value } : {})
+			await gpCall("get_host_state", session.value ? { session: session.value } : {}),
 		);
 	} catch (e) {
 		error.value = readError(e);
@@ -939,7 +1083,17 @@ async function applyState(state) {
 	view.value = state.view || {};
 	seqSeen = state.state_version ?? seqSeen;
 
-	if (["turn_ready", "turn_open", "prompt_open", "prediction_open", "draw_ready", "draw_open", "round_open"].includes(state.phase)) {
+	if (
+		[
+			"turn_ready",
+			"turn_open",
+			"prompt_open",
+			"prediction_open",
+			"draw_ready",
+			"draw_open",
+			"round_open",
+		].includes(state.phase)
+	) {
 		startCountdown(Math.max(0.5, state.remaining_seconds));
 	} else {
 		stopCountdown();
@@ -947,7 +1101,7 @@ async function applyState(state) {
 }
 
 function joinUrl() {
-	return `${window.location.origin}/play/join?pin=${pin.value}`;
+	return `${window.location.origin}/play/join?pin=${pin.value}&lang=${locale.value}`;
 }
 
 async function copyJoinUrl() {
@@ -1175,11 +1329,13 @@ async function togglePause() {
 
 async function reassignPerformer() {
 	const stageTeam = (view.value.teams || []).find(
-		(t) => t.team_name === view.value.actor_team_name
+		(t) => t.team_name === view.value.actor_team_name,
 	);
 	const roster = participants.value.filter(
 		(p) =>
-			stageTeam && p.team === stageTeam.name && p.nickname !== view.value.performer?.nickname
+			stageTeam &&
+			p.team === stageTeam.name &&
+			p.nickname !== view.value.performer?.nickname,
 	);
 	if (!roster.length) return;
 	await hostAction("host_command", {
@@ -1191,7 +1347,7 @@ async function reassignPerformer() {
 async function voidPrompt() {
 	const ok = await confirm(
 		"Void the last prompt? Its points are returned and it counts for nothing.",
-		{ action: "Void it", danger: true }
+		{ action: "Void it", danger: true },
 	);
 	if (!ok) return;
 	await hostAction("host_command", { command: "void_prompt" });

@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "Legacy pack and quiz editors open in Amharic without initialization errors",
+    "Amharic private pack saved with correct language; changing the interface to English preserves authored questions"
+  ],
+  "errors": [],
+  "passed": true
+}

@@ -1,0 +1,14 @@
+{
+  "browser": true,
+  "live": true,
+  "embedded": true,
+  "authoring": true,
+  "unit_tests": 7,
+  "production_build": "passed",
+  "python_lint": "passed",
+  "site_checks": "passed",
+  "video_seconds": 76.44,
+  "agent_plane_run": "BSR-2026-00998",
+  "access_regression_checks": 8,
+  "qa_records_cleaned": 7
+}

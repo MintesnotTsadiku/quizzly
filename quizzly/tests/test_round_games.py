@@ -40,11 +40,15 @@ class TestRoundGameCatalog(IntegrationTestCase):
 		frappe.delete_doc("GP Session", session, force=True, ignore_permissions=True)
 		frappe.db.commit()
 
-	def test_every_planned_game_is_registered_and_has_exactly_three_demos(self):
+	def test_every_planned_game_is_registered_and_has_three_english_demos(self):
 		available = {m.key for m in manifests() if m.status == "Available"}
 		self.assertTrue(set(ROUND_DEMO_TITLES).issubset(available))
 		for key in ROUND_DEMO_TITLES:
-			self.assertEqual(frappe.db.count("GP Game Pack", {"game_key": key, "is_demo": 1}), 3, key)
+			self.assertEqual(
+				frappe.db.count("GP Game Pack", {"game_key": key, "is_demo": 1, "content_language": "en"}),
+				3,
+				key,
+			)
 
 	def test_every_round_profile_has_content_preview_metadata(self):
 		self.assertEqual(ROUND_GAME_KEYS, set(PROFILES))

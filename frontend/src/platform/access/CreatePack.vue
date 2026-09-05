@@ -2,14 +2,20 @@
 	<div class="gather-ui gp-page">
 		<HostBar />
 		<main class="gp-account gp-container">
-			<p class="gp-eyebrow">A game only your people could make</p>
-			<h1>Put your room<br />in the questions.</h1>
+			<p class="gp-eyebrow">{{ $t("A game only your people could make") }}</p>
+			<h1>
+				{{ $t("Put your room") }} <br />
+				{{ $t("in the questions.") }}
+			</h1>
 			<p class="gp-lead">
-				Make a private Crowd Compass pack. Everyone chooses, predicts the room, and
-				discovers something new.
+				{{
+					$t(
+						"Make a private Crowd Compass pack. Everyone chooses, predicts the room, and discovers something new.",
+					)
+				}}
 			</p>
 			<section v-if="library.length" class="gp-pack-library">
-				<h2>Your private packs</h2>
+				<h2>{{ $t("Your private packs") }}</h2>
 				<div>
 					<button
 						v-for="pack in library"
@@ -17,27 +23,27 @@
 						class="gp-button gp-button-secondary"
 						@click="edit(pack.name)"
 					>
-						{{ pack.title }} · Edit →
+						{{ pack.title }} {{ $t("· Edit →") }}
 					</button>
 				</div>
 			</section>
 			<div class="gp-author-layout">
 				<form class="gp-account-card" @submit.prevent="save">
 					<label class="gp-field"
-						><span>Give your pack a name</span
+						><span> {{ $t("Give your pack a name") }} </span
 						><input
 							v-model="title"
 							required
 							maxlength="100"
-							placeholder="Our kind of weekend"
+							:placeholder="$t('Our kind of weekend')"
 					/></label>
 					<fieldset v-for="(q, i) in prompts" :key="i" class="gp-question-card">
-						<legend>Question {{ i + 1 }}</legend>
+						<legend>{{ $t("Question") }} {{ i + 1 }}</legend>
 						<label class="gp-field"
-							><span>Ask something with no wrong answer</span
+							><span> {{ $t("Ask something with no wrong answer") }} </span
 							><textarea v-model="q.text" required maxlength="300" rows="2" /></label
 						><label v-for="(_, j) in q.choices" :key="j" class="gp-field"
-							><span>Choice {{ j + 1 }}</span
+							><span> {{ $t("Choice") }} {{ j + 1 }}</span
 							><input v-model="q.choices[j]" required maxlength="120" /></label
 						><button
 							v-if="prompts.length > 1"
@@ -45,7 +51,7 @@
 							class="gp-text-button"
 							@click="prompts.splice(i, 1)"
 						>
-							Remove question
+							{{ $t("Remove question") }}
 						</button>
 					</fieldset>
 					<button
@@ -54,18 +60,19 @@
 						class="gp-button gp-button-secondary"
 						@click="prompts.push({ text: '', choices: ['', ''] })"
 					>
-						+ Add a question
+						{{ $t("+ Add a question") }}
 					</button>
 					<p v-if="error" class="gp-error" role="alert">
-						{{ error }} <RouterLink to="/access">Your access →</RouterLink>
+						{{ $t(error) }}
+						<RouterLink to="/access"> {{ $t("Your access →") }} </RouterLink>
 					</p>
 					<p v-if="saved" class="gp-notice" role="status">
-						Saved privately. Your room is ready when you are.
+						{{ $t("Saved privately. Your room is ready when you are.") }}
 					</p>
 					<div class="gp-stage-actions">
 						<button class="gp-button" :disabled="busy">
 							{{
-								busy ? "Saving…" : saved ? "Save changes" : "Save my pack"
+								$t(busy ? "Saving…" : saved ? "Save changes" : "Save my pack")
 							}}</button
 						><button
 							v-if="saved"
@@ -74,22 +81,28 @@
 							:disabled="busy"
 							@click="host"
 						>
-							Host this pack →
+							{{ $t("Host this pack →") }}
 						</button>
 					</div>
 				</form>
 				<aside class="gp-account-card gp-author-aside">
 					<GameArtwork game-key="crowd-compass" color="lilac" />
-					<h2>Make it easy to join in.</h2>
+					<h2>{{ $t("Make it easy to join in.") }}</h2>
 					<p>
-						Use short questions, clear choices, and topics everyone can enjoy. Avoid
-						asking people to share private or sensitive information.
+						{{
+							$t(
+								"Use short questions, clear choices, and topics everyone can enjoy. Avoid asking people to share private or sensitive information.",
+							)
+						}}
 					</p>
 					<p>
-						Your pack is only available to you and the games you host. It won’t appear
-						in the public catalog.
+						{{
+							$t(
+								"Your pack is only available to you and the games you host. It won’t appear in the public catalog.",
+							)
+						}}
 					</p>
-					<RouterLink to="/access">See your allowance →</RouterLink>
+					<RouterLink to="/access"> {{ $t("See your allowance →") }} </RouterLink>
 				</aside>
 			</div>
 		</main>
@@ -101,15 +114,17 @@ import { useRouter } from "vue-router";
 import HostBar from "@/components/HostBar.vue";
 import GameArtwork from "@/platform/discovery/GameArtwork.vue";
 import { call, readError } from "@/api";
+import { locale, t } from "@/i18n";
 import { refreshAccess } from "@/platform/site";
 import { gpCall, rememberHostedSession } from "@/platform/session/gp";
 const library = ref([]);
+const contentLanguage = ref(locale.value);
 const router = useRouter(),
-	title = ref("Our kind of weekend"),
+	title = ref(t("Our kind of weekend")),
 	prompts = ref([
 		{
-			text: "A free afternoon together. What are we choosing?",
-			choices: ["An adventure outside", "Something cosy inside"],
+			text: t("A free afternoon together. What are we choosing?"),
+			choices: [t("An adventure outside"), t("Something cosy inside")],
 		},
 	]),
 	saved = ref(""),
@@ -123,6 +138,7 @@ async function save() {
 		const r = await call("quizzly.access.save_pack", {
 			title: title.value,
 			prompts: prompts.value,
+			language: contentLanguage.value,
 			name: saved.value || undefined,
 		});
 		saved.value = r.name;

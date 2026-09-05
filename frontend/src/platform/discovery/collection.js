@@ -1,3 +1,5 @@
+import { locale, t } from "@/i18n";
+import { gameAm, accessAm } from "@/i18n/games-am";
 // Editorial facets are intentionally separate from the server's playable registry.
 // Sharing means one collective answer/score, not several private player identities.
 export const featuredKeys = [
@@ -113,7 +115,7 @@ const profiles = {
 		access: "Use the reorder buttons as an alternative to dragging. Shared phones get one score. Choose a pack matched to the group’s language and knowledge.",
 	},
 };
-export function profileFor(game) {
+function originalProfileFor(game) {
 	return (
 		profiles[game?.key] || {
 			category: "Think",
@@ -130,4 +132,23 @@ export function profileFor(game) {
 }
 export function matchesDevice(game, device) {
 	return device === "any" || profileFor(game).devices.includes(device);
+}
+
+export function profileFor(game) {
+	const profile = originalProfileFor(game),
+		copy = gameAm[game?.key];
+	return locale.value === "am" && copy
+		? {
+				...profile,
+				access: accessAm[game?.key] || t(profile.access),
+				description: copy.description,
+				steps: copy.steps,
+				kicker: copy.title,
+				sample: copy.steps[0],
+				time: t("{count} min", { count: game?.typical_minutes || 15 }),
+				people: profiles[game?.key]
+					? t(profile.people)
+					: t("{count}+ entries", { count: game?.min_players || 1 }),
+			}
+		: profile;
 }

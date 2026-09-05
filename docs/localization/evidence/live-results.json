@@ -1,0 +1,12 @@
+{
+  "checks": [
+    "Three isolated guest browsers join: two household/team entries and an individual",
+    "Every guest submits a real vote and private prediction",
+    "Shared-device identity survives reload; live reveal reaches shared screen",
+    "One scored round completes and persists results",
+    "Amharic device-free host and shared-screen prompts agree; three conversations and shares finish through the UI"
+  ],
+  "errors": [],
+  "session": "6p1oro49ps",
+  "passed": true
+}

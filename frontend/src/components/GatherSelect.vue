@@ -1,6 +1,6 @@
 <template>
 	<div ref="root" class="gp-select" @keydown="keydown">
-		<span :id="id + '-label'" class="gp-control-label">{{ label }}</span>
+		<span :id="id + '-label'" class="gp-control-label">{{ $t(label) }}</span>
 		<button
 			ref="trigger"
 			type="button"
@@ -14,8 +14,8 @@
 			@click="toggle"
 		>
 			<span :id="id + '-value'"
-				><strong>{{ chosen?.label || placeholder }}</strong
-				><small v-if="chosen?.description">{{ chosen.description }}</small></span
+				><strong>{{ $t(chosen?.label || placeholder) }}</strong
+				><small v-if="chosen?.description">{{ $t(chosen.description) }}</small></span
 			><span aria-hidden="true" :class="{ rotated: open }">⌄</span>
 		</button>
 		<ul
@@ -40,14 +40,15 @@
 				@click="choose(i)"
 			>
 				<span
-					><strong>{{ option.label }}</strong
-					><small v-if="option.description">{{ option.description }}</small></span
+					><strong>{{ $t(option.label) }}</strong
+					><small v-if="option.description">{{ $t(option.description) }}</small></span
 				><span v-if="modelValue === option.value" aria-hidden="true">✓</span>
 			</li>
 		</ul>
 	</div>
 </template>
 <script setup>
+import { t } from "@/i18n";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from "vue";
 const props = defineProps({
 	modelValue: [String, Number],
@@ -116,7 +117,7 @@ function keydown(e) {
 		typed += e.key.toLowerCase();
 		clearTimeout(typeTimer);
 		typeTimer = setTimeout(() => (typed = ""), 600);
-		const i = props.options.findIndex((o) => o.label.toLowerCase().startsWith(typed));
+		const i = props.options.findIndex((o) => t(o.label).toLowerCase().startsWith(typed));
 		if (i >= 0) active.value = i;
 	}
 	nextTick(() =>

@@ -8,8 +8,11 @@
   "field_order": [
     "branding_section",
     "product_name",
+    "default_language",
     "tagline",
+    "tagline_am",
     "intro",
+    "intro_am",
     "accent_color",
     "logo",
     "enable_install",
@@ -30,6 +33,7 @@
     "price",
     "currency",
     "payment_instructions",
+    "payment_instructions_am",
     "paid_host_limit",
     "paid_pack_limit",
     "plan_days",
@@ -51,16 +55,37 @@
       "reqd": 1
     },
     {
+      "fieldname": "default_language",
+      "fieldtype": "Select",
+      "label": "Default language",
+      "options": "en\nam",
+      "default": "en",
+      "reqd": 1,
+      "description": "en = English; am = Amharic. Visitors can choose another interface language."
+    },
+    {
       "fieldname": "tagline",
       "fieldtype": "Data",
       "label": "Tagline",
       "default": "Good company. Great games."
     },
     {
+      "fieldname": "tagline_am",
+      "fieldtype": "Data",
+      "label": "Tagline — Amharic",
+      "description": "Optional Amharic copy. If blank, the original text is used; built-in English copy has an Amharic translation."
+    },
+    {
       "fieldname": "intro",
       "fieldtype": "Small Text",
       "label": "Landing introduction",
       "default": "Turn spare moments into shared memories. Games for your people, your place, your kind of fun."
+    },
+    {
+      "fieldname": "intro_am",
+      "fieldtype": "Small Text",
+      "label": "Landing introduction — Amharic",
+      "description": "Optional Amharic copy. If blank, the original text is used; built-in English copy has an Amharic translation."
     },
     {
       "fieldname": "accent_color",
@@ -181,6 +206,12 @@
       "fieldname": "payment_instructions",
       "fieldtype": "Small Text",
       "label": "Payment instructions"
+    },
+    {
+      "fieldname": "payment_instructions_am",
+      "fieldtype": "Small Text",
+      "label": "Payment instructions — Amharic",
+      "description": "Optional Amharic copy. If blank, the original text is used; built-in English copy has an Amharic translation."
     },
     {
       "fieldname": "paid_host_limit",

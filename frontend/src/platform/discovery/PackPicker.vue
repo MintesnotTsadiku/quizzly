@@ -20,12 +20,14 @@
 				<span v-if="selected" class="block truncate font-display font-bold text-paper">{{
 					selected.title
 				}}</span>
-				<span v-else class="block text-paper/45">Choose a ready-made pack…</span>
+				<span v-else class="block text-paper/45">
+					{{ $t("Choose a ready-made pack…") }}
+				</span>
 				<span
 					v-if="selected"
 					class="mt-0.5 block font-mono text-[10px] uppercase tracking-wider text-paper/40"
 				>
-					{{ selected.prompt_count }} prompts
+					{{ selected.prompt_count }} {{ $t("prompts") }}
 				</span>
 			</span>
 			<svg
@@ -52,7 +54,7 @@
 					ref="searchInput"
 					v-model="query"
 					class="min-w-0 flex-1 bg-transparent text-sm text-paper outline-none placeholder:text-paper/30"
-					placeholder="Search packs…"
+					:placeholder="$t('Search packs…')"
 					role="combobox"
 					aria-controls="pack-options"
 					aria-autocomplete="list"
@@ -84,7 +86,7 @@
 						<span
 							class="mt-1 block font-mono text-[9px] uppercase tracking-wider text-paper/35"
 						>
-							{{ pack.prompt_count }} prompts
+							{{ pack.prompt_count }} {{ $t("prompts") }}
 							<template v-if="pack.mode">· {{ pack.mode }}</template>
 						</span>
 					</button>
@@ -105,11 +107,11 @@
 					</button>
 				</div>
 				<p v-if="!filtered.length" class="px-4 py-8 text-center text-sm text-paper/40">
-					No packs match “{{ query }}”.
+					{{ $t("No packs match “") }} {{ query }}”.
 				</p>
 			</div>
 			<p class="border-t border-haze px-4 py-3 text-xs text-paper/35">
-				Use the eye button to inspect every prompt before choosing.
+				{{ $t("Use the eye button to inspect every prompt before choosing.") }}
 			</p>
 		</div>
 	</div>
@@ -133,8 +135,8 @@ const filtered = computed(() => {
 	const needle = query.value.trim().toLowerCase();
 	return needle
 		? props.packs.filter((pack) =>
-				`${pack.title} ${pack.mode || ""}`.toLowerCase().includes(needle)
-		  )
+				`${pack.title} ${pack.mode || ""}`.toLowerCase().includes(needle),
+			)
 		: props.packs;
 });
 

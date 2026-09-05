@@ -1,0 +1,8 @@
+PASS: Guest quota is enforced by document creation, with two durable sessions
+PASS: Direct document creation cannot bypass the guest quota
+PASS: Account claim transfers ownership and retains consumed trial allowance; unverified hosting is denied
+PASS: Email verification is account-bound, single-use and required before unlimited community access
+PASS: Private receipt grants expiring provisional access on paid sites
+PASS: Rejection removes paid hosting entitlement while retaining control of an existing game
+PASS: Admin approval restores access and records the reviewer
+PASS: Claimed guest capability cannot access the account's games or packs

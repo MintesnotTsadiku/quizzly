@@ -8,7 +8,7 @@
 	>
 		<p class="text-lg font-medium">{{ pendingConfirm?.message }}</p>
 		<div class="mt-6 flex justify-end gap-3">
-			<button class="ctl" @click="pendingConfirm.settle(false)">Cancel</button>
+			<button class="ctl" @click="pendingConfirm.settle(false)">{{ $t("Cancel") }}</button>
 			<button
 				ref="confirmButton"
 				class="ctl"

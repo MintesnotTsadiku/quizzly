@@ -1,3 +1,5 @@
+import { locale } from "@/i18n";
+import { amGuide } from "@/i18n/games-am";
 import { listGames } from "@/platform/session/gp";
 
 // Roadmap entries: the plan allows Coming Soon cards when they communicate the
@@ -22,18 +24,47 @@ export function gameIcon(key) {
 const GUIDES = {
 	"doodle-dash": {
 		contentKey: "pack",
-		whyGame: "One person receives a secret word and draws it live. Everyone else races to recognize the sketch; quick correct guesses reward both guesser and artist.",
-		howTo: ["The artist privately receives a word.","Draw on the phone canvas without letters or numbers.","Everyone else types guesses while the picture appears live.","Correct guessers score more when they are fast.","Rotate artists and finish on the individual podium."],
-		hostDoes: "Chooses a pack and timer, watches the live canvas, advances or pauses the presentation, and can skip an unsuitable round.",
-		playerSees: "The artist gets a touch canvas and secret prompt. Guessers see the same canvas with a private guess box and immediate acknowledgement.",
-		roomSees: "A clean live canvas, artist name, timer, answer reveal, and standings—never the secret word while drawing is open.",
-		scoring: "Correct guessers earn 500–1,000 points by server receipt time. The artist earns 50 points per correct guesser, capped at 500.",
+		whyGame:
+			"One person receives a secret word and draws it live. Everyone else races to recognize the sketch; quick correct guesses reward both guesser and artist.",
+		howTo: [
+			"The artist privately receives a word.",
+			"Draw on the phone canvas without letters or numbers.",
+			"Everyone else types guesses while the picture appears live.",
+			"Correct guessers score more when they are fast.",
+			"Rotate artists and finish on the individual podium.",
+		],
+		hostDoes:
+			"Chooses a pack and timer, watches the live canvas, advances or pauses the presentation, and can skip an unsuitable round.",
+		playerSees:
+			"The artist gets a touch canvas and secret prompt. Guessers see the same canvas with a private guess box and immediate acknowledgement.",
+		roomSees:
+			"A clean live canvas, artist name, timer, answer reveal, and standings—never the secret word while drawing is open.",
+		scoring:
+			"Correct guessers earn 500–1,000 points by server receipt time. The artist earns 50 points per correct guesser, capped at 500.",
 		setup: "Use one projector and one phone per player. Landscape orientation gives the artist more drawing room.",
-		accessibility: "Large touch targets, keyboard-ready guess entry, numeric timers, high contrast ink, and a non-colour-dependent reveal.",
+		accessibility:
+			"Large touch targets, keyboard-ready guess entry, numeric timers, high contrast ink, and a non-colour-dependent reveal.",
 		demos: [
-			{demo_key:"doodle-dash-church-bible",title:"Symbols and Stories Sketch-Off",blurb:"Familiar Bible symbols and story objects.",audience:"Church / Bible"},
-			{demo_key:"doodle-dash-family-general",title:"Family Doodle Box",blurb:"Friendly objects for children and grown-ups.",audience:"Child / Family"},
-			{demo_key:"doodle-dash-big-room",title:"Sketch the Room",blurb:"Big-screen prompts for a lively assembly.",audience:"General Assembly",video:"/assets/quizzly/videos/gatherplay/doodle-dash-overview.mp4",poster:"/assets/quizzly/videos/gatherplay/doodle-dash-overview-poster.jpg"},
+			{
+				demo_key: "doodle-dash-church-bible",
+				title: "Symbols and Stories Sketch-Off",
+				blurb: "Familiar Bible symbols and story objects.",
+				audience: "Church / Bible",
+			},
+			{
+				demo_key: "doodle-dash-family-general",
+				title: "Family Doodle Box",
+				blurb: "Friendly objects for children and grown-ups.",
+				audience: "Child / Family",
+			},
+			{
+				demo_key: "doodle-dash-big-room",
+				title: "Sketch the Room",
+				blurb: "Big-screen prompts for a lively assembly.",
+				audience: "General Assembly",
+				video: "/assets/quizzly/videos/gatherplay/doodle-dash-overview.mp4",
+				poster: "/assets/quizzly/videos/gatherplay/doodle-dash-overview-poster.jpg",
+			},
 		],
 	},
 	"crowd-compass": {
@@ -173,73 +204,193 @@ const GUIDES = {
 };
 
 const ROUND_GUIDES = {
-	bluffline:["Curious Bible Context","Silly Word Museum","Unexpected Facts"],
-	"sequence-sprint":["Bible Timeline Relay","Put It in Order","Process and History Race"],
-	"picture-peek":["Symbols, Places, and Scenes","What Is Hiding?","World in Focus"],
-	"sound-snap":["Sounds of the Story","Home and Animal Sounds","Soundscape Challenge"],
-	"caption-clash":["Modern Parable Moments","Family Photo Giggles","Conference Caption Cup"],
-	"story-loom":["Journey of Courage","The Bedtime Adventure Machine","Fifty Voices, One City"],
-	"signal-spectrum":["Journey and Wisdom Scales","Silly Family Scales","Know Your Room"],
-	"memory-mosaic":["Objects and Journeys Memory","Toy Room Memory","Auditorium Snapshot"],
-	"common-thread":["Threads Through Scripture","Family Connection Box","Big Room Connections"],
-	"escape-together":["The Lamp and the Locked Library","The Friendly Castle Escape","The Assembly Code"],
-	"bracket-bash":["Bible Story Bracket","Family Favorites Cup","Big Room Championship"],
-	"closest-call":["Bible Numbers Duel","Family Guess-Off","Assembly Estimation Arena"],
-	"phrase-forge":["Words of Encouragement","Silly Sentence Factory","Conference Phrase Forge"],
-	"seek-and-show":["Service and Symbols Hunt","Home or Hall Treasure Hunt","Venue Team Quest"],
-	"one-word-chorus":["People, Places, and Symbols","Animals and Everyday Things","One Word, Big Room"],
-	"grid-conquest":["Connect the Story","Family Grid Conquest","Big Room Grid Battle"],
-	"dots-and-boxes":["Community Squares","Family Box Builders","Assembly Territory"],
-	"hidden-picture":["Symbols Revealed","Family Hidden Pictures","Big Screen Pixel Reveal"],
-	"path-weaver":["Journey Paths","Family Path Weaver","Assembly Route Challenge"],
-	"quilt-puzzle":["Patterns and Places","Family Quilt Puzzle","Big Room Pattern Lab"],
-	"group-sudoku":["Symbol Sudoku","Family Mini Sudoku","Assembly Logic Grid"],
+	bluffline: ["Curious Bible Context", "Silly Word Museum", "Unexpected Facts"],
+	"sequence-sprint": ["Bible Timeline Relay", "Put It in Order", "Process and History Race"],
+	"picture-peek": ["Symbols, Places, and Scenes", "What Is Hiding?", "World in Focus"],
+	"sound-snap": ["Sounds of the Story", "Home and Animal Sounds", "Soundscape Challenge"],
+	"caption-clash": ["Modern Parable Moments", "Family Photo Giggles", "Conference Caption Cup"],
+	"story-loom": [
+		"Journey of Courage",
+		"The Bedtime Adventure Machine",
+		"Fifty Voices, One City",
+	],
+	"signal-spectrum": ["Journey and Wisdom Scales", "Silly Family Scales", "Know Your Room"],
+	"memory-mosaic": ["Objects and Journeys Memory", "Toy Room Memory", "Auditorium Snapshot"],
+	"common-thread": [
+		"Threads Through Scripture",
+		"Family Connection Box",
+		"Big Room Connections",
+	],
+	"escape-together": [
+		"The Lamp and the Locked Library",
+		"The Friendly Castle Escape",
+		"The Assembly Code",
+	],
+	"bracket-bash": ["Bible Story Bracket", "Family Favorites Cup", "Big Room Championship"],
+	"closest-call": ["Bible Numbers Duel", "Family Guess-Off", "Assembly Estimation Arena"],
+	"phrase-forge": [
+		"Words of Encouragement",
+		"Silly Sentence Factory",
+		"Conference Phrase Forge",
+	],
+	"seek-and-show": [
+		"Service and Symbols Hunt",
+		"Home or Hall Treasure Hunt",
+		"Venue Team Quest",
+	],
+	"one-word-chorus": [
+		"People, Places, and Symbols",
+		"Animals and Everyday Things",
+		"One Word, Big Room",
+	],
+	"grid-conquest": ["Connect the Story", "Family Grid Conquest", "Big Room Grid Battle"],
+	"dots-and-boxes": ["Community Squares", "Family Box Builders", "Assembly Territory"],
+	"hidden-picture": ["Symbols Revealed", "Family Hidden Pictures", "Big Screen Pixel Reveal"],
+	"path-weaver": ["Journey Paths", "Family Path Weaver", "Assembly Route Challenge"],
+	"quilt-puzzle": ["Patterns and Places", "Family Quilt Puzzle", "Big Room Pattern Lab"],
+	"group-sudoku": ["Symbol Sudoku", "Family Mini Sudoku", "Assembly Logic Grid"],
 };
 const ROUND_COPY = {
-	bluffline:["Invent a believable false answer, then identify the truth while other players try to fool you.","Write one bluff, vote from an anonymous ballot that excludes your own answer, then score for finding truth and fooling the room."],
-	"sequence-sprint":["Ordering every card rewards exact positions, correct neighbours, and a fully perfect sequence.","Tap the shuffled cards into order, lock the complete sequence, then compare it with the revealed solution."],
-	"picture-peek":["A projected image tests careful observation through one private text response.","Study the picture and question, submit one answer, then compare it with the reveal for a 1,000-point exact match."],
-	"sound-snap":["A short sound-related text clue becomes a multiple-choice challenge.","Read the clue, lock one displayed choice, then earn 1,000 points if it matches the revealed answer."],
-	"caption-clash":["Everyone writes for the same image, then the room anonymously decides which wholesome caption lands best.","Submit one caption, wait for the anonymous ballot, vote for someone else, and reveal the author and winner."],
-	"story-loom":["One shared opening produces many constrained continuations for the room to compare anonymously.","Write one continuation, vote for another player's line, then earn a 250-point base plus 500 for every vote received."],
-	"signal-spectrum":["Each player submits one estimate from 0 to 100. The game compares every estimate with a hidden target, and closer answers earn more points.","Read the prompt on the big screen, type one estimate from 0 to 100, lock it before time runs out, then see the updated score after the distance is checked."],
-	"memory-mosaic":["A detailed projected scene turns careful observation into one multiple-choice challenge.","Inspect the scene with its question and choices, lock one answer, then earn 1,000 points for the correct choice."],
-	"common-thread":["The full clue set appears together and challenges everyone to name one connecting word.","Read all clues, lock one text response, then earn 1,000 points for an exact normalized match."],
-	"escape-together":["Each current round presents one puzzle with a predefined multiple-choice solution.","Read the puzzle, lock one choice, then earn 1,000 points if it matches the revealed answer."],
-	"bracket-bash":["Current play presents a matchup-style prompt with predefined choices and scores each round individually.","Choose the contender that matches the prompt, lock once, then earn 1,000 points for the predefined answer."],
-	"closest-call":["Everyone submits a number and the single smallest absolute distance from the target wins.","Enter one numeric estimate, lock before time runs out, then reveal the target; the nearest estimate earns 1,000 points."],
-	"phrase-forge":["Shuffled phrase tiles reward exact positions, correct neighbours, and a fully perfect order.","Tap every fragment into order, lock the complete phrase, then reveal its position, adjacency, and perfection score."],
-	"seek-and-show":["A safe creative mission invites each player to find something nearby and describe it concisely.","Read the mission, submit one text description, then share it at reveal and earn 250 points for a valid response."],
-	"one-word-chorus":["The current round asks every player to identify one word from the same complete clue prompt.","Read the clue, lock one private word, then earn 1,000 points for an exact normalized match."],
-	"grid-conquest":["A scalable connection puzzle turns classic line-making strategy into a simultaneous room challenge.","Read the board, choose the strongest move privately, then reveal the move that completes or protects the line."],
-	"dots-and-boxes":["Territory strategy becomes fast enough for a full room when everyone evaluates the same position at once.","Inspect the highlighted box, lock the best line, then reveal which edge claims or protects it."],
-	"hidden-picture":["Compact nonogram-style clues turn cell-pattern deduction into a simultaneous room challenge.","Read the row clue, choose the only matching cell pattern, then reveal the correct pattern."],
-	"path-weaver":["Constrained next-move puzzles reward spatial reasoning without making a large room wait through individual turns.","Read the stated route constraints, choose the next valid action, then reveal whether the move stays legal."],
-	"quilt-puzzle":["Repeating visual sequences turn pattern recognition into a shared-screen challenge.","Study the sequence, choose the patch that completes it, then compare it with the revealed answer."],
-	"group-sudoku":["Short missing-cell Sudoku decisions keep everyone solving simultaneously.","Check the row, column, and region, lock the missing symbol, then reveal the valid choice."],
+	bluffline: [
+		"Invent a believable false answer, then identify the truth while other players try to fool you.",
+		"Write one bluff, vote from an anonymous ballot that excludes your own answer, then score for finding truth and fooling the room.",
+	],
+	"sequence-sprint": [
+		"Ordering every card rewards exact positions, correct neighbours, and a fully perfect sequence.",
+		"Tap the shuffled cards into order, lock the complete sequence, then compare it with the revealed solution.",
+	],
+	"picture-peek": [
+		"A projected image tests careful observation through one private text response.",
+		"Study the picture and question, submit one answer, then compare it with the reveal for a 1,000-point exact match.",
+	],
+	"sound-snap": [
+		"A short sound-related text clue becomes a multiple-choice challenge.",
+		"Read the clue, lock one displayed choice, then earn 1,000 points if it matches the revealed answer.",
+	],
+	"caption-clash": [
+		"Everyone writes for the same image, then the room anonymously decides which wholesome caption lands best.",
+		"Submit one caption, wait for the anonymous ballot, vote for someone else, and reveal the author and winner.",
+	],
+	"story-loom": [
+		"One shared opening produces many constrained continuations for the room to compare anonymously.",
+		"Write one continuation, vote for another player's line, then earn a 250-point base plus 500 for every vote received.",
+	],
+	"signal-spectrum": [
+		"Each player submits one estimate from 0 to 100. The game compares every estimate with a hidden target, and closer answers earn more points.",
+		"Read the prompt on the big screen, type one estimate from 0 to 100, lock it before time runs out, then see the updated score after the distance is checked.",
+	],
+	"memory-mosaic": [
+		"A detailed projected scene turns careful observation into one multiple-choice challenge.",
+		"Inspect the scene with its question and choices, lock one answer, then earn 1,000 points for the correct choice.",
+	],
+	"common-thread": [
+		"The full clue set appears together and challenges everyone to name one connecting word.",
+		"Read all clues, lock one text response, then earn 1,000 points for an exact normalized match.",
+	],
+	"escape-together": [
+		"Each current round presents one puzzle with a predefined multiple-choice solution.",
+		"Read the puzzle, lock one choice, then earn 1,000 points if it matches the revealed answer.",
+	],
+	"bracket-bash": [
+		"Current play presents a matchup-style prompt with predefined choices and scores each round individually.",
+		"Choose the contender that matches the prompt, lock once, then earn 1,000 points for the predefined answer.",
+	],
+	"closest-call": [
+		"Everyone submits a number and the single smallest absolute distance from the target wins.",
+		"Enter one numeric estimate, lock before time runs out, then reveal the target; the nearest estimate earns 1,000 points.",
+	],
+	"phrase-forge": [
+		"Shuffled phrase tiles reward exact positions, correct neighbours, and a fully perfect order.",
+		"Tap every fragment into order, lock the complete phrase, then reveal its position, adjacency, and perfection score.",
+	],
+	"seek-and-show": [
+		"A safe creative mission invites each player to find something nearby and describe it concisely.",
+		"Read the mission, submit one text description, then share it at reveal and earn 250 points for a valid response.",
+	],
+	"one-word-chorus": [
+		"The current round asks every player to identify one word from the same complete clue prompt.",
+		"Read the clue, lock one private word, then earn 1,000 points for an exact normalized match.",
+	],
+	"grid-conquest": [
+		"A scalable connection puzzle turns classic line-making strategy into a simultaneous room challenge.",
+		"Read the board, choose the strongest move privately, then reveal the move that completes or protects the line.",
+	],
+	"dots-and-boxes": [
+		"Territory strategy becomes fast enough for a full room when everyone evaluates the same position at once.",
+		"Inspect the highlighted box, lock the best line, then reveal which edge claims or protects it.",
+	],
+	"hidden-picture": [
+		"Compact nonogram-style clues turn cell-pattern deduction into a simultaneous room challenge.",
+		"Read the row clue, choose the only matching cell pattern, then reveal the correct pattern.",
+	],
+	"path-weaver": [
+		"Constrained next-move puzzles reward spatial reasoning without making a large room wait through individual turns.",
+		"Read the stated route constraints, choose the next valid action, then reveal whether the move stays legal.",
+	],
+	"quilt-puzzle": [
+		"Repeating visual sequences turn pattern recognition into a shared-screen challenge.",
+		"Study the sequence, choose the patch that completes it, then compare it with the revealed answer.",
+	],
+	"group-sudoku": [
+		"Short missing-cell Sudoku decisions keep everyone solving simultaneously.",
+		"Check the row, column, and region, lock the missing symbol, then reveal the valid choice.",
+	],
 };
-for (const [key,titles] of Object.entries(ROUND_GUIDES)) {
-	const title=key.split("-").map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");
-	const [whyGame,how]=ROUND_COPY[key];
-	GUIDES[key]={contentKey:"pack",whyGame,howTo:["Join the room from your phone.",...how.split(", "),"Continue through the shared reveal and final podium."],hostDoes:"Chooses a themed pack and timing, starts the room, reviews participation, and uses Previous, Next, Pause, or Resume without reopening submissions.",playerSees:"A private response control tailored to this mechanic, a locked confirmation, reveal, score, and rank.",roomSees:`A presentation-safe ${title} stage with participation, timer, reveal, standings, and final podium.`,scoring:"All validation and scoring happen on the server from accepted, idempotent actions; reconnecting restores the same authoritative state.",setup:"One shared screen plus a phone per player. Works responsively in a family room or a large assembly.",accessibility:"Text labels accompany every control; keyboard input, numeric timers, reduced motion, and high contrast are supported.",demos:titles.map((demoTitle,index)=>({demo_key:`${key}-${["church-bible","family-general","big-room"][index]}`,title:demoTitle,blurb:`A ready-to-play ${demoTitle} experience.`,audience:["Church / Bible","Child / Family","General Assembly"][index],...(index===2?{video:`/assets/quizzly/videos/gatherplay/${key}-overview.mp4`,poster:`/assets/quizzly/videos/gatherplay/${key}-overview-poster.jpg`}:{})}))};
+for (const [key, titles] of Object.entries(ROUND_GUIDES)) {
+	const title = key
+		.split("-")
+		.map((w) => w[0].toUpperCase() + w.slice(1))
+		.join(" ");
+	const [whyGame, how] = ROUND_COPY[key];
+	GUIDES[key] = {
+		contentKey: "pack",
+		whyGame,
+		howTo: [
+			"Join the room from your phone.",
+			...how.split(", "),
+			"Continue through the shared reveal and final podium.",
+		],
+		hostDoes:
+			"Chooses a themed pack and timing, starts the room, reviews participation, and uses Previous, Next, Pause, or Resume without reopening submissions.",
+		playerSees:
+			"A private response control tailored to this mechanic, a locked confirmation, reveal, score, and rank.",
+		roomSees: `A presentation-safe ${title} stage with participation, timer, reveal, standings, and final podium.`,
+		scoring:
+			"All validation and scoring happen on the server from accepted, idempotent actions; reconnecting restores the same authoritative state.",
+		setup: "One shared screen plus a phone per player. Works responsively in a family room or a large assembly.",
+		accessibility:
+			"Text labels accompany every control; keyboard input, numeric timers, reduced motion, and high contrast are supported.",
+		demos: titles.map((demoTitle, index) => ({
+			demo_key: `${key}-${["church-bible", "family-general", "big-room"][index]}`,
+			title: demoTitle,
+			blurb: `A ready-to-play ${demoTitle} experience.`,
+			audience: ["Church / Bible", "Child / Family", "General Assembly"][index],
+			...(index === 2
+				? {
+						video: `/assets/quizzly/videos/gatherplay/${key}-overview.mp4`,
+						poster: `/assets/quizzly/videos/gatherplay/${key}-overview-poster.jpg`,
+					}
+				: {}),
+		})),
+	};
 }
 Object.assign(GUIDES["signal-spectrum"], {
 	playerSees:
 		"The prompt, a number field for the 0–100 estimate, a locked confirmation, the round reveal message, and updated standings.",
-	roomSees:
-		"The prompt, response count, timer, round reveal message, and updated scoreboard.",
+	roomSees: "The prompt, response count, timer, round reveal message, and updated scoreboard.",
 	scoring:
 		"A marker within 3 points of the target earns 1,000; within 7 earns 750; within 12 earns 500; within 20 earns 250; farther away earns 0.",
 });
 
 export function guideFor(key) {
-	return GUIDES[key] || GUIDES.quiz;
+	const guide = GUIDES[key] || GUIDES.quiz;
+	return locale.value === "am" ? amGuide(key, guide) : guide;
 }
 
 export async function catalogGames() {
 	const available = await listGames();
 	const soon = COMING_SOON.filter(
-		(c) => !available.some((a) => a.title.toLowerCase() === c.title.toLowerCase())
+		(c) => !available.some((a) => a.title.toLowerCase() === c.title.toLowerCase()),
 	);
 	return [...available, ...soon];
 }

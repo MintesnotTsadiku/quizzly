@@ -5,22 +5,25 @@
 			<header class="flex flex-wrap items-end justify-between gap-5">
 				<div>
 					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
-						Host overview
+						{{ $t("Host overview") }}
 					</p>
 					<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">
-						Games dashboard
+						{{ $t("Games dashboard") }}
 					</h1>
 					<p class="mt-3 max-w-2xl text-paper/50">
-						See what is live now, review every session, and understand how people are
-						playing.
+						{{
+							$t(
+								"See what is live now, review every session, and understand how people are playing.",
+							)
+						}}
 					</p>
 				</div>
 				<button class="ctl" :disabled="loading" @click="load">
-					{{ loading ? "Refreshing…" : "Refresh" }}
+					{{ $t(loading ? "Refreshing…" : "Refresh") }}
 				</button>
 			</header>
 
-			<p v-if="error" class="mt-6 text-alert">{{ error }}</p>
+			<p v-if="error" class="mt-6 text-alert">{{ $t(error) }}</p>
 
 			<section class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
 				<div v-for="metric in metrics" :key="metric.label" class="metric-card">
@@ -38,10 +41,12 @@
 				class="mt-8 rounded-3xl border border-haze bg-dusk p-6"
 			>
 				<div class="flex items-center justify-between gap-4">
-					<h2 class="font-display text-xl font-bold text-paper">Games played</h2>
-					<span class="font-mono text-[10px] uppercase tracking-wider text-paper/35"
-						>Sessions · players</span
-					>
+					<h2 class="font-display text-xl font-bold text-paper">
+						{{ $t("Games played") }}
+					</h2>
+					<span class="font-mono text-[10px] uppercase tracking-wider text-paper/35">
+						{{ $t("Sessions · players") }}
+					</span>
 				</div>
 				<div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					<div
@@ -51,7 +56,8 @@
 					>
 						<p class="font-display text-lg font-bold text-paper">{{ game.game }}</p>
 						<p class="mt-1 font-mono text-xs text-paper/45">
-							{{ game.sessions }} sessions · {{ game.players }} players
+							{{ game.sessions }} {{ $t("sessions ·") }} {{ game.players }}
+							{{ $t("players") }}
 						</p>
 					</div>
 				</div>
@@ -60,8 +66,12 @@
 			<section class="mt-10">
 				<div class="flex flex-wrap items-end justify-between gap-4">
 					<div>
-						<h2 class="font-display text-2xl font-bold text-paper">Session history</h2>
-						<p class="mt-1 text-sm text-paper/45">Active rooms appear first.</p>
+						<h2 class="font-display text-2xl font-bold text-paper">
+							{{ $t("Session history") }}
+						</h2>
+						<p class="mt-1 text-sm text-paper/45">
+							{{ $t("Active rooms appear first.") }}
+						</p>
 					</div>
 					<div class="flex gap-2">
 						<button
@@ -71,7 +81,7 @@
 							:data-on="filter === option.value"
 							@click="filter = option.value"
 						>
-							{{ option.label }}
+							{{ $t(option.label) }}
 						</button>
 					</div>
 				</div>
@@ -98,11 +108,12 @@
 								</span>
 							</div>
 							<p class="mt-1 font-mono text-xs text-paper/35">
-								{{ formatDate(session.created_at) }} · PIN {{ session.pin }}
+								{{ formatDate(session.created_at) }} {{ $t("· PIN") }}
+								{{ session.pin }}
 							</p>
 						</div>
 						<p class="font-mono text-sm text-paper/60">
-							{{ session.players }} players
+							{{ session.players }} {{ $t("players") }}
 						</p>
 						<p class="font-mono text-sm text-paper/60">
 							{{ duration(session.duration_seconds) }}
@@ -112,13 +123,13 @@
 							class="ctl justify-self-start sm:justify-self-end"
 							:to="resumeLink(session)"
 						>
-							Open room
+							{{ $t("Open room") }}
 						</RouterLink>
 						<span
 							v-else-if="isActive(session)"
 							class="font-mono text-xs text-paper/30 sm:text-right"
 						>
-							View only
+							{{ $t("View only") }}
 						</span>
 						<span v-else class="font-mono text-xs text-paper/30 sm:text-right">{{
 							session.status
@@ -129,7 +140,7 @@
 					v-else-if="!loading"
 					class="mt-6 rounded-2xl border border-haze p-8 text-center text-paper/45"
 				>
-					No sessions in this view yet.
+					{{ $t("No sessions in this view yet.") }}
 				</p>
 			</section>
 		</main>
@@ -163,7 +174,7 @@ const metrics = computed(() => [
 
 const visibleSessions = computed(() => {
 	const sessions = [...(dashboard.value.sessions || [])].sort(
-		(a, b) => Number(isActive(b)) - Number(isActive(a))
+		(a, b) => Number(isActive(b)) - Number(isActive(a)),
 	);
 	if (filter.value === "active") return sessions.filter(isActive);
 	if (filter.value === "completed")
@@ -197,7 +208,7 @@ function resumeLink(session) {
 
 function formatDate(value) {
 	return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(
-		new Date(value)
+		new Date(value),
 	);
 }
 

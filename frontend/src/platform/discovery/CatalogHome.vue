@@ -5,41 +5,46 @@
 			<section class="gp-hero">
 				<div class="gp-hero-copy">
 					<p class="gp-eyebrow">
-						<span class="gp-status-dot"></span> Made for being together
+						<span class="gp-status-dot"></span> {{ $t("Made for being together") }}
 					</p>
-					<h1>Good company.<br /><em>Great games.</em></h1>
+					<h1>
+						{{ $t("Good company.") }} <br /><em> {{ $t("Great games.") }} </em>
+					</h1>
 					<p>
-						Turn “what should we do?” into one more round.<br class="gp-desktop" />
-						Games for your people, your place, your kind of fun.
+						{{ $t("Turn “what should we do?” into one more round.") }}
+						<br class="gp-desktop" />
+						{{ $t("Games for your people, your place, your kind of fun.") }}
 					</p>
-					<a class="gp-button" href="#games"
-						>Find your next game <span aria-hidden="true">↓</span></a
+					<a class="gp-button" href="#games">
+						{{ $t("Find your next game") }} <span aria-hidden="true">↓</span></a
 					>
 					<div class="gp-hero-foot">
-						<span class="gp-faces" aria-hidden="true">● ● ●</span> Friends. Families.
-						Classrooms. Everyone’s invited.
+						<span class="gp-faces" aria-hidden="true">● ● ●</span>
+						{{ $t("Friends. Families. Classrooms. Everyone’s invited.") }}
 					</div>
 				</div>
 				<RouterLink
 					class="gp-feature"
 					:to="{ name: 'GameDetail', params: { game: 'common-ground' } }"
 				>
-					<span class="gp-feature-tag">NEW · NO PLAYER PHONES NEEDED</span>
+					<span class="gp-feature-tag"> {{ $t("NEW · NO PLAYER PHONES NEEDED") }} </span>
 					<GameArtwork game-key="common-ground" color="peach" />
 					<div class="gp-feature-copy">
 						<div>
-							<p>Start with a little connection</p>
-							<h2>Common Ground</h2>
-							<span>8 minutes. A few surprises. A room closer together.</span>
+							<p>{{ $t("Start with a little connection") }}</p>
+							<h2>{{ $t("Common Ground") }}</h2>
+							<span>
+								{{ $t("8 minutes. A few surprises. A room closer together.") }}
+							</span>
 						</div>
 						<span class="gp-circle-arrow" aria-hidden="true">↗</span>
 					</div>
 				</RouterLink>
 			</section>
-			<section class="gp-finder" aria-label="Find games for your devices">
+			<section class="gp-finder" :aria-label="$t('Find games for your devices')">
 				<div>
-					<p class="gp-eyebrow">Your room, your rules</p>
-					<h2>What devices do you have?</h2>
+					<p class="gp-eyebrow">{{ $t("Your room, your rules") }}</p>
+					<h2>{{ $t("What devices do you have?") }}</h2>
 				</div>
 				<div class="gp-device-options">
 					<button
@@ -49,47 +54,49 @@
 						@click="device = option.id"
 					>
 						<span aria-hidden="true">{{ option.icon }}</span
-						>{{ option.label }}
+						>{{ $t(option.label) }}
 					</button>
 				</div>
 			</section>
 			<section id="games" class="gp-collection">
 				<div class="gp-section-head">
 					<div>
-						<p class="gp-eyebrow">Less choosing, more playing</p>
-						<h2>Find the room’s next favourite</h2>
+						<p class="gp-eyebrow">{{ $t("Less choosing, more playing") }}</p>
+						<h2>{{ $t("Find the room’s next favourite") }}</h2>
 					</div>
 					<label class="gp-search"
 						><span aria-hidden="true">⌕</span
 						><input
 							v-model="query"
 							type="search"
-							aria-label="Search games"
-							placeholder="Find a game…"
+							:aria-label="$t('Search games')"
+							:placeholder="$t('Find a game…')"
 					/></label>
 				</div>
 				<div class="gp-category-row">
-					<div class="gp-categories" aria-label="Game category">
+					<div class="gp-categories" :aria-label="$t('Game category')">
 						<button
 							v-for="item in categories"
 							:key="item"
 							:aria-pressed="category === item"
 							@click="category = item"
 						>
-							{{ item }}
+							{{ $t(item) }}
 						</button>
 					</div>
-					<span aria-live="polite">{{ filtered.length }} games</span>
+					<span aria-live="polite">{{ filtered.length }} {{ $t("games") }} </span>
 				</div>
-				<p v-if="loading" role="status" class="gp-state">Finding something fun…</p>
+				<p v-if="loading" role="status" class="gp-state">
+					{{ $t("Finding something fun…") }}
+				</p>
 				<div v-else-if="error" class="gp-state" role="alert">
-					<p>{{ error }}</p>
-					<button class="gp-button" @click="load">Try again</button>
+					<p>{{ $t(error) }}</p>
+					<button class="gp-button" @click="load">{{ $t("Try again") }}</button>
 				</div>
 				<div v-else-if="!filtered.length" class="gp-state">
-					<h3>No games with that combination yet.</h3>
-					<p>Try another category or device setup.</p>
-					<button class="gp-button" @click="reset">Show all games</button>
+					<h3>{{ $t("No games with that combination yet.") }}</h3>
+					<p>{{ $t("Try another category or device setup.") }}</p>
+					<button class="gp-button" @click="reset">{{ $t("Show all games") }}</button>
 				</div>
 				<div v-else class="gp-game-grid">
 					<RouterLink
@@ -101,12 +108,12 @@
 						<GameArtwork :game-key="game.key" :color="profileFor(game).color" />
 						<div class="gp-card-copy">
 							<div class="gp-card-top">
-								<span>{{ profileFor(game).category }}</span
-								><span>{{ profileFor(game).time }}</span>
+								<span>{{ $t(profileFor(game).category) }}</span
+								><span>{{ $t(profileFor(game).time) }}</span>
 							</div>
-							<h3>{{ game.title }} <span aria-hidden="true">↗</span></h3>
-							<p>{{ profileFor(game).description }}</p>
-							<div class="gp-card-meta">{{ profileFor(game).deviceLabel }}</div>
+							<h3>{{ $t(game.title) }} <span aria-hidden="true">↗</span></h3>
+							<p>{{ $t(profileFor(game).description) }}</p>
+							<div class="gp-card-meta">{{ $t(profileFor(game).deviceLabel) }}</div>
 						</div>
 					</RouterLink>
 				</div>
@@ -115,34 +122,43 @@
 					class="gp-more"
 					@click="showAll = true"
 				>
-					Explore all {{ games.length }} formats <span aria-hidden="true">→</span>
+					{{ $t("Explore all") }} {{ games.length }} {{ $t("formats") }}
+					<span aria-hidden="true">→</span>
 				</button>
 				<p v-if="showAll" class="gp-caption">
-					More formats include focused puzzle and question-based variants. Check each
-					guide for its current rules.
+					{{
+						$t(
+							"More formats include focused puzzle and question-based variants. Check each guide for its current rules.",
+						)
+					}}
 				</p>
 			</section>
 			<section class="gp-room-note">
 				<span class="gp-note-star" aria-hidden="true">✳</span>
 				<div>
-					<h2>The best part isn’t on the screen.</h2>
+					<h2>{{ $t("The best part isn’t on the screen.") }}</h2>
 					<p>
-						Make a little room for laughter, a new perspective, or a wonderfully wrong
-						answer.
+						{{
+							$t(
+								"Make a little room for laughter, a new perspective, or a wonderfully wrong answer.",
+							)
+						}}
 					</p>
 				</div>
-				<RouterLink :to="{ name: 'GameDetail', params: { game: 'common-ground' } }"
-					>Try a game without player phones ↗</RouterLink
-				>
+				<RouterLink :to="{ name: 'GameDetail', params: { game: 'common-ground' } }">
+					{{ $t("Try a game without player phones ↗") }}
+				</RouterLink>
 			</section>
 			<footer class="gp-footer">
-				<strong>GatherPlay</strong><span>Good company is all you need to begin.</span
-				><RouterLink to="/join">Have a code? Join in →</RouterLink>
+				<strong> {{ $t("GatherPlay") }} </strong
+				><span> {{ $t("Good company is all you need to begin.") }} </span
+				><RouterLink to="/join"> {{ $t("Have a code? Join in →") }} </RouterLink>
 			</footer>
 		</main>
 	</div>
 </template>
 <script setup>
+import { t } from "@/i18n";
 import { computed, onMounted, ref } from "vue";
 import HostBar from "@/components/HostBar.vue";
 import GameArtwork from "./GameArtwork.vue";
@@ -172,7 +188,9 @@ const filtered = computed(() =>
 			(g) =>
 				matchesDevice(g, device.value) &&
 				(category.value === "All games" || profileFor(g).category === category.value) &&
-				`${g.title} ${g.summary}`.toLowerCase().includes(query.value.trim().toLowerCase()),
+				`${g.title} ${g.summary} ${t(g.title)} ${t(profileFor(g).description)}`
+					.toLowerCase()
+					.includes(query.value.trim().toLowerCase()),
 		)
 		.sort(
 			(a, b) =>

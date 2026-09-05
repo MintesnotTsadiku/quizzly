@@ -1,0 +1,9 @@
+{
+  "checks": [
+    "English/Amharic switch persists across navigation; six curated games; Amharic pack picker with keyboard controls; latest artwork selected; 390px layout fits",
+    "Site default, trusted-parent inheritance, explicit preference precedence, invite links, parameters and untranslated user-copy fallback",
+    "Amharic join and access pages render on phones"
+  ],
+  "errors": [],
+  "passed": true
+}

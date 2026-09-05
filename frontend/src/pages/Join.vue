@@ -4,8 +4,9 @@
 			class="absolute left-4 top-4 font-mono text-xs uppercase tracking-wider text-paper/40 transition hover:text-paper"
 			:to="{ name: 'Catalog' }"
 		>
-			← All games
+			{{ $t("← All games") }}
 		</RouterLink>
+		<LanguageSwitch class="absolute right-12 top-3" />
 		<ThemeButton
 			class="absolute right-4 top-4 text-lg leading-none opacity-60 transition hover:opacity-100"
 		/>
@@ -16,17 +17,19 @@
 				<svg class="h-3 w-3 fill-gold" viewBox="0 0 24 24">
 					<path :d="SHAPES[1].path" />
 				</svg>
-				Live quiz
+				{{ $t("Live quiz") }}
 			</p>
-			<h1 class="font-display text-6xl font-extrabold leading-none text-paper">Quizzly</h1>
+			<h1 class="font-display text-6xl font-extrabold leading-none text-paper">
+				{{ $t("Quizzly") }}
+			</h1>
 			<p class="mt-3 text-paper/50">
-				Type the PIN on the big screen, pick a face, and you're in.
+				{{ $t("Type the PIN on the big screen, pick a face, and you're in.") }}
 			</p>
 
 			<form class="mt-9 flex flex-col gap-6" @submit.prevent="join">
 				<label class="flex flex-col gap-2">
 					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
-						Game PIN
+						{{ $t("Game PIN") }}
 					</span>
 					<input
 						v-model="pin"
@@ -40,12 +43,12 @@
 
 				<label class="flex flex-col gap-2">
 					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
-						Nickname
+						{{ $t("Nickname") }}
 					</span>
 					<input
 						v-model="nickname"
 						class="w-full rounded-2xl border border-haze bg-dusk px-4 py-3.5 text-lg font-medium text-paper placeholder:text-paper/25 focus:border-ember"
-						placeholder="Your name"
+						:placeholder="$t('Your name')"
 						maxlength="20"
 						autocomplete="off"
 					/>
@@ -64,14 +67,14 @@
 							class="rounded-full border border-haze px-3 py-1 text-sm text-paper/45 transition hover:border-paper hover:text-paper"
 							@click="suggestions = suggestNicknames()"
 						>
-							↻ More
+							{{ $t("↻ More") }}
 						</button>
 					</span>
 				</label>
 
 				<div class="flex flex-col gap-3">
 					<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
-						Your face
+						{{ $t("Your face") }}
 					</span>
 					<!-- The bleed lives on the wrapper so the scroller's 50% end padding,
 					     which is what lets the first and last face reach the centre line,
@@ -113,10 +116,10 @@
 					class="rounded-2xl bg-ember py-4 font-display text-xl font-extrabold text-sunk transition hover:brightness-110 disabled:opacity-50"
 					:disabled="joining"
 				>
-					{{ joining ? "Joining…" : "Join game" }}
+					{{ $t(joining ? "Joining…" : "Join game") }}
 				</button>
 				<p v-if="error" class="text-center text-sm text-alert">
-					{{ error }}
+					{{ $t(error) }}
 				</p>
 			</form>
 		</div>
@@ -124,6 +127,7 @@
 </template>
 
 <script setup>
+import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { call } from "@/api";

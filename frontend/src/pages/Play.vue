@@ -17,8 +17,9 @@
 					:aria-label="muted ? 'Turn sound on' : 'Turn sound off'"
 					@click="toggleMute"
 				>
-					{{ muted ? "🔇" : "🔊" }}
+					{{ $t(muted ? "🔇" : "🔊") }}
 				</button>
+				<LanguageSwitch />
 				<ThemeButton
 					class="text-lg leading-none opacity-60 transition hover:opacity-100"
 				/>
@@ -31,7 +32,7 @@
 					class="rounded-full border border-haze px-3 py-1 text-xs text-paper/50 transition hover:border-ember hover:text-alert"
 					@click="leave"
 				>
-					Leave
+					{{ $t("Leave") }}
 				</button>
 			</span>
 		</header>
@@ -46,7 +47,7 @@
 				/>
 				<div class="min-w-0">
 					<p class="font-mono text-[10px] uppercase tracking-[0.22em] text-paper/40">
-						Question {{ qIndex + 1 }} of {{ total }}
+						{{ $t("Question") }} {{ qIndex + 1 }} {{ $t("of") }} {{ total }}
 					</p>
 					<h1 class="mt-1 font-display text-lg font-bold leading-snug text-paper">
 						{{ question.question_text }}
@@ -75,7 +76,7 @@
 					</span>
 				</button>
 			</div>
-			<p v-if="error" class="px-4 pb-3 text-center text-sm text-alert">{{ error }}</p>
+			<p v-if="error" class="px-4 pb-3 text-center text-sm text-alert">{{ $t(error) }}</p>
 		</template>
 
 		<main
@@ -84,33 +85,39 @@
 		>
 			<template v-if="phase === 'kicked'">
 				<h1 class="font-display text-3xl font-extrabold text-paper">
-					The host removed you
+					{{ $t("The host removed you") }}
 				</h1>
-				<p class="text-paper/50">You can join again with the PIN.</p>
+				<p class="text-paper/50">{{ $t("You can join again with the PIN.") }}</p>
 				<button
 					class="rounded-2xl bg-ember px-7 py-3 font-display text-lg font-extrabold text-sunk"
 					@click="router.replace('/join')"
 				>
-					Back to join
+					{{ $t("Back to join") }}
 				</button>
 			</template>
 
 			<template v-else-if="phase === 'lobby'">
 				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
-					PIN {{ player.pin }}
+					{{ $t("PIN") }} {{ player.pin }}
 				</p>
-				<h1 class="font-display text-5xl font-extrabold text-paper">You're in</h1>
+				<h1 class="font-display text-5xl font-extrabold text-paper">
+					{{ $t("You're in") }}
+				</h1>
 				<p class="max-w-xs text-paper/50">
-					Find your name on the big screen. The host starts when everyone's here.
+					{{
+						$t(
+							"Find your name on the big screen. The host starts when everyone's here.",
+						)
+					}}
 				</p>
 				<p class="font-mono text-sm tabular-nums text-paper/40">
-					{{ participants.length }} in the lobby
+					{{ participants.length }} {{ $t("in the lobby") }}
 				</p>
 			</template>
 
 			<template v-else-if="phase === 'get_ready'">
 				<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-paper/40">
-					Question {{ (qIndex ?? 0) + 1 }} of {{ total }}
+					{{ $t("Question") }} {{ (qIndex ?? 0) + 1 }} {{ $t("of") }} {{ total }}
 				</p>
 				<h1 class="max-w-md font-display text-2xl font-bold leading-snug text-paper">
 					{{ questionText }}
@@ -121,7 +128,7 @@
 					:size="132"
 					color="rgb(var(--accent))"
 				/>
-				<p class="text-paper/50">Read it. Answers land in a second.</p>
+				<p class="text-paper/50">{{ $t("Read it. Answers land in a second.") }}</p>
 			</template>
 
 			<template v-else-if="phase === 'locked'">
@@ -133,8 +140,10 @@
 				>
 					<path :d="shapeFor(selected).path" />
 				</svg>
-				<h1 class="font-display text-4xl font-extrabold text-paper">Locked in</h1>
-				<p class="text-paper/50">Look up at the big screen.</p>
+				<h1 class="font-display text-4xl font-extrabold text-paper">
+					{{ $t("Locked in") }}
+				</h1>
+				<p class="text-paper/50">{{ $t("Look up at the big screen.") }}</p>
 			</template>
 
 			<template v-else-if="phase === 'result'">
@@ -142,19 +151,21 @@
 					class="grid h-24 w-24 place-items-center rounded-full text-5xl text-sunk"
 					:class="result.is_correct ? 'bg-lagoon' : 'bg-ember'"
 				>
-					{{ result.is_correct ? "✓" : "✕" }}
+					{{ $t(result.is_correct ? "✓" : "✕") }}
 				</div>
 				<h1 class="font-display text-4xl font-extrabold text-paper">
-					{{ result.is_correct ? "Correct" : result.answered ? "Wrong" : "No answer" }}
+					{{
+						$t(result.is_correct ? "Correct" : result.answered ? "Wrong" : "No answer")
+					}}
 				</h1>
 				<p v-if="result.points" class="font-mono text-2xl font-bold text-accent">
 					+{{ result.points }}
 				</p>
 				<p v-if="result.streak > 1" class="text-paper/60">
-					{{ result.streak }} in a row 🔥
+					{{ result.streak }} {{ $t("in a row 🔥") }}
 				</p>
 				<p class="font-mono text-xs uppercase tracking-[0.2em] text-paper/40">
-					Rank {{ result.rank }} · {{ result.score }} pts
+					{{ $t("Rank") }} {{ result.rank }} · {{ result.score }} {{ $t("pts") }}
 				</p>
 				<img
 					v-if="explanation?.image_url"
@@ -193,15 +204,15 @@
 					class="text-sm text-paper/40 underline-offset-4 hover:text-paper hover:underline"
 					@click="goHome"
 				>
-					Back to all games
+					{{ $t("Back to all games") }}
 				</button>
 			</template>
 
 			<template v-else-if="phase === 'podium'">
 				<h1 class="font-display text-5xl font-extrabold text-paper">
-					{{ myRank === 1 ? "You won" : `You finished #${myRank}` }}
+					{{ $t(myRank === 1 ? "You won" : `You finished #${myRank}`) }}
 				</h1>
-				<p class="font-mono text-2xl font-bold text-accent">{{ score }} pts</p>
+				<p class="font-mono text-2xl font-bold text-accent">{{ score }} {{ $t("pts") }}</p>
 				<ul class="mt-2 w-full max-w-xs text-left">
 					<li
 						v-for="entry in leaderboard.slice(0, 5)"
@@ -224,14 +235,16 @@
 					</li>
 				</ul>
 				<div class="mt-3 flex flex-wrap justify-center gap-2">
-					<button class="ctl ctl-go" @click="playAgain">Join another game</button>
-					<button class="ctl" @click="goHome">Back to all games</button>
+					<button class="ctl ctl-go" @click="playAgain">
+						{{ $t("Join another game") }}
+					</button>
+					<button class="ctl" @click="goHome">{{ $t("Back to all games") }}</button>
 				</div>
 			</template>
 
 			<template v-else>
 				<p class="font-mono text-sm uppercase tracking-[0.22em] text-paper/40">
-					Hang tight
+					{{ $t("Hang tight") }}
 				</p>
 			</template>
 		</main>
@@ -239,6 +252,7 @@
 </template>
 
 <script setup>
+import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { call } from "@/api";
@@ -280,19 +294,19 @@ watch(
 	() => Math.ceil(remaining.value),
 	(secondsLeft) => {
 		if (phase.value === "question" && secondsLeft > 0 && secondsLeft <= 5) playCue("tick");
-	}
+	},
 );
 
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
 );
 
 const urgentColor = computed(() =>
-	remaining.value <= 5 ? "rgb(var(--alert))" : "rgb(var(--ok))"
+	remaining.value <= 5 ? "rgb(var(--alert))" : "rgb(var(--ok))",
 );
 
 const orderedOptions = computed(() =>
-	question.value ? optionOrder(question.value, player.value.token) : []
+	question.value ? optionOrder(question.value, player.value.token) : [],
 );
 
 // Nothing left to follow once the host removes the player, so the room goes too:
@@ -407,7 +421,7 @@ async function restore() {
 			state.question.question_text,
 			state.q_index,
 			state.total,
-			state.remaining_seconds
+			state.remaining_seconds,
 		);
 	} else if (state.phase === "question") {
 		showQuestion(state.question, state.remaining_seconds);

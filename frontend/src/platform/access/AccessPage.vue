@@ -2,63 +2,88 @@
 	<div class="gather-ui gp-page">
 		<HostBar />
 		<main class="gp-account gp-container">
-			<p class="gp-eyebrow">More good times, on your terms</p>
+			<p class="gp-eyebrow">{{ $t("More good times, on your terms") }}</p>
 			<a
 				v-if="site.can_manage"
 				class="gp-admin-link"
 				href="/app/gatherplay-settings"
 				target="_blank"
 				rel="noopener"
-				>Manage this site’s settings ↗</a
 			>
-			<h1>Your place at the table.</h1>
-			<p class="gp-lead">Start small. Make it yours. Keep your people playing.</p>
-			<p v-if="error" class="gp-error" role="alert">{{ error }}</p>
-			<p v-if="notice" class="gp-notice" role="status">{{ notice }}</p>
+				{{ $t("Manage this site’s settings ↗") }}
+			</a>
+			<h1>{{ $t("Your place at the table.") }}</h1>
+			<p class="gp-lead">
+				{{ $t("Start small. Make it yours. Keep your people playing.") }}
+			</p>
+			<p v-if="error" class="gp-error" role="alert">{{ $t(error) }}</p>
+			<p v-if="notice" class="gp-notice" role="status">{{ $t(notice) }}</p>
 			<div class="gp-account-grid">
 				<section class="gp-account-card">
 					<p class="gp-eyebrow">
 						{{
-							state.guest
-								? "Your guest trial"
-								: state.verified
-									? "Your account"
-									: "One more step"
+							$t(
+								state.guest
+									? "Your guest trial"
+									: state.verified
+										? "Your account"
+										: "One more step",
+							)
 						}}
 					</p>
 					<h2>
 						{{
-							state.guest
-								? "Come as you are."
-								: state.verified
-									? "Ready when you are."
-									: "Make it official."
+							$t(
+								state.guest
+									? "Come as you are."
+									: state.verified
+										? "Ready when you are."
+										: "Make it official.",
+							)
 						}}
 					</h2>
 					<p v-if="state.loaded">
-						{{ state.hosts_remaining === null ? "Unlimited" : state.hosts_remaining }}
-						games ·
-						{{ state.packs_remaining === null ? "unlimited" : state.packs_remaining }}
-						private packs available
+						{{
+							$t(
+								state.hosts_remaining === null
+									? "Unlimited"
+									: state.hosts_remaining,
+							)
+						}}
+						{{ $t("games ·") }}
+						{{
+							$t(
+								state.packs_remaining === null
+									? "unlimited"
+									: state.packs_remaining,
+							)
+						}}
+						{{ $t("private packs available") }}
 					</p>
 					<p v-if="state.guest">
-						Your trial stays in this browser for a limited time. Sign in here to bring
-						your trial games and packs with you.
+						{{
+							$t(
+								"Your trial stays in this browser for a limited time. Sign in here to bring your trial games and packs with you.",
+							)
+						}}
 					</p>
 					<p v-else-if="!state.verified">
-						Verify your email to continue after your starter allowance. Your existing
-						games can still finish.
+						{{
+							$t(
+								"Verify your email to continue after your starter allowance. Your existing games can still finish.",
+							)
+						}}
 					</p>
-					<a v-if="state.guest" class="gp-button" :href="loginUrl"
-						>Sign in or create an account →</a
-					>
+					<a v-if="state.guest" class="gp-button" :href="loginUrl">
+						{{ $t("Sign in or create an account →") }}
+					</a>
 					<button
 						v-else-if="!state.verified"
 						class="gp-button"
 						:disabled="busy"
 						@click="sendVerification"
 					>
-						Email me a verification link
+						{{ $t("Email me a verification link") }}
 					</button>
 					<button
 						v-if="verifyToken"
@@ -66,11 +91,11 @@
 						:disabled="busy || state.guest"
 						@click="verify"
 					>
-						Confirm my email
+						{{ $t("Confirm my email") }}
 					</button>
 					<div class="gp-account-links">
-						<RouterLink to="/explore">Find a game →</RouterLink
-						><RouterLink to="/create">Make a question pack →</RouterLink>
+						<RouterLink to="/explore"> {{ $t("Find a game →") }} </RouterLink
+						><RouterLink to="/create"> {{ $t("Make a question pack →") }} </RouterLink>
 					</div>
 				</section>
 				<section
@@ -80,58 +105,67 @@
 					<p class="gp-eyebrow">{{ site.plan_name }}</p>
 					<h2>{{ site.currency }} {{ site.price }}</h2>
 					<p>
-						{{ site.plan_days }} days · {{ site.paid_host_limit }} games and
-						{{ site.paid_pack_limit }} packs per calendar month.
+						{{ site.plan_days }} {{ $t("days ·") }} {{ site.paid_host_limit }}
+						{{ $t("games and") }} {{ site.paid_pack_limit }}
+						{{ $t("packs per calendar month.") }}
 					</p>
-					<p class="gp-payment-instructions">{{ site.payment_instructions }}</p>
+					<p class="gp-payment-instructions">{{ siteText("payment_instructions") }}</p>
 					<p>
 						{{
-							site.optimistic_approval
-								? `Your first receipt each month unlocks ${site.provisional_days} days of provisional access while it is reviewed.`
-								: "Access begins when your receipt is approved."
+							$t(
+								site.optimistic_approval
+									? `Your first receipt each month unlocks ${site.provisional_days} days of provisional access while it is reviewed.`
+									: "Access begins when your receipt is approved.",
+							)
 						}}
-						Approval grants {{ site.plan_days }} days. A rejected receipt removes paid
-						access for new games.
+						{{ $t("Approval grants") }} {{ site.plan_days }}
+						{{ $t("days. A rejected receipt removes paid access for new games.") }}
 					</p>
 					<form v-if="!state.guest && state.verified" @submit.prevent="submit">
 						<label class="gp-field"
-							><span>Payment reference</span
+							><span> {{ $t("Payment reference") }} </span
 							><input
 								v-model="reference"
 								required
 								minlength="4"
 								maxlength="100"
-								placeholder="Reference from your payment" /></label
+								:placeholder="$t('Reference from your payment')" /></label
 						><label class="gp-field"
-							><span>Private receipt · PNG, JPEG or PDF, up to 5 MB</span
+							><span>
+								{{ $t("Private receipt · PNG, JPEG or PDF, up to 5 MB") }} </span
 							><input
 								type="file"
 								accept="image/png,image/jpeg,application/pdf"
 								required
 								@change="file = $event.target.files[0]" /></label
 						><button class="gp-button" :disabled="busy">
-							{{ busy ? "Submitting…" : "Attach receipt and request access" }}
+							{{ $t(busy ? "Submitting…" : "Attach receipt and request access") }}
 						</button>
 					</form>
-					<p v-else>Sign in and verify your email before attaching a receipt.</p>
+					<p v-else>
+						{{ $t("Sign in and verify your email before attaching a receipt.") }}
+					</p>
 				</section>
 				<section v-else class="gp-account-card gp-account-plan">
-					<p class="gp-eyebrow">Community comes first</p>
-					<h2>No payment required.</h2>
+					<p class="gp-eyebrow">{{ $t("Community comes first") }}</p>
+					<h2>{{ $t("No payment required.") }}</h2>
 					<p>
-						This site keeps gathering free. Sign in after your guest trial to continue
-						under the community’s hosting policy.
+						{{
+							$t(
+								"This site keeps gathering free. Sign in after your guest trial to continue under the community’s hosting policy.",
+							)
+						}}
 					</p>
 					<GameArtwork game-key="common-ground" color="lime" />
 				</section>
 			</div>
 			<section v-if="receipts.length" class="gp-receipts">
-				<h2>Your requests</h2>
+				<h2>{{ $t("Your requests") }}</h2>
 				<article v-for="r in receipts" :key="r.name">
 					<strong>{{ r.reference }}</strong
-					><span>{{ r.status }}</span>
+					><span>{{ $t(r.status) }}</span>
 					<p v-if="r.valid_until">
-						Access until {{ new Date(r.valid_until).toLocaleDateString() }}
+						{{ $t("Access until") }} {{ new Date(r.valid_until).toLocaleDateString() }}
 					</p>
 					<p v-if="r.review_note">{{ r.review_note }}</p>
 				</article>
@@ -143,7 +177,7 @@
 import { onMounted, ref } from "vue";
 import HostBar from "@/components/HostBar.vue";
 import GameArtwork from "@/platform/discovery/GameArtwork.vue";
-import { site, accessState as state, refreshAccess } from "@/platform/site";
+import { site, siteText, accessState as state, refreshAccess } from "@/platform/site";
 import { call, readError } from "@/api";
 const busy = ref(false),
 	error = ref(""),

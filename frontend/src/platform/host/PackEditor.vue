@@ -6,13 +6,15 @@
 				class="font-mono text-xs uppercase tracking-[0.22em] text-paper/40 transition hover:text-paper"
 				:to="{ name: 'GpHost' }"
 			>
-				← Host console
+				{{ $t("← Host console") }}
 			</RouterLink>
 
 			<!-- List -->
 			<template v-if="!editing">
-				<h1 class="mt-6 font-display text-4xl font-extrabold text-paper">Crowd Compass packs</h1>
-				<button class="ctl ctl-go mt-6" @click="startNew">New pack</button>
+				<h1 class="mt-6 font-display text-4xl font-extrabold text-paper">
+					{{ $t("Crowd Compass packs") }}
+				</h1>
+				<button class="ctl ctl-go mt-6" @click="startNew">{{ $t("New pack") }}</button>
 				<div class="mt-8 flex flex-col gap-3">
 					<button
 						v-for="pack in packs"
@@ -21,41 +23,66 @@
 						@click="edit(pack)"
 					>
 						<span class="flex-1">
-							<span class="font-display text-xl font-bold text-paper">{{ pack.title }}</span>
+							<span class="font-display text-xl font-bold text-paper">{{
+								pack.title
+							}}</span>
 							<span class="ml-3 font-mono text-xs text-paper/40">
-								{{ pack.prompt_count }} prompts{{ Number(pack.ranked) ? " · ranked" : "" }}{{ Number(pack.is_demo) ? " · demo" : "" }}
+								{{ pack.prompt_count }} {{ $t("prompts") }}
+								{{ $t(Number(pack.ranked) ? " · ranked" : "")
+								}}{{ $t(Number(pack.is_demo) ? " · demo" : "") }}
 							</span>
 						</span>
 						<span class="text-paper/25 transition group-hover:text-alert">→</span>
 					</button>
-					<p v-if="!packs.length && loaded" class="text-paper/50">No packs yet — write your first one.</p>
+					<p v-if="!packs.length && loaded" class="text-paper/50">
+						{{ $t("No packs yet — write your first one.") }}
+					</p>
 				</div>
 			</template>
 
 			<!-- Editor -->
 			<template v-else>
 				<h1 class="mt-6 font-display text-4xl font-extrabold text-paper">
-					{{ doc.name ? "Edit pack" : "New pack" }}
+					{{ $t(doc.name ? "Edit pack" : "New pack") }}
 				</h1>
 				<div class="mt-8 flex flex-col gap-6">
 					<p
 						v-if="Number(doc.is_demo)"
 						class="rounded-2xl border border-haze bg-dusk px-5 py-4 text-sm text-paper/60"
 					>
-						Demo packs are read-only. Duplicate one to make your own version.
+						{{
+							$t("Demo packs are read-only. Duplicate one to make your own version.")
+						}}
 					</p>
 					<label class="flex flex-col gap-2">
-						<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">Title</span>
-						<input v-model="doc.title" class="field text-lg" placeholder="Pack title" maxlength="140" :disabled="Number(doc.is_demo)" />
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
+							{{ $t("Title") }}
+						</span>
+						<input
+							v-model="doc.title"
+							class="field text-lg"
+							:placeholder="$t('Pack title')"
+							maxlength="140"
+							:disabled="Number(doc.is_demo)"
+						/>
 					</label>
 					<label class="flex items-center gap-3 text-paper/70">
-						<input type="checkbox" v-model="doc.ranked" class="size-4 accent-[rgb(var(--accent))]" :disabled="Number(doc.is_demo)" />
-						Ranked — players pick a first and second choice (weighted 2/1)
+						<input
+							type="checkbox"
+							v-model="doc.ranked"
+							class="size-4 accent-[rgb(var(--accent))]"
+							:disabled="Number(doc.is_demo)"
+						/>
+						{{ $t("Ranked — players pick a first and second choice (weighted 2/1)") }}
 					</label>
 
 					<div class="flex flex-col gap-4">
-						<span class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45">
-							Prompts · {{ doc.prompts.length }}
+						<span
+							class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
+						>
+							{{ $t("Prompts ·") }} {{ doc.prompts.length }}
 						</span>
 						<div
 							v-for="(prompt, index) in doc.prompts"
@@ -64,21 +91,21 @@
 						>
 							<div class="flex items-start justify-between gap-3">
 								<span class="font-mono text-xs tabular-nums text-paper/35">
-									{{ String(index + 1).padStart(2, "0") }}
+									{{ $t(String(index + 1).padStart(2, "0")) }}
 								</span>
 								<button
 									class="rounded-full border border-haze px-3 py-1 text-xs text-paper/50 transition hover:border-alert hover:text-alert"
 									@click="removePrompt(index)"
 									:disabled="Number(doc.is_demo)"
 								>
-									Remove
+									{{ $t("Remove") }}
 								</button>
 							</div>
 							<textarea
 								v-model="prompt.prompt_text"
 								class="field mt-3"
 								rows="2"
-								placeholder="Ask the room something…"
+								:placeholder="$t('Ask the room something…')"
 								maxlength="200"
 								:disabled="Number(doc.is_demo)"
 							/>
@@ -94,7 +121,10 @@
 									:disabled="Number(doc.is_demo)"
 								/>
 							</div>
-							<div class="mt-3 grid grid-cols-2 gap-2" aria-label="Player choice preview">
+							<div
+								class="mt-3 grid grid-cols-2 gap-2"
+								:aria-label="$t('Player choice preview')"
+							>
 								<span
 									v-for="(choice, choiceIndex) in promptChoices(prompt)"
 									:key="choiceIndex"
@@ -105,18 +135,30 @@
 								</span>
 							</div>
 						</div>
-						<button v-if="!Number(doc.is_demo)" class="ctl w-fit" @click="addPrompt">+ Add prompt</button>
+						<button v-if="!Number(doc.is_demo)" class="ctl w-fit" @click="addPrompt">
+							{{ $t("+ Add prompt") }}
+						</button>
 					</div>
 
-					<p v-if="error" class="text-alert">{{ error }}</p>
+					<p v-if="error" class="text-alert">{{ $t(error) }}</p>
 					<div class="flex gap-3">
-						<button v-if="!Number(doc.is_demo)" class="ctl ctl-go" :disabled="saving" @click="save">
-							{{ saving ? "Saving…" : doc.name ? "Save pack" : "Create pack" }}
+						<button
+							v-if="!Number(doc.is_demo)"
+							class="ctl ctl-go"
+							:disabled="saving"
+							@click="save"
+						>
+							{{ $t(saving ? "Saving…" : doc.name ? "Save pack" : "Create pack") }}
 						</button>
-						<button v-if="doc.name && !Number(doc.is_demo)" class="ctl ctl-danger" :disabled="saving" @click="removePack">
-							Delete pack
+						<button
+							v-if="doc.name && !Number(doc.is_demo)"
+							class="ctl ctl-danger"
+							:disabled="saving"
+							@click="removePack"
+						>
+							{{ $t("Delete pack") }}
 						</button>
-						<button class="ctl" @click="editing = null">Back</button>
+						<button class="ctl" @click="editing = null">{{ $t("Back") }}</button>
 					</div>
 				</div>
 			</template>
@@ -125,6 +167,7 @@
 </template>
 
 <script setup>
+import { locale } from "@/i18n";
 import { onMounted, ref } from "vue";
 import { call, readError } from "@/api";
 import { confirm } from "@/confirm";
@@ -138,7 +181,13 @@ const saving = ref(false);
 const error = ref("");
 
 function blank() {
-	return { doctype: "GP Crowd Pack", title: "", ranked: false, prompts: [blankPrompt()] };
+	return {
+		doctype: "GP Crowd Pack",
+		content_language: locale.value,
+		title: "",
+		ranked: false,
+		prompts: [blankPrompt()],
+	};
 }
 
 function blankPrompt() {
@@ -151,6 +200,7 @@ async function load() {
 	try {
 		const rows = await call("frappe.client.get_list", {
 			doctype: "GP Crowd Pack",
+			content_language: doc.value.content_language || locale.value,
 			fields: ["name", "title", "ranked", "is_demo"],
 			limit_page_length: 0,
 			order_by: "modified desc",
@@ -173,7 +223,10 @@ async function load() {
 async function edit(pack) {
 	error.value = "";
 	try {
-		const loadedDoc = await call("frappe.client.get", { doctype: "GP Crowd Pack", name: pack.name });
+		const loadedDoc = await call("frappe.client.get", {
+			doctype: "GP Crowd Pack",
+			name: pack.name,
+		});
 		doc.value = loadedDoc.message ?? loadedDoc;
 		editing.value = pack.name;
 	} catch (e) {
@@ -210,6 +263,7 @@ async function save() {
 		// order always follows this screen
 		const payload = {
 			doctype: "GP Crowd Pack",
+			content_language: doc.value.content_language || locale.value,
 			name: doc.value.name,
 			title: doc.value.title,
 			ranked: doc.value.ranked ? 1 : 0,
@@ -238,7 +292,11 @@ async function removePack() {
 	saving.value = true;
 	error.value = "";
 	try {
-		await call("frappe.client.delete", { doctype: "GP Crowd Pack", name: doc.value.name });
+		await call("frappe.client.delete", {
+			doctype: "GP Crowd Pack",
+			content_language: doc.value.content_language || locale.value,
+			name: doc.value.name,
+		});
 		editing.value = null;
 		await load();
 	} catch (e) {

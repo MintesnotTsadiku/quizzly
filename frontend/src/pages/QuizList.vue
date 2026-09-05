@@ -5,18 +5,18 @@
 			<div class="flex items-end justify-between gap-4">
 				<div>
 					<p class="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
-						Host
+						{{ $t("Host") }}
 					</p>
 					<h1 class="mt-2 font-display text-4xl font-extrabold text-paper sm:text-5xl">
-						Your quizzes
+						{{ $t("Your quizzes") }}
 					</h1>
 				</div>
 				<RouterLink class="ctl ctl-go shrink-0 whitespace-nowrap" to="/host/quizzes/new">
-					New quiz
+					{{ $t("New quiz") }}
 				</RouterLink>
 			</div>
 
-			<p v-if="error" class="text-alert">{{ error }}</p>
+			<p v-if="error" class="text-alert">{{ $t(error) }}</p>
 
 			<div v-if="quizzes.length" class="flex flex-col gap-2">
 				<div
@@ -30,24 +30,26 @@
 						</p>
 						<p class="font-mono text-xs text-paper/40">
 							{{ quiz.question_count }}
-							{{ quiz.question_count === 1 ? "question" : "questions" }}
+							{{ $t(quiz.question_count === 1 ? "question" : "questions") }}
 						</p>
 					</div>
-					<span v-if="Number(quiz.is_demo)" class="font-mono text-xs uppercase text-ok"
-						>Demo</span
-					>
+					<span v-if="Number(quiz.is_demo)" class="font-mono text-xs uppercase text-ok">
+						{{ $t("Demo") }}
+					</span>
 					<button v-if="Number(quiz.is_demo)" class="ctl" @click="duplicate(quiz)">
-						Duplicate
+						{{ $t("Duplicate") }}
 					</button>
 					<template v-else>
-						<RouterLink class="ctl" :to="`/host/quizzes/${quiz.name}`"
-							>Edit</RouterLink
-						>
-						<button class="ctl" @click="remove(quiz)">Delete</button>
+						<RouterLink class="ctl" :to="`/host/quizzes/${quiz.name}`">
+							{{ $t("Edit") }}
+						</RouterLink>
+						<button class="ctl" @click="remove(quiz)">{{ $t("Delete") }}</button>
 					</template>
 				</div>
 			</div>
-			<p v-else-if="loaded" class="text-paper/50">No quizzes yet. Make your first one.</p>
+			<p v-else-if="loaded" class="text-paper/50">
+				{{ $t("No quizzes yet. Make your first one.") }}
+			</p>
 		</div>
 	</div>
 </template>

@@ -1,11 +1,14 @@
 <template>
 	<div class="flex h-full flex-col overflow-hidden bg-night">
+		<div class="flex justify-end px-4 py-2"><LanguageSwitch /></div>
 		<!-- Podium outranks everything: the last thing a room sees must be the winner -->
 		<div
 			v-if="podium"
 			class="flex min-h-0 flex-1 flex-col items-center justify-center gap-10 p-10"
 		>
-			<h2 class="font-display text-6xl font-extrabold text-paper">Final results</h2>
+			<h2 class="font-display text-6xl font-extrabold text-paper">
+				{{ $t("Final results") }}
+			</h2>
 			<ol
 				class="grid w-full max-w-5xl gap-5"
 				:class="podium.length > 2 ? 'sm:grid-cols-2' : ''"
@@ -42,12 +45,16 @@
 					</span>
 				</li>
 			</ol>
-			<p class="font-mono uppercase tracking-[0.3em] text-paper/35">Thanks for playing</p>
+			<p class="font-mono uppercase tracking-[0.3em] text-paper/35">
+				{{ $t("Thanks for playing") }}
+			</p>
 			<div class="flex flex-wrap justify-center gap-3">
-				<RouterLink class="ctl ctl-go" :to="{ name: 'GpJoin' }"
-					>Join another game</RouterLink
-				>
-				<RouterLink class="ctl" :to="{ name: 'Catalog' }">Back to all games</RouterLink>
+				<RouterLink class="ctl ctl-go" :to="{ name: 'GpJoin' }">
+					{{ $t("Join another game") }}
+				</RouterLink>
+				<RouterLink class="ctl" :to="{ name: 'Catalog' }">
+					{{ $t("Back to all games") }}
+				</RouterLink>
 			</div>
 		</div>
 
@@ -59,7 +66,7 @@
 			<div class="flex flex-wrap items-center justify-center gap-8">
 				<div class="text-center sm:text-left">
 					<p class="max-w-3xl break-all font-mono text-xl text-accent">
-						Join at {{ joinUrl }}
+						{{ $t("Join at") }} {{ joinUrl }}
 						<button
 							class="ml-1 inline-flex translate-y-1 rounded-md p-1 text-paper/35 transition hover:bg-dusk hover:text-paper"
 							:title="copied ? 'Copied' : `Copy ${joinUrl}`"
@@ -78,7 +85,7 @@
 				<img
 					v-if="qrDataUrl"
 					:src="qrDataUrl"
-					alt="Join QR code"
+					:alt="$t('Join QR code')"
 					class="size-48 rounded-2xl bg-card p-2"
 				/>
 			</div>
@@ -93,7 +100,7 @@
 				</span>
 			</div>
 			<p class="font-mono uppercase tracking-[0.28em] text-paper/40">
-				{{ publicParticipants.length }} in the room
+				{{ publicParticipants.length }} {{ $t("in the room") }}
 			</p>
 		</div>
 
@@ -112,7 +119,9 @@
 			/>
 
 			<template v-else-if="view.phase === 'scoreboard'">
-				<h2 class="font-display text-5xl font-extrabold text-paper">Scoreboard</h2>
+				<h2 class="font-display text-5xl font-extrabold text-paper">
+					{{ $t("Scoreboard") }}
+				</h2>
 				<ol
 					class="grid w-full max-w-5xl gap-5"
 					:class="(view.teams || []).length > 2 ? 'sm:grid-cols-2' : ''"
@@ -151,23 +160,31 @@
 						</span>
 					</li>
 				</ol>
-				<RouterLink class="ctl" :to="{ name: 'Catalog' }">Back to all games</RouterLink>
+				<RouterLink class="ctl" :to="{ name: 'Catalog' }">
+					{{ $t("Back to all games") }}
+				</RouterLink>
 			</template>
 
 			<template v-else>
-				<p class="font-mono uppercase tracking-[0.3em] text-paper/40">Here we go…</p>
+				<p class="font-mono uppercase tracking-[0.3em] text-paper/40">
+					{{ $t("Here we go…") }}
+				</p>
 			</template>
 		</div>
 
 		<!-- Ended / unknown pin -->
 		<div v-else class="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 p-10">
-			<h1 class="font-display text-6xl font-extrabold text-paper">See you next time</h1>
-			<p class="text-paper/50">Start the next room from the host console.</p>
+			<h1 class="font-display text-6xl font-extrabold text-paper">
+				{{ $t("See you next time") }}
+			</h1>
+			<p class="text-paper/50">{{ $t("Start the next room from the host console.") }}</p>
 		</div>
 	</div>
 </template>
 
 <script setup>
+import LanguageSwitch from "@/components/LanguageSwitch.vue";
+import { locale } from "@/i18n";
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import QRCode from "qrcode";
@@ -203,9 +220,9 @@ onBeforeUnmount(() => stopRoom?.());
 
 const live = computed(() => liveFor(gameKey.value));
 const gamePhases = computed(() => phasesFor(gameKey.value));
-const joinUrl = `${window.location.origin}/play/join?pin=${pin}`;
+const joinUrl = `${window.location.origin}/play/join?pin=${pin}&lang=${locale.value}`;
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
 );
 const solvedCount = computed(() => view.value.solved ?? 0);
 
@@ -283,7 +300,15 @@ function applyState(state) {
 	if (state.view) view.value = { ...view.value, ...state.view };
 	if (
 		status.value === "Active" &&
-		["turn_ready", "turn_open", "prompt_open", "prediction_open", "draw_ready", "draw_open", "round_open"].includes(state.phase)
+		[
+			"turn_ready",
+			"turn_open",
+			"prompt_open",
+			"prediction_open",
+			"draw_ready",
+			"draw_open",
+			"round_open",
+		].includes(state.phase)
 	) {
 		startCountdown(Math.max(0.5, state.remaining_seconds));
 	} else {

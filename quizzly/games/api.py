@@ -93,7 +93,7 @@ for _game_key in ROUND_GAME_KEYS:
 
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @frappe.whitelist(allow_guest=True)
-def list_public_decks(game_key: str | None = None) -> list[dict]:
+def list_public_decks(game_key: str | None = None, language: str | None = None) -> list[dict]:
 	"""Demo packs are marketing content: browsable by guests, playable by hosts."""
 	preview = CONTENT_PREVIEWS.get(game_key or "")
 	if not preview:
@@ -103,12 +103,16 @@ def list_public_decks(game_key: str | None = None) -> list[dict]:
 	choice_fields = preview["choice_fields"]
 	text_field = preview.get("text_field", "prompt_text")
 	filters = {"is_demo": 1}
+	if language is not None:
+		from quizzly.localization import content_language
+
+		filters["content_language"] = content_language(language)
 	if pack_doctype == "GP Game Pack":
 		filters["game_key"] = game_key
 	roster = frappe.get_all(
 		pack_doctype,
 		filters=filters,
-		fields=["name", "title", "demo_key", preview["metadata_field"]],
+		fields=["name", "title", "demo_key", "content_language", preview["metadata_field"]],
 		order_by="title asc",
 	)
 	for pack in roster:
