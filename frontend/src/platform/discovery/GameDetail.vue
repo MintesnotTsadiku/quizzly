@@ -29,7 +29,24 @@
 				</header>
 				<div class="gp-detail-grid">
 					<section class="gp-example" aria-label="Try an example round">
-						<GameArtwork :game-key="game.key" :color="profile.color" />
+						<a
+							v-if="coverImage"
+							class="gp-game-illustration"
+							:href="coverImage"
+							target="_blank"
+							rel="noopener"
+							:aria-label="`Open the ${game.title} illustration at full size (new tab)`"
+						>
+							<img
+								:src="coverImage"
+								:alt="coverAlt"
+								:width="roomGame ? 1536 : 1672"
+								:height="roomGame ? 1024 : 941"
+								fetchpriority="high"
+							/>
+							<span>Open illustration <span aria-hidden="true">↗</span></span>
+						</a>
+						<GameArtwork v-else :game-key="game.key" :color="profile.color" />
 						<div class="gp-example-content">
 							<p class="gp-eyebrow">
 								{{
@@ -325,6 +342,16 @@ const profile = computed(() => profileFor(game.value));
 const guide = computed(() => (roomGame.value ? {} : guideFor(game.value?.key)));
 const guideVideo = computed(() => guide.value.demos?.find((demo) => demo.video));
 const visual = computed(() => visualFor(game.value?.key));
+const coverImage = computed(() =>
+	roomGame.value
+		? "/assets/quizzly/images/games/common-ground/gathering-v1.png"
+		: visual.value?.hero,
+);
+const coverAlt = computed(() =>
+	roomGame.value
+		? "Six people of different generations talk in a circle, discovering a shared love of walks, food and music. Only the host needs a device."
+		: visual.value?.summary || `${game.value?.title} illustrated guide`,
+);
 const steps = computed(() =>
 	profile.value.steps.length ? profile.value.steps : guide.value.howTo || [],
 );

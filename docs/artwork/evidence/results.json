@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "common-ground: actual illustration visible on entry and opens full size with keyboard",
+    "crowd-compass: actual illustration visible on entry and opens full size with keyboard",
+    "Existing full guide and worked-example dialog remain available",
+    "Both game pages fit a 390px phone; every registered guide asset exists"
+  ],
+  "errors": []
+}

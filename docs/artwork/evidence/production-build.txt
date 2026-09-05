@@ -1,0 +1,61 @@
+
+> quizzly-ui@0.0.1 build
+> vite build --base=/assets/quizzly/frontend/
+
+vite v4.5.14 building for production...
+
+/assets/quizzly/fonts/gatherplay-fonts.css doesn't exist at build time, it will remain unchanged to be resolved at runtime
+transforming...
+✓ 2196 modules transformed.
+rendering chunks...
+[frappeui-build-config-plugin] Successfully copied index.html to ../quizzly/www/quizzly.html
+computing gzip size...
+../quizzly/public/frontend/index.html                                      1.29 kB │ gzip:  0.58 kB
+../quizzly/public/frontend/assets/Inter.var-d30c3bd0.woff2               264.24 kB
+../quizzly/public/frontend/assets/Inter-Italic.var-d9f448e3.woff2        297.27 kB
+../quizzly/public/frontend/assets/RoomStage-b06b4b78.css                   0.38 kB │ gzip:  0.23 kB
+../quizzly/public/frontend/assets/HostDashboard-728e5235.css               0.83 kB │ gzip:  0.33 kB
+../quizzly/public/frontend/assets/PackPreviewDrawer-1e594ff9.css           1.19 kB │ gzip:  0.43 kB
+../quizzly/public/frontend/assets/GpHost-7393bf38.css                      2.32 kB │ gzip:  0.70 kB
+../quizzly/public/frontend/assets/index-9dd36484.css                     206.41 kB │ gzip: 30.21 kB
+../quizzly/public/frontend/assets/_plugin-vue_export-helper-c27b6911.js    0.15 kB │ gzip:  0.16 kB │ map:   0.12 kB
+../quizzly/public/frontend/assets/socket-ed6d1433.js                       0.19 kB │ gzip:  0.18 kB │ map:   0.64 kB
+../quizzly/public/frontend/assets/confirm-cd8f5a1d.js                      0.27 kB │ gzip:  0.22 kB │ map:   1.02 kB
+../quizzly/public/frontend/assets/nicknames-d2819a01.js                    0.30 kB │ gzip:  0.25 kB │ map:   1.12 kB
+../quizzly/public/frontend/assets/player-477feef5.js                       0.40 kB │ gzip:  0.26 kB │ map:   1.12 kB
+../quizzly/public/frontend/assets/ThemeButton-9a2ea633.js                  0.44 kB │ gzip:  0.34 kB │ map:   1.06 kB
+../quizzly/public/frontend/assets/AvatarPic-b052fa01.js                    0.74 kB │ gzip:  0.51 kB │ map:   1.90 kB
+../quizzly/public/frontend/assets/DrainRing-310041ec.js                    0.88 kB │ gzip:  0.53 kB │ map:   1.69 kB
+../quizzly/public/frontend/assets/AnswerGrid-31d10db1.js                   1.06 kB │ gzip:  0.67 kB │ map:   2.41 kB
+../quizzly/public/frontend/assets/sound-5e5b4409.js                        1.08 kB │ gzip:  0.63 kB │ map:   3.65 kB
+../quizzly/public/frontend/assets/gp-31503dc0.js                           1.12 kB │ gzip:  0.51 kB │ map:   3.65 kB
+../quizzly/public/frontend/assets/site-fb4cf259.js                         1.79 kB │ gzip:  0.99 kB │ map:   4.38 kB
+../quizzly/public/frontend/assets/game-d53918f2.js                         2.04 kB │ gzip:  1.04 kB │ map:   7.55 kB
+../quizzly/public/frontend/assets/HostBar-eb6f721d.js                      2.26 kB │ gzip:  1.11 kB │ map:   4.52 kB
+../quizzly/public/frontend/assets/QuizList-219444df.js                     2.78 kB │ gzip:  1.40 kB │ map:   6.00 kB
+../quizzly/public/frontend/assets/App-8b246493.js                          3.15 kB │ gzip:  1.60 kB │ map:   7.39 kB
+../quizzly/public/frontend/assets/PackPreviewDrawer-e4868f34.js            3.65 kB │ gzip:  1.83 kB │ map:   9.63 kB
+../quizzly/public/frontend/assets/GameArtwork-bcdc3dde.js                  3.68 kB │ gzip:  1.57 kB │ map:   6.26 kB
+../quizzly/public/frontend/assets/CreatePack-da88eeb7.js                   4.89 kB │ gzip:  2.19 kB │ map:  10.81 kB
+../quizzly/public/frontend/assets/Join-bef0fad7.js                         5.16 kB │ gzip:  2.35 kB │ map:  11.67 kB
+../quizzly/public/frontend/assets/GpJoin-44994c9c.js                       5.22 kB │ gzip:  2.36 kB │ map:  10.85 kB
+../quizzly/public/frontend/assets/HostDashboard-9a5d9349.js                5.61 kB │ gzip:  2.32 kB │ map:  13.01 kB
+../quizzly/public/frontend/assets/CatalogHome-d00cf8f3.js                  6.12 kB │ gzip:  2.78 kB │ map:  13.14 kB
+../quizzly/public/frontend/assets/AccessPage-04120ebf.js                   6.33 kB │ gzip:  2.92 kB │ map:  13.65 kB
+../quizzly/public/frontend/assets/PackEditor-c1072fd8.js                   6.94 kB │ gzip:  2.71 kB │ map:  15.76 kB
+../quizzly/public/frontend/assets/LandingPage-341b5e7b.js                  7.03 kB │ gzip:  2.98 kB │ map:  12.79 kB
+../quizzly/public/frontend/assets/RoomStage-31f8739a.js                    7.11 kB │ gzip:  3.02 kB │ map:  16.45 kB
+../quizzly/public/frontend/assets/GpScreen-b8f4bf98.js                     7.52 kB │ gzip:  2.96 kB │ map:  18.10 kB
+../quizzly/public/frontend/assets/router-34499932.js                       8.30 kB │ gzip:  1.61 kB │ map:   6.07 kB
+../quizzly/public/frontend/assets/GpPlayer-d2ea5762.js                     9.65 kB │ gzip:  3.50 kB │ map:  24.44 kB
+../quizzly/public/frontend/assets/Play-0128fde4.js                        10.73 kB │ gzip:  3.85 kB │ map:  26.91 kB
+../quizzly/public/frontend/assets/QuizEditor-ef30a5d2.js                  18.60 kB │ gzip:  6.40 kB │ map:  47.72 kB
+../quizzly/public/frontend/assets/collection-d56a3537.js                  21.01 kB │ gzip:  8.04 kB │ map:  31.60 kB
+../quizzly/public/frontend/assets/Host-c26627c0.js                        22.62 kB │ gzip:  7.51 kB │ map:  60.54 kB
+../quizzly/public/frontend/assets/browser-9d43139f.js                     24.13 kB │ gzip:  9.50 kB │ map: 122.73 kB
+../quizzly/public/frontend/assets/vue-router-da714b5e.js                  25.79 kB │ gzip: 10.16 kB │ map: 162.13 kB
+../quizzly/public/frontend/assets/registry-c9063b6a.js                    35.37 kB │ gzip:  8.74 kB │ map:  72.65 kB
+../quizzly/public/frontend/assets/GpHost-b0ad203d.js                      37.05 kB │ gzip: 11.39 kB │ map:  88.88 kB
+../quizzly/public/frontend/assets/GameDetail-9f0e1a4e.js                  45.68 kB │ gzip: 15.19 kB │ map:  82.91 kB
+../quizzly/public/frontend/assets/index-dadfdd2b.js                      144.39 kB │ gzip: 52.17 kB │ map: 859.15 kB
+✓ built in 21.93s
