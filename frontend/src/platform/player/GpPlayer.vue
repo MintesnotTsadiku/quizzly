@@ -277,13 +277,13 @@ const gameKey = computed(() => player.value?.gameKey || "cuecast");
 const live = computed(() => liveFor(gameKey.value));
 const gamePhases = computed(() => phasesFor(gameKey.value));
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
 );
 const myRowId = computed(() => player.value?.participant);
 const standings = computed(() => view.value.teams || []);
 const rankedStandings = computed(() => podium.value || standings.value);
 const myTeam = computed(() =>
-	(view.value.teams || []).find((t) => t.team_name === view.value.actor_team_name),
+	(view.value.teams || []).find((t) => t.team_name === view.value.actor_team_name)
 );
 const headline = computed(() => {
 	const mine =
@@ -355,6 +355,18 @@ async function refreshPrivate() {
 }
 
 function applyState(state) {
+	if (state.continuation) {
+		saveGpPlayer({
+			...state.continuation,
+			participant_token: player.value.token,
+			nickname: player.value.nickname,
+			avatar: player.value.avatar,
+		});
+		const url = new URL(window.location.href);
+		url.pathname = `/play/p/${state.continuation.game_pin}`;
+		window.location.replace(url);
+		return;
+	}
 	if (state.status === "Ended" || state.podium) {
 		ending.value = state.ending || null;
 		podium.value = state.podium || [];
@@ -436,7 +448,7 @@ async function act(actionType) {
 			action_type: actionType,
 			idempotency_key: crypto.randomUUID(),
 		});
-		if (result.next_prompt) prompt.value = result.next_prompt;
+		if (Object.hasOwn(result, "next_prompt")) prompt.value = result.next_prompt || "";
 		else await refreshPrivate();
 		solvedCount.value += actionType === "correct_prompt" ? 1 : 0;
 	} catch {

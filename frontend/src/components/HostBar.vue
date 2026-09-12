@@ -17,7 +17,7 @@
 					$t(
 						brand.short_name !== "GatherPlay"
 							? brand.short_name
-							: "Games for your community",
+							: "Games for your community"
 					)
 				}}</span></span
 			>
@@ -39,6 +39,9 @@
 			<RouterLink class="gp-nav-content" to="/create">
 				{{ $t("Create a pack") }}
 			</RouterLink>
+			<RouterLink v-if="site.can_manage" to="/manage/games">{{
+				$t("Published games")
+			}}</RouterLink>
 			<RouterLink to="/access"> {{ $t("Your access") }} </RouterLink>
 		</nav>
 		<div class="gp-nav-actions">

@@ -1,5 +1,9 @@
 # Progress
 
+## Site publishing and durable replay (2026-09-12)
+
+Added one System Manager publication policy across standalone and embedded discovery and new-room creation, with six browser-verified starter formats. Independent question/prompt games persist a configurable random batch. Authorized replay continues the group through unseen content, smaller final batches and explicit reset, preserving player tokens and preventing duplicate successors. Ordered games retain their rules. Validation: 189 Bench tests, both frontend test files, all changed-file pre-commit hooks, production build, and browser audits of all six starters plus the remaining round formats passed. See [implementation and evidence](docs/game-publishing/IMPLEMENTATION.md).
+
 ## Amharic riddle games split (2026-09-11)
 
 The 45 riddles are three separate quizzes of 15: `quiz-amharic-riddles-1`,

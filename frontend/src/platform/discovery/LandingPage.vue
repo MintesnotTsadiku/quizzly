@@ -38,12 +38,18 @@
 					:aria-label="$t('Games for conversation, imagination and connection')"
 				>
 					<div class="gp-orbit-caption">{{ $t("The people are the main event.") }}</div>
-					<RouterLink to="/games/common-ground" class="gp-collage-main"
+					<RouterLink
+						v-if="published.includes('common-ground')"
+						to="/games/common-ground"
+						class="gp-collage-main"
 						><GameArtwork game-key="common-ground" color="peach" /><strong>
 							{{ $t("Common") }} <br />
 							{{ $t("Ground") }} </strong
 						><span> {{ $t("No player phones") }} </span></RouterLink
-					><RouterLink to="/games/crowd-compass" class="gp-collage-small"
+					><RouterLink
+						v-if="published.includes('crowd-compass')"
+						to="/games/crowd-compass"
+						class="gp-collage-small"
 						><GameArtwork game-key="crowd-compass" color="lilac" /><strong>
 							{{ $t("Know your crowd?") }}
 						</strong></RouterLink
@@ -92,11 +98,15 @@
 					<p>
 						{{
 							$t(
-								"See a sample round before you start. Choose a pack. Give everyone a way to join in.",
+								"See a sample round before you start. Choose a pack. Give everyone a way to join in."
 							)
 						}}
 					</p>
-					<RouterLink class="gp-button" to="/games/common-ground">
+					<RouterLink
+						class="gp-button"
+						v-if="published.includes('common-ground')"
+						to="/games/common-ground"
+					>
 						{{ $t("Try a little connection →") }}
 					</RouterLink>
 				</div>
@@ -108,7 +118,7 @@
 							<p>
 								{{
 									$t(
-										"Choose by mood and devices. A room full of people needs more than one way to play.",
+										"Choose by mood and devices. A room full of people needs more than one way to play."
 									)
 								}}
 							</p>
@@ -121,7 +131,7 @@
 							<p>
 								{{
 									$t(
-										"Join by code, share a device, or put the phones away. Each game tells you what works.",
+										"Join by code, share a device, or put the phones away. Each game tells you what works."
 									)
 								}}
 							</p>
@@ -134,7 +144,7 @@
 							<p>
 								{{
 									$t(
-										"The conversation after a reveal. The terrible drawing. The unexpected thing you share.",
+										"The conversation after a reveal. The terrible drawing. The unexpected thing you share."
 									)
 								}}
 							</p>
@@ -153,7 +163,7 @@
 					<p>
 						{{
 							$t(
-								"Create a private question pack in minutes, then host it for your group.",
+								"Create a private question pack in minutes, then host it for your group."
 							)
 						}}
 					</p>
@@ -179,7 +189,7 @@
 					<p>
 						{{
 							$t(
-								"No. Filter the collection for shared devices or just the host’s device. Common Ground works through conversation, with an optional big screen.",
+								"No. Filter the collection for shared devices or just the host’s device. Common Ground works through conversation, with an optional big screen."
 							)
 						}}
 					</p>
@@ -191,7 +201,7 @@
 							$t(
 								site.allow_guest_host
 									? `Yes. This site offers ${site.guest_host_limit} guest-hosted games and ${site.guest_pack_limit} private packs. Sign in in the same browser to keep your work.`
-									: "This site asks hosts to sign in first.",
+									: "This site asks hosts to sign in first."
 							)
 						}}
 					</p>
@@ -203,7 +213,7 @@
 							$t(
 								site.access_mode === "Community"
 									? "This is a free community site. Your access page explains the hosting allowance."
-									: "You can start with the available trial. Your access page shows the local plan, price and receipt process.",
+									: "You can start with the available trial. Your access page shows the local plan, price and receipt process."
 							)
 						}}
 					</p>
@@ -214,7 +224,7 @@
 					<p>
 						{{
 							$t(
-								"Yes, on a supported browser. Look for the install suggestion or use Add to Home Screen. Live play needs internet access.",
+								"Yes, on a supported browser. Look for the install suggestion or use Add to Home Screen. Live play needs internet access."
 							)
 						}}
 					</p>
@@ -229,10 +239,21 @@
 	</div>
 </template>
 <script setup>
+import { computed, onMounted, ref } from "vue";
+import { listGames } from "@/platform/session/gp";
+const published = ref([]);
+onMounted(async () => {
+	try {
+		published.value = (await listGames()).map((g) => g.key);
+	} catch {
+		published.value = [];
+	}
+});
+const picks = computed(() => PICK_CARDS.filter((g) => published.value.includes(g.key)));
 import HostBar from "@/components/HostBar.vue";
 import GameArtwork from "./GameArtwork.vue";
 import { site, siteText } from "@/platform/site";
-const picks = [
+const PICK_CARDS = [
 	{
 		key: "common-ground",
 		color: "peach",

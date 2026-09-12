@@ -158,6 +158,9 @@ def next_question(session_doc, questions, index: int, total: int) -> None:
 
 def get_ready(session_doc, question, index: int, total: int) -> None:
 	"""Read-the-question pause before the clock starts, Kahoot style."""
+	from quizzly.batches import note_seen
+
+	note_seen(session_doc, [question.name])
 	now = time.time()
 	deadline_ts = now + GETREADY_SECONDS
 	set_state(
@@ -574,7 +577,16 @@ def get_quiz(session_doc):
 
 
 def get_quiz_questions(session_doc):
-	return get_quiz(session_doc).questions
+	questions = get_quiz(session_doc).questions
+	from quizzly.batches import batch_of
+
+	selected = batch_of(session_doc).get("selected")
+	if selected is None:
+		return questions
+	by_id = {q.name: q for q in questions}
+	if any(i not in by_id for i in selected):
+		frappe.throw(_("This pack changed after the room was created. Start a new room."))
+	return [by_id[i] for i in selected]
 
 
 def get_live_participants(session: str) -> list:

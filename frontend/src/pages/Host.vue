@@ -22,13 +22,34 @@
 						{{ $t("Pick a quiz") }}
 					</h1>
 				</div>
+				<div v-if="selectedQuiz">
+					<h2>{{ selectedQuiz.title }}</h2>
+					<BatchPicker
+						v-model="privateCount"
+						:available="selectedQuiz.question_count"
+						:seconds="45"
+					/><button
+						class="ctl ctl-go"
+						:disabled="
+							!Number.isInteger(privateCount) ||
+							privateCount < 1 ||
+							privateCount > selectedQuiz.question_count
+						"
+						@click="createSession(selectedQuiz.name, privateCount)"
+					>
+						{{ $t("Start a room") }}
+					</button>
+				</div>
 				<p v-if="error" class="text-alert">{{ $t(error) }}</p>
 				<div v-if="quizzes.length" class="flex flex-col gap-2">
 					<button
 						v-for="(quiz, index) in quizzes"
 						:key="quiz.name"
 						class="group flex items-center gap-4 rounded-2xl border border-haze bg-dusk px-5 py-4 text-left transition hover:border-ember"
-						@click="createSession(quiz.name)"
+						@click="
+							selectedQuiz = quiz;
+							privateCount = Math.min(10, quiz.question_count);
+						"
 					>
 						<span class="font-mono text-xs tabular-nums text-paper/35">
 							{{ $t(String(index + 1).padStart(2, "0")) }}
@@ -250,6 +271,12 @@
 					</li>
 				</ol>
 				<div v-if="!reviewing" class="flex flex-wrap justify-center gap-2">
+					<ReplayControls
+						:session="session?.name"
+						:batch="replayBatch"
+						quiz
+						@created="continueQuiz"
+					/>
 					<button class="ctl ctl-go" @click="reset">{{ $t("New game") }}</button>
 					<RouterLink class="ctl" :to="{ name: 'HostDashboard' }">
 						{{ $t("Dashboard") }}
@@ -524,6 +551,11 @@
 </template>
 
 <script setup>
+import BatchPicker from "@/platform/discovery/BatchPicker.vue";
+import ReplayControls from "@/platform/ending/ReplayControls.vue";
+const replayBatch = ref(null),
+	selectedQuiz = ref(null),
+	privateCount = ref(10);
 import { locale } from "@/i18n";
 import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { computed, inject, onMounted, onUnmounted, ref, watch } from "vue";
@@ -590,7 +622,7 @@ let liveFrame = null;
 watch(qrFullscreen, (open) => (open ? qrDialog.value.showModal() : qrDialog.value.close()));
 
 const joinUrl = computed(
-	() => `${window.location.origin}/play/quizzly/join?pin=${session.value.game_pin}`,
+	() => `${window.location.origin}/play/quizzly/join?pin=${session.value.game_pin}`
 );
 
 const LOBBY_CHIP_LIMIT = 10;
@@ -601,18 +633,18 @@ const overflowCount = computed(() => Math.max(0, participants.value.length - LOB
 
 // The projector shows where to go, not the whole query string.
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
 );
 
 const visibleShapes = computed(() =>
-	SHAPES.filter((shape) => question.value?.options[Number(shape.id) - 1]),
+	SHAPES.filter((shape) => question.value?.options[Number(shape.id) - 1])
 );
 
 watch(
 	() => Math.ceil(remaining.value),
 	(secondsLeft) => {
 		if (phase.value === "question" && secondsLeft > 0 && secondsLeft <= 5) playCue("tick");
-	},
+	}
 );
 
 // tallest bar fills the chart; the rest scale against it
@@ -627,14 +659,14 @@ const barHeight = (optionId) => {
 const afterQuestionLabel = computed(() =>
 	(question.value?.q_index ?? 0) >= (question.value?.total ?? 1) - 1
 		? "Final results"
-		: "Show scores",
+		: "Show scores"
 );
 
 const reviewing = computed(() => reviewAt.value !== null);
 
 // 2nd, 1st, 3rd — the winner stands in the middle
 const podiumOrder = computed(() =>
-	[leaderboard.value[1], leaderboard.value[0], leaderboard.value[2]].filter(Boolean),
+	[leaderboard.value[1], leaderboard.value[0], leaderboard.value[2]].filter(Boolean)
 );
 
 function onSessionEvent(message) {
@@ -700,7 +732,7 @@ function showScoreboard(message, animate = true) {
 	standings.value = byRank(entries, animate ? "previous_rank" : "rank");
 	shownScores.value = scoresAt(
 		entries,
-		animate ? (entry) => entry.score - entry.gained : (entry) => entry.score,
+		animate ? (entry) => entry.score - entry.gained : (entry) => entry.score
 	);
 	settled.value = !animate;
 	phase.value = "scoreboard";
@@ -722,7 +754,7 @@ function tallyScores(entries) {
 		const progress = Math.min(1, (now - start) / TALLY_MS);
 		const eased = 1 - Math.pow(1 - progress, 3);
 		shownScores.value = scoresAt(entries, (entry) =>
-			Math.round(entry.score - entry.gained * (1 - eased)),
+			Math.round(entry.score - entry.gained * (1 - eased))
 		);
 		if (progress < 1) requestAnimationFrame(step);
 		else settled.value = true;
@@ -771,6 +803,7 @@ async function applyState(state) {
 	// screen off an empty state is what put a NaN clock on the projector.
 	if (!state.session) return reset();
 	session.value = { name: state.session, game_pin: state.game_pin };
+	replayBatch.value = state.batch;
 	localStorage.setItem(HOSTED_SESSION_KEY, state.session);
 	participants.value = state.participants || [];
 	lobbyLocked.value = Boolean(state.lobby_locked);
@@ -856,10 +889,19 @@ onMounted(async () => {
 	}
 });
 
-async function createSession(quiz) {
+async function continueQuiz(created) {
+	window.location.href = `/play/quizzly/host?session=${created.session}&lang=${locale.value}`;
+}
+
+async function createSession(quiz, count) {
 	error.value = "";
 	try {
-		const created = await call("quizzly.api.create_session", { quiz });
+		const created = await call("quizzly.api.create_session", {
+			quiz,
+			question_count:
+				count ??
+				(route.query.question_count ? Number(route.query.question_count) : undefined),
+		});
 		await applyState(await call("quizzly.api.get_host_state", { session: created.session }));
 		stopSessionRoom?.();
 		stopSessionRoom = useSessionRoom(socket, session.value.game_pin, onSessionEvent, refresh);
@@ -881,7 +923,7 @@ async function hostCall(method, params = {}) {
 
 async function toggleLock() {
 	const lobby = await hostCall(
-		lobbyLocked.value ? "quizzly.api.unlock_lobby" : "quizzly.api.lock_lobby",
+		lobbyLocked.value ? "quizzly.api.unlock_lobby" : "quizzly.api.lock_lobby"
 	);
 	if (lobby) lobbyLocked.value = Boolean(lobby.lobby_locked);
 }

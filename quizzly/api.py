@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe.rate_limiter import rate_limit
 from frappe.utils import now_datetime, strip_html_tags
 
-from quizzly import access, engine
+from quizzly import access, batches, engine
 from quizzly.avatars import get_boot_pack
 from quizzly.engine import publish_session_event
 from quizzly.nicknames import get_boot_words
@@ -33,7 +33,10 @@ def get_spa_boot() -> dict:
 
 
 @frappe.whitelist()
-def create_session(quiz: str) -> dict:
+def create_session(quiz: str, question_count: int | None = None) -> dict:
+	from quizzly.publishing import check_published
+
+	check_published("quiz")
 	quiz_doc = frappe.get_doc("QZ Quiz", quiz)
 	access.check_pack("QZ Quiz", quiz)
 	session = frappe.get_doc(
@@ -44,7 +47,9 @@ def create_session(quiz: str) -> dict:
 			"game_pin": generate_game_pin(),
 			"status": "Lobby",
 		}
-	).insert(ignore_permissions=True)
+	)
+	session.flags.batch_count = question_count
+	session.insert(ignore_permissions=True)
 	return {"session": session.name, "game_pin": session.game_pin}
 
 
@@ -91,6 +96,7 @@ def get_host_state(session: str | None = None) -> dict:
 		"session": session_doc.name,
 		"game_pin": session_doc.game_pin,
 		"quiz_title": quiz.title,
+		"batch": batches.summary(session_doc),
 		"auto_advance": session_doc.auto_advance,
 		"show_host_controls": quiz.show_host_controls,
 		**get_lobby_state(session_doc),
@@ -308,7 +314,11 @@ def get_state(pin: str, token: str) -> dict:
 	if session.status == "Lobby":
 		return {**result, **get_lobby_state(session)}
 	if session.status == "Ended":
-		return {**result, "leaderboard": get_leaderboard(session.name)}
+		return {
+			**result,
+			"leaderboard": get_leaderboard(session.name),
+			"continuation": batches.continuation(session, participant),
+		}
 
 	state = engine.get_state(session.name)
 	if not state:

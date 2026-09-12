@@ -41,7 +41,7 @@
 			<p
 				class="mt-2 max-w-md break-words font-display text-5xl font-extrabold leading-tight text-paper sm:text-6xl"
 			>
-				{{ prompt }}
+				{{ prompt || $t("No prompts remain. Wait for this turn to finish.") }}
 			</p>
 			<p class="-mt-3 font-mono uppercase tracking-widest text-paper/35">
 				{{ view.mode }} {{ $t("mode · no letters!") }}
@@ -49,14 +49,14 @@
 			<div class="grid w-full max-w-md grid-cols-2 gap-3">
 				<button
 					class="flex flex-col items-center gap-2 rounded-3xl bg-lagoon py-8 font-display text-2xl font-extrabold text-sunk transition active:scale-95"
-					:disabled="submitting"
+					:disabled="submitting || !prompt"
 					@click="$emit('act', 'correct_prompt')"
 				>
 					<span class="text-4xl">✓</span> {{ $t("Solved it") }}
 				</button>
 				<button
 					class="flex flex-col items-center gap-2 rounded-3xl bg-gold py-8 font-display text-2xl font-extrabold text-sunk transition active:scale-95"
-					:disabled="submitting"
+					:disabled="submitting || !prompt"
 					@click="$emit('act', 'pass_prompt')"
 				>
 					<span class="text-4xl">»</span> {{ $t("Pass") }}
@@ -124,6 +124,6 @@ const props = defineProps({
 defineEmits(["act"]);
 
 const urgentColor = computed(() =>
-	props.remaining <= 5 ? "rgb(var(--alert))" : "rgb(var(--ok))",
+	props.remaining <= 5 ? "rgb(var(--alert))" : "rgb(var(--ok))"
 );
 </script>

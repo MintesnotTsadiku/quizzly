@@ -1,0 +1,19 @@
+{
+  "checks": [
+    "Common Ground: 3 then 2 unseen prompts, durable reloads, projector follows, exhaustion shown",
+    "Explicit reset retains the chosen batch size",
+    "Amharic count controls render at 390px without horizontal overflow",
+    "Quiz: selected count honored, simultaneous replay requests return one room, original player token continues",
+    "Crowd Compass: original guest token follows the new room and the next prompt is unseen"
+  ],
+  "errors": [],
+  "sessions": [
+    "0mnpbp7th3",
+    "0qd027lb0v",
+    "0supu63m89",
+    "quiz:0t57do9ipk",
+    "quiz:0vk73croj1",
+    "16ft5o5qvp",
+    "193vs99q5b"
+  ]
+}

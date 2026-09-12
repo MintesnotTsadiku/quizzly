@@ -14,7 +14,9 @@
   "current_round",
   "started_at",
   "ended_at",
-  "gatherplay_access"
+  "gatherplay_access",
+  "play_batch",
+  "next_session"
  ],
  "fields": [
   {
@@ -85,6 +87,22 @@
    "options": "GatherPlay Access",
    "read_only": 1,
    "hidden": 1
+  },
+  {
+   "fieldname": "play_batch",
+   "label": "Content batch",
+   "fieldtype": "JSON",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "next_session",
+   "label": "Next session",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1
   }
  ],
  "links": [],

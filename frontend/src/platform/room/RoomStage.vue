@@ -23,7 +23,7 @@
 						$t(
 							error
 								? "Your room will reconnect automatically."
-								: "Opening your room…",
+								: "Opening your room…"
 						)
 					}}
 				</p>
@@ -49,14 +49,14 @@
 				<p>
 					{{
 						$t(
-							"Make little groups of 2–5. You’ll find surprising things you share, one playful prompt at a time.",
+							"Make little groups of 2–5. You’ll find surprising things you share, one playful prompt at a time."
 						)
 					}}
 				</p>
 				<p class="gp-stage-support">
 					{{
 						$t(
-							"Sit, stand, speak or gesture. Anyone can pass. No sign-ups for players.",
+							"Sit, stand, speak or gesture. Anyone can pass. No sign-ups for players."
 						)
 					}}
 				</p>
@@ -79,14 +79,17 @@
 				<p>
 					{{
 						$t(
-							"Before you go: tell someone one thing you’re glad you discovered about them.",
+							"Before you go: tell someone one thing you’re glad you discovered about them."
 						)
 					}}
 				</p>
 				<div v-if="!screen" class="gp-stage-actions">
-					<button class="gp-button" :disabled="busy" @click="replay">
-						{{ $t(busy ? "Opening…" : "Play another round") }} ↻</button
-					><RouterLink class="gp-button gp-button-secondary" to="/">
+					<ReplayControls
+						:session="route.params.session"
+						:batch="snapshot.batch"
+						@created="replay"
+					/>
+					<RouterLink class="gp-button gp-button-secondary" to="/">
 						{{ $t("Find our next game →") }}
 					</RouterLink>
 				</div>
@@ -98,7 +101,7 @@
 						$t(
 							snapshot.phase === "room_share"
 								? "Share a little surprise"
-								: "Talk it through together",
+								: "Talk it through together"
 						)
 					}}
 					· {{ snapshot.view.round }} {{ $t("of") }} {{ snapshot.view.rounds }}
@@ -129,7 +132,7 @@
 						$t(
 							snapshot.phase === "room_share"
 								? "In a big room, hear from two or three groups. Save time for everyone to keep playing."
-								: "Take turns. Make space for quieter voices. Anyone can pass.",
+								: "Take turns. Make space for quieter voices. Anyone can pass."
 						)
 					}}
 				</p>
@@ -140,10 +143,10 @@
 								busy
 									? "Moving on…"
 									: snapshot.phase === "room_prompt"
-										? "We’re ready to share"
-										: snapshot.view.round === snapshot.view.rounds
-											? "Finish together"
-											: "Next conversation",
+									? "We’re ready to share"
+									: snapshot.view.round === snapshot.view.rounds
+									? "Finish together"
+									: "Next conversation"
 							)
 						}}
 						→
@@ -179,6 +182,7 @@
 	</div>
 </template>
 <script setup>
+import ReplayControls from "@/platform/ending/ReplayControls.vue";
 import { computed, onBeforeUnmount, onMounted, ref, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import LanguageSwitch from "@/components/LanguageSwitch.vue";
@@ -197,8 +201,8 @@ const snapshot = ref({}),
 	endDialog = ref(null);
 const screenUrl = computed(() =>
 	languageUrl(
-		router.resolve({ name: "RoomScreen", params: { pin: snapshot.value.game_pin } }).href,
-	),
+		router.resolve({ name: "RoomScreen", params: { pin: snapshot.value.game_pin } }).href
+	)
 );
 let timer,
 	stopped = false,
@@ -212,14 +216,26 @@ async function refresh() {
 	try {
 		const state = await gpCall(
 			screen.value ? "get_public_state" : "get_host_state",
-			screen.value ? { pin: route.params.pin } : { session: route.params.session },
+			screen.value ? { pin: route.params.pin } : { session: route.params.session }
 		);
 		if (stopped) return;
+		if (screen.value && state.continuation) {
+			const url = new URL(window.location.href);
+			url.pathname = `/play/room-screen/${state.continuation.game_pin}`;
+			window.location.replace(url);
+			return;
+		}
 		snapshot.value = Object.keys(state).length ? state : { status: "Unknown" };
 		error.value = "";
 		failures = 0;
 	} catch (e) {
 		if (stopped) return;
+		if (screen.value && state.continuation) {
+			const url = new URL(window.location.href);
+			url.pathname = `/play/room-screen/${state.continuation.game_pin}`;
+			window.location.replace(url);
+			return;
+		}
 		failures++;
 		error.value = snapshot.value.status
 			? "Connection interrupted. Keep talking — reconnecting before the next prompt."
@@ -265,16 +281,9 @@ async function end() {
 		router.push("/");
 	}
 }
-async function replay() {
+async function replay(created) {
 	busy.value = true;
 	try {
-		const created = await gpCall("create_session", {
-			game_key: "common-ground",
-			configuration: {
-				pack: snapshot.value.configuration?.pack || "everyday",
-				language: snapshot.value.configuration?.language || locale.value,
-			},
-		});
 		rememberHostedSession(created.session);
 		await router.push({ name: "RoomHost", params: { session: created.session } });
 	} catch (e) {
@@ -288,13 +297,13 @@ watch(
 	() => {
 		snapshot.value = {};
 		refresh();
-	},
+	}
 );
 watch(
 	() => snapshot.value.status,
 	(status) => {
 		if (status === "Ended" && !screen.value) forgetHostedSession();
-	},
+	}
 );
 </script>
 <style scoped>

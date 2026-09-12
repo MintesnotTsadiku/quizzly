@@ -235,7 +235,9 @@ class RoundGame(GameModule):
 		return {
 			"pack": pack,
 			"seconds": seconds,
-			"rounds": max(1, min(int(cfg.get("rounds") or count), count)),
+			"rounds": count
+			if self.key == "escape-together"
+			else max(1, min(int(cfg.get("rounds") or count), count)),
 		}
 
 	def start_game(self, ctx, participants):
@@ -244,7 +246,13 @@ class RoundGame(GameModule):
 			filters={"parent": ctx.configuration["pack"], "parenttype": "GP Game Pack"},
 			pluck="name",
 		)
-		random.shuffle(items)
+		from quizzly.batches import selected_ids
+
+		selected = selected_ids(ctx)
+		if selected is not None:
+			items = selected
+		else:
+			random.shuffle(items)
 		return self.open_round(ctx, {"items": items, "position": 0, "round_index": -1})
 
 	def open_round(self, ctx, ms):

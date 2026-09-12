@@ -109,7 +109,10 @@ class CommonGroundGame(GameModule):
 			if ctx.configuration.get("language") == "am"
 			else PACKS[ctx.configuration["pack"]]["prompts"]
 		)
-		prompts = random.sample(source, 3)
+		from quizzly.batches import selected_ids
+
+		selected = selected_ids(ctx)
+		prompts = [source[int(i)] for i in selected] if selected is not None else random.sample(source, 3)
 		return self._step({"prompts": prompts, "position": 0}, "room_prompt")
 
 	def _step(self, state, phase, resolution=None):

@@ -1,0 +1,45 @@
+{
+  "findings": [
+    {
+      "key": "doodle-dash",
+      "shortStrokeSegments": 12,
+      "longStrokeSegments": 120,
+      "requestedLongSegments": 120,
+      "correctGuess": true,
+      "completed": true
+    },
+    {
+      "key": "cuecast",
+      "privatePrompt": true,
+      "solvedAndPassed": true,
+      "completed": true
+    }
+  ],
+  "errors": [],
+  "responseLog": [
+    {
+      "action_type": "stroke_batch",
+      "status": 200
+    },
+    {
+      "action_type": "stroke_batch",
+      "status": 200
+    },
+    {
+      "action_type": "stroke_batch",
+      "status": 200
+    },
+    {
+      "action_type": "guess",
+      "status": 200
+    },
+    {
+      "action_type": "correct_prompt",
+      "status": 200
+    },
+    {
+      "action_type": "pass_prompt",
+      "status": 200
+    }
+  ]
+}

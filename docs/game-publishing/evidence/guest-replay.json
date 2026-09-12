@@ -1,0 +1,7 @@
+{
+  "checks": [
+    "Browser capability authorizes only its own replay",
+    "Duplicate replay consumes no additional allowance",
+    "Explicit reset cannot bypass the two-game guest trial"
+  ]
+}

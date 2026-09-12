@@ -88,7 +88,13 @@ class CueCastGame(GameModule):
 			filters={"parent": config["deck"], "parenttype": "GP Cue Deck"},
 			pluck="name",
 		)
-		random.shuffle(prompts)
+		from quizzly.batches import selected_ids
+
+		selected = selected_ids(ctx)
+		if selected is not None:
+			prompts = selected
+		else:
+			random.shuffle(prompts)
 		module_state = {
 			"teams": [team["name"] for team in teams],
 			"team_order": order,
@@ -125,6 +131,8 @@ class CueCastGame(GameModule):
 
 	def next_turn(self, ctx, module_state: dict) -> Transition:
 		module_state = dict(module_state)
+		if module_state["prompt_pos"] >= len(module_state["prompt_ids"]):
+			return Transition(phase="podium", finished=self.finish_game(ctx, {"module_state": module_state}))
 		module_state["turn_number"] += 1
 		total_regular = len(module_state["team_order"]) * ctx.configuration["turns_per_team"]
 		team = module_state["team_order"][module_state["turn_number"] % len(module_state["team_order"])]
@@ -176,6 +184,9 @@ class CueCastGame(GameModule):
 	def close_turn(self, ctx, state) -> Transition:
 		module_state = dict(state["module_state"])
 		actions = accepted_actions(ctx.session, module_state["round_index"])
+		module_state["prompt_pos"] = min(
+			len(module_state["prompt_ids"]), module_state["turn_start_pos"] + len(actions) + 1
+		)
 		solved_rows = [a for a in actions if a.action_type == "correct_prompt"]
 		passed_count = sum(1 for a in actions if a.action_type == "pass_prompt")
 		deltas = [
@@ -281,7 +292,11 @@ class CueCastGame(GameModule):
 		already = accepted_actions(ctx.session, module_state["round_index"])
 		prompts = module_state["prompt_ids"]
 		index = module_state["turn_start_pos"] + len(already) + 1
-		next_row = prompts[index % len(prompts)] if prompts else None
+		if index - 1 >= len(prompts):
+			return ActionDecision(
+				accepted=False, reason="No prompts remain in this batch. Wait for the turn to finish."
+			)
+		next_row = prompts[index] if index < len(prompts) else None
 		return ActionDecision(accepted=True, result={"ok": True, "next_prompt": self.prompt_text(next_row)})
 
 	# -- host commands ---------------------------------------------------------
@@ -357,7 +372,7 @@ class CueCastGame(GameModule):
 				position = module_state["turn_start_pos"] + len(
 					accepted_actions(ctx.session, module_state.get("round_index"))
 				)
-				view["prompt"] = self.prompt_text(prompts[position % len(prompts)])
+				view["prompt"] = self.prompt_text(prompts[position]) if position < len(prompts) else None
 		elif state["phase"] == "turn_ready" and view["is_performer"]:
 			view["mode"] = ctx.configuration["mode"]
 		return view
@@ -449,7 +464,7 @@ class CueCastGame(GameModule):
 	def played_prompts(self, module_state, count: int) -> list[str]:
 		start = module_state["turn_start_pos"]
 		prompts = module_state["prompt_ids"]
-		rows = [prompts[(start + offset) % len(prompts)] for offset in range(max(0, count))]
+		rows = prompts[start : start + max(0, count)]
 		texts = frappe.get_all(
 			"GP Cue Prompt", filters={"name": ("in", rows)}, fields=["name", "prompt_text"]
 		)

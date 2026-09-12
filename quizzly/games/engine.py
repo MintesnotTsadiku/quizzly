@@ -27,7 +27,12 @@ SCHEMA_VERSION = 1
 
 def context_for(session_doc) -> GameContext:
 	# a JSON field can come back as a raw string off a plain db read; modules index into it
-	configuration = frappe.parse_json(session_doc.get("configuration")) or {}
+	configuration = dict(frappe.parse_json(session_doc.get("configuration")) or {})
+	from quizzly.batches import batch_of
+
+	batch = batch_of(session_doc)
+	if batch:
+		configuration["_selected_ids"] = batch["selected"]
 	return GameContext(
 		session=session_doc.name,
 		pin=session_doc.game_pin,
@@ -223,6 +228,9 @@ def apply_transition(session_doc, old_state: dict, transition: Transition) -> No
 		new_state["presentation_history"] = history[-8:]
 	elif old_state.get("presentation_history"):
 		new_state["presentation_history"] = old_state["presentation_history"]
+	from quizzly.batches import observe_transition
+
+	observe_transition(session_doc, new_state)
 	set_state(session_doc.name, new_state, ttl=ttl)
 
 	round_index = module_state.get("round_index")

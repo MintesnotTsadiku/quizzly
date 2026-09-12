@@ -1,0 +1,305 @@
+Starting test run with parameters: site=training.localhost, app=quizzly, verbose=False, tests=(), force=False, profile=False, failfast=False, skip_before_tests=False, debug=False, selected_categories=[]
+View detailed logs (using --verbose): /home/minte/projects/training-apps/logs/frappe.testing.log
+
+Running 1 unit tests for quizzly
+
+quizzly.tests.test_demo_seed.TestQuizDemoCatalog
+    ✔  test_quiz_ships_composed_and_funny_demo_sets
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.003s
+
+OK
+
+Running 136 integration tests for quizzly
+
+quizzly.tests.test_avatars.TestAvatars
+    ✔  test_boot_pack_exposes_id_and_url_per_avatar
+    ✔  test_chosen_avatar_is_stored
+    ✔  test_every_avatar_in_the_manifest_is_rendered
+    ✔  test_lobby_payload_carries_avatar
+    ✔  test_missing_avatar_falls_back_to_a_stable_pick
+    ✔  test_unknown_avatar_rejected
+
+quizzly.tests.test_engine.TestExplanationScreen
+    ✔  test_explanation_after_stats_reverses_the_two_screens
+    ✔  test_explanation_expires_into_stats_on_its_own
+    ✔  test_explanation_holds_the_scoreboard_back
+    ✔  test_no_explanation_phase_when_quiz_toggle_is_off
+    ✔  test_question_without_explanation_skips_the_screen
+    ✔  test_quiz_sets_how_long_the_explanation_stays_up
+
+quizzly.tests.test_engine.TestGameLoop
+    ✔  test_advance_control_on_last_question_finishes
+    ✔  test_end_session_from_lobby_cancels
+    ✔  test_finish_session_is_idempotent
+    ✔  test_full_game_to_podium  (2.7s)
+    ✔  test_kicked_player_does_not_block_the_reveal
+    ✔  test_last_question_skips_the_standings_for_the_podium
+    ✔  test_question_closes_when_every_player_has_answered
+    ✔  test_question_stays_open_until_every_player_answers
+    ✔  test_skip_control_closes_question_early
+    ✔  test_stats_hands_over_to_the_standings_screen
+    ✔  test_stats_holds_for_host_when_auto_advance_off
+    ✔  test_ticker_reveals_as_soon_as_everyone_answers
+    ✔  test_ticker_survives_bad_session  (8.74s)
+    ✔  test_wrong_answer_scores_zero_and_resets_streak
+
+quizzly.tests.test_engine.TestScoring
+    ✔  test_fastest_answer_gets_full_base
+    ✔  test_grace_overshoot_clamps_to_half_base
+    ✔  test_multiplier_zero_and_double
+    ✔  test_slowest_answer_gets_half_base
+    ✔  test_streak_bonus
+    ✔  test_streak_bonus_caps_at_250
+
+quizzly.tests.test_engine.TestSubmitGauntlet
+    ✔  test_db_unique_constraint_is_final_word
+    ✔  test_duplicate_submit_rejected
+    ✔  test_get_state_mid_question_gives_remaining_time
+    ✔  test_kicked_token_rejected
+    ✔  test_question_payload_never_contains_correct_answer
+    ✔  test_submit_after_deadline_rejected
+    ✔  test_submit_for_non_active_question_rejected
+    ✔  test_submit_rejected_when_session_not_active
+    ✔  test_submit_stores_answer_without_correctness_leak
+
+quizzly.tests.test_dashboard.TestHostDashboard
+    ✔  test_combines_active_history_and_analytics_for_the_host
+
+quizzly.tests.test_game_ux.TestAbandonedSession
+    ✔  test_end_session_ends_it_instead_of_flagging_a_dead_loop
+    ✔  test_host_state_reaps_it_and_preserves_the_ending
+    ✔  test_just_started_game_is_not_reaped_before_the_loop_writes_state
+    ✔  test_lobby_waiting_for_players_is_never_reaped
+    ✔  test_remembered_session_settles_to_a_podium
+    ✔  test_running_game_is_left_alone
+
+quizzly.tests.test_game_ux.TestHostState
+    ✔  test_finds_live_session_without_argument
+    ✔  test_in_game_host_controls_are_off_until_the_quiz_turns_them_on
+    ✔  test_lobby_state
+    ✔  test_mid_question_state_carries_correct_option_for_host
+    ✔  test_non_host_is_refused
+
+quizzly.tests.test_game_ux.TestJoinFiltersNicknames
+    ✔  test_profane_nickname_rejected_with_message
+
+quizzly.tests.test_game_ux.TestPlayerResult
+    ✔  test_podium_survives_reload_after_the_game_ends
+    ✔  test_result_reports_own_outcome_and_rank
+
+quizzly.tests.test_game_ux.TestProfanityFilter
+    ✔  test_clean_nicknames_pass
+    ✔  test_dirty_nicknames_blocked
+
+quizzly.tests.test_authoring.TestQuizAuthoring
+    ✔  test_controller_rejects_broken_quizzes
+    ✔  test_delete_refuses_while_a_session_references_the_quiz
+    ✔  test_demo_quiz_is_visible_but_read_only_and_can_be_duplicated
+    ✔  test_image_rides_along_on_the_question_payload
+    ✔  test_list_quizzes_counts_questions
+    ✔  test_reorder_survives_a_client_save
+
+quizzly.tests.test_crowd_compass.TestConfiguration
+    ✔  test_bad_stage_rejected
+    ✔  test_defaults_normalized
+    ✔  test_team_match_requires_team_mode
+
+quizzly.tests.test_crowd_compass.TestHostPowers
+    ✔  test_live_prompt_on_blank_room  (36.6s)
+    ✔  test_second_prompt_events_and_void_keep_their_round  (58.7s)
+    ✔  test_void_prompt_reverses_deltas  (29.4s)
+
+quizzly.tests.test_crowd_compass.TestRanked
+    ✔  test_weighted_aggregation_and_second_pick  (20.2s)
+
+quizzly.tests.test_crowd_compass.TestRoundScoring
+    ✔  test_duplicate_vote_rejected
+    ✔  test_full_round_scores_prediction_match_and_estimation  (20.3s)
+    ✔  test_nonresponse_scores_nothing  (29.5s)
+    ✔  test_quorum_miss_voids_scoring  (20.3s)
+    ✔  test_tied_pluralities_both_win  (20.4s)
+
+quizzly.tests.test_crowd_compass.TestSecrecy
+    ✔  test_vote_and_prediction_snapshots_leak_nothing  (10.3s)
+
+quizzly.tests.test_crowd_compass.TestTeamAverage
+    ✔  test_team_podium_averages_members  (35.7s)
+
+quizzly.tests.test_nicknames.TestNicknameWords
+    ✔  test_boot_words_expose_both_lists
+    ✔  test_generated_nicknames_fit_the_input_limit
+    ✔  test_no_generated_nickname_is_profane
+
+quizzly.tests.test_api.TestLobbyFlow
+    ✔  test_duplicate_nickname_rejected
+    ✔  test_join_returns_token_and_lobby_snapshot
+    ✔  test_kick_frees_nickname_and_rejects_token
+    ✔  test_leave_removes_participant
+    ✔  test_locked_lobby_rejects_join_until_unlocked
+    ✔  test_non_host_cannot_control_session
+    ✔  test_session_created_with_pin
+    ✔  test_wrong_pin_rejected
+
+quizzly.tests.test_api.TestSpaBoot
+    ✔  test_boot_matches_the_current_frappe_session
+
+quizzly.tests.test_platform.TestJoinGauntlet
+    ✔  test_duplicate_nickname_rejected
+    ✔  test_kicked_token_rejected_everywhere
+    ✔  test_locked_lobby_rejects_join
+    ✔  test_token_stored_hashed_only
+
+quizzly.tests.test_platform.TestLedger
+    ✔  test_delta_applies_once_under_retry
+
+quizzly.tests.test_platform.TestPinAllocation
+    ✔  test_generated_pin_is_six_digits_and_unique_enough
+
+quizzly.tests.test_platform.TestPublicContentDiscovery
+    ✔  test_demo_pack_includes_safe_prompt_preview
+    ✔  test_demo_quiz_includes_safe_question_preview
+
+quizzly.tests.test_platform.TestPublicSafety
+    ✔  test_public_snapshot_never_carries_prompt_or_controls
+
+quizzly.tests.test_platform.TestRegistry
+    ✔  test_browser_json_object_arguments_are_normalized
+    ✔  test_create_session_is_an_authenticated_whitelisted_method
+    ✔  test_non_module_path_rejected
+    ✔  test_registered_modules_expose_manifests
+    ✔  test_unknown_game_key_throws
+
+quizzly.tests.test_platform.TestSubmitGauntlet
+    ✔  test_action_persists_with_idempotency
+    ✔  test_db_unique_backstops_redis_bypass
+    ✔  test_wrong_role_rejected
+
+quizzly.tests.test_doodle_dash.TestDoodleDash
+    ✔  test_bad_strokes_and_artist_guess_are_rejected
+    ✔  test_prompt_secrecy_canvas_recovery_and_scoring
+
+quizzly.tests.test_cuecast.TestConfiguration
+    ✔  test_defaults_normalized
+    ✔  test_missing_deck_throws_and_creates_nothing
+
+quizzly.tests.test_cuecast.TestHostControls
+    ✔  test_end_session_from_lobby_cancels
+    ✔  test_non_host_rejected
+
+quizzly.tests.test_cuecast.TestRotationAndFinish
+    ✔  test_equal_turns_then_podium  (1.76e+02s)
+    ✔  test_host_end_from_lobby_cancels
+    ✔  test_tied_game_gets_sudden_death  (1.76e+02s)
+
+quizzly.tests.test_cuecast.TestTurnFlow
+    ✔  test_correct_advances_and_scores_team  (39.2s)
+    ✔  test_ledger_rows_match_solved_count  (39.3s)
+    ✔  test_only_performer_scores_prompts  (3.22s)
+    ✔  test_prompt_secret_scoped_to_performer  (3.2s)
+
+quizzly.tests.test_batches.TestBatches
+    ✔  test_administrator_ui_allowance_matches_existing_creation_exemption
+    ✔  test_bad_counts_are_rejected
+    ✔  test_common_ground_uses_three_then_two_prompts
+    ✔  test_history_and_identity_cannot_be_overwritten_through_document_save
+    ✔  test_management_can_publish_nothing_and_reject_unknown_keys
+    ✔  test_pack_language_change_requires_explicit_reset
+    ✔  test_partial_batch_preserves_requested_size_and_retries_return_same_room
+    ✔  test_player_tokens_transfer_but_kicked_players_do_not
+    ✔  test_policy_is_shared_by_catalog_api_and_document_creation
+    ✔  test_replay_requires_owner_and_an_ended_room
+    ✔  test_selection_is_durable_and_replay_exhausts_without_repeats
+    ✔  test_unseen_reserved_content_remains_available_and_groups_are_independent
+
+quizzly.tests.test_round_games.TestRoundGameCatalog
+    ✔  test_bluffline_has_anonymous_submission_and_vote_phases
+    ✔  test_every_planned_game_is_registered_and_has_three_english_demos
+    ✔  test_every_round_profile_has_content_preview_metadata
+    ✔  test_numeric_round_is_secret_scored_and_reconnectable
+
+
+----------------------------------------------------------------------
+Ran 136 tests in 737.869s
+
+OK
+
+Running 52 unspecified-category tests for quizzly
+
+quizzly.tests.test_recovery.TestRecovery
+    ✔  test_concurrently_ended_room_is_ignored
+    ✔  test_device_free_room_never_gets_a_timer_job
+    ✔  test_expired_state_ends_with_saved_scores
+    ✔  test_running_or_queued_job_is_not_replaced
+    ✔  test_startup_grace_is_respected
+    ✔  test_stopped_job_requeued_without_resetting_round
+
+quizzly.tests.test_shared_branding.SharedBrandingTests
+    ✔  test_installed_cms_is_the_single_configuration_source
+    ✔  test_standalone_does_not_import_cms
+
+quizzly.tests.test_common_ground.TestCommonGround
+    ✔  test_deadline_never_rushes_a_conversation
+    ✔  test_pack_validation_and_manual_pacing
+    ✔  test_starts_without_digital_participants_and_snapshots_three_prompts
+    ✔  test_three_conversations_and_shares_end_cooperatively
+    ✔  test_unknown_commands_do_not_advance
+
+quizzly.tests.test_round_repairs.ContentGuards
+    ✔  test_atomic_replay_marker
+    ✔  test_missing_and_unsafe_media_are_rejected
+
+quizzly.tests.test_round_repairs.RoundRepairs
+    ✔  test_bracket_majority_advances_and_ties_keep_seed
+    ✔  test_chorus_duplicates_disappear_and_guesser_cannot_give_clue
+    ✔  test_creative_reveal_retains_contribution_after_reload
+    ✔  test_escape_wrong_majority_retries_stage
+    ✔  test_failed_number_validation
+    ✔  test_memory_hides_scene_and_question_in_opposite_phases
+    ✔  test_private_response_lock_survives_new_snapshot
+    ✔  test_seek_only_confirmed_missions_score
+    ✔  test_story_selection_and_persistence
+    ✔  test_wrong_amharic_and_empty_answers_never_score
+
+quizzly.tests.test_puzzle_rules.PuzzleRules
+    ✔  test_dots_extra_turn_and_completion
+    ✔  test_nonogram_solution
+    ✔  test_path_solution_undo_and_invalid_jump
+    ✔  test_quilt_bounds_overlap_completion
+    ✔  test_sudoku_givens_conflicts_notes_and_solution
+    ✔  test_unicode_and_symbols_remain_distinct
+
+quizzly.tests.test_grid_conquest.TestGridConquest
+    ✔  test_a_tied_match_assigns_equal_ranks
+    ✔  test_alternating_moves_complete_a_real_board_once
+    ✔  test_draw_has_no_winner_or_point
+    ✔  test_every_winning_line_and_both_marks
+    ✔  test_host_help_is_explicit_and_ends_after_one_move
+    ✔  test_invalid_and_occupied_cells_cannot_change_state
+    ✔  test_legacy_sessions_keep_their_original_player_view
+    ✔  test_mutating_requests_restore_with_a_current_locking_read
+    ✔  test_no_pack_or_clock_required
+    ✔  test_private_views_expose_only_the_correct_controller
+    ✔  test_second_board_starts_with_o
+    ✔  test_turns_rotate_within_each_side
+    ✔  test_two_wins_or_three_boards_end_match
+    ✔  test_wrong_side_and_paused_moves_are_rejected
+
+quizzly.tests.test_reveal_snapshot.TestRevealSnapshot
+    ✔  test_reveal_snapshot_counts_predictions_as_well_as_votes
+
+quizzly.tests.test_crowd_progression.TestCrowdProgression
+    ✔  test_extra_prompt_does_not_move_announced_finale
+    ✔  test_finale_doubles_prediction_only_and_dedupe_keys_stay_stable
+    ✔  test_finale_preserves_team_and_estimation_bonuses
+    ✔  test_legacy_short_classic_and_extra_rounds
+    ✔  test_recap_excludes_void_ties_no_quorum_and_private_details
+    ✔  test_void_reverses_actual_finale_score_once
+
+
+----------------------------------------------------------------------
+Ran 52 tests in 0.018s
+
+OK

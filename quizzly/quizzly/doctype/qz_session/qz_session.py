@@ -2,6 +2,17 @@ from frappe.model.document import Document
 
 
 class QZSession(Document):
+	def before_insert(self):
+		from quizzly.batches import prepare
+
+		self.play_batch = prepare("quiz", {"pack": self.quiz}, self.flags.batch_count)
+		self.next_session = None
+
+	def validate(self):
+		from quizzly.batches import protect_session
+
+		protect_session(self)
+
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

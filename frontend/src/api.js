@@ -9,6 +9,14 @@ export function readError(e) {
 }
 
 export function call(method, params = {}) {
+	if (window.session_user === "Guest" && method === "quizzly.batches.replay") {
+		params = {
+			method: "replay",
+			legacy: params.quiz,
+			params: { session: params.session, reset: params.reset },
+		};
+		method = "quizzly.access.guest_host";
+	}
 	const hostMethods = new Set([
 		"create_session",
 		"get_host_state",
@@ -60,7 +68,7 @@ export async function get(method) {
 	if (!response.ok) {
 		throw Object.assign(
 			new Error(payload.message || `Request failed (${response.status})`),
-			payload,
+			payload
 		);
 	}
 	return payload.message;

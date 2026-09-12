@@ -164,6 +164,9 @@ def paid_receipt(access):
 
 
 def allowance(access, action, policy=None):
+	# Match before_create: Administrator already bypasses site quotas.
+	if frappe.session.user == "Administrator":
+		return None, ""
 	policy = policy or settings()
 	used = int(access.get("trial_" + action) or 0) if access else 0
 	if is_guest():
@@ -331,6 +334,7 @@ def guest_host(method: str, params: dict | str | None = None, legacy: bool = Fal
 	same_origin()
 	allowed = {
 		"create_session",
+		"replay",
 		"get_host_state",
 		"start_session",
 		"host_command",
@@ -360,6 +364,11 @@ def guest_host(method: str, params: dict | str | None = None, legacy: bool = Fal
 	from quizzly import api as quiz_api
 	from quizzly.games import api as game_api
 
+	if method == "replay":
+		from quizzly.batches import replay
+
+		args = game_api.as_dict(params)
+		return replay(session=args.get("session"), quiz=legacy, reset=args.get("reset", False))
 	api = quiz_api if legacy else game_api
 	if not hasattr(api, method):
 		frappe.throw("Unknown host action")

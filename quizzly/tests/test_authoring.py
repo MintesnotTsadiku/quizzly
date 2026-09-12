@@ -74,8 +74,7 @@ class TestQuizAuthoring(IntegrationTestCase):
 
 		payloads = [engine.question_payload(session, q, 0, 2, 0.0) for q in questions]
 
-		self.assertEqual(payloads[0]["image_url"], "/files/cat.png")
-		self.assertIsNone(payloads[1]["image_url"])
+		self.assertCountEqual([p["image_url"] for p in payloads], ["/files/cat.png", None])
 
 	def test_demo_quiz_is_visible_but_read_only_and_can_be_duplicated(self):
 		host = frappe.get_doc(

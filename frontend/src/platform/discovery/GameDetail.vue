@@ -67,7 +67,7 @@
 									$t(
 										exampleStep
 											? "Here’s what happens next"
-											: "Try a little round",
+											: "Try a little round"
 									)
 								}}
 								{{ $t("· Example only") }}
@@ -79,7 +79,7 @@
 										$t(
 											exampleStep
 												? "Now predict the group’s favourite. These are sample results, not a live vote."
-												: "First, pick the answer that sounds like you.",
+												: "First, pick the answer that sounds like you."
 										)
 									}}
 								</p>
@@ -104,7 +104,7 @@
 										$t(
 											samplePrediction === 0
 												? "You read this sample room!"
-												: "A surprise! Outside wins this sample room.",
+												: "A surprise! Outside wins this sample room."
 										)
 									}}
 									{{ $t("In a real game, the reveal starts the conversation.") }}
@@ -129,7 +129,7 @@
 										$t(
 											sampleChoice === 1
 												? "That’s it!"
-												: "Good try! It’s Mars.",
+												: "Good try! It’s Mars."
 										)
 									}}</strong>
 									{{ $t("Iron-rich dust gives Mars its reddish colour.") }}
@@ -144,7 +144,7 @@
 										$t(
 											exampleStep
 												? "Try the prompt again"
-												: "Show me how it feels",
+												: "Show me how it feels"
 										)
 									}}
 									<span aria-hidden="true">→</span>
@@ -163,7 +163,7 @@
 							<p class="gp-caption">
 								{{
 									$t(
-										"No account needed to explore. Your example answers aren’t saved.",
+										"No account needed to explore. Your example answers aren’t saved."
 									)
 								}}
 							</p>
@@ -178,8 +178,8 @@
 									roomGame
 										? "One host device. Everyone else can put theirs away."
 										: boardGame
-											? "Choose who controls the board. Your lobby opens before the game starts."
-											: "Choose your content and how you’ll play. Your lobby opens before the game starts.",
+										? "Choose who controls the board. Your lobby opens before the game starts."
+										: "Choose your content and how you’ll play. Your lobby opens before the game starts."
 								)
 							}}
 						</p>
@@ -195,10 +195,10 @@
 									boardGame
 										? "Play on a real shared board. No question pack or move timer needed."
 										: participation === "shared"
-											? "Join once per team or household with a group nickname. Agree on one answer; each device gets one score."
-											: roomGame
-												? "Make small groups of 2–5. Read the prompt aloud, or open it on a shared screen. No one needs to join online."
-												: "Players join with a code. Keep private prompts on the right person’s device. A shared screen is optional.",
+										? "Join once per team or household with a group nickname. Agree on one answer; each device gets one score."
+										: roomGame
+										? "Make small groups of 2–5. Read the prompt aloud, or open it on a shared screen. No one needs to join online."
+										: "Players join with a code. Keep private prompts on the right person’s device. A shared screen is optional."
 								)
 							}}
 						</p>
@@ -224,7 +224,7 @@
 						<p v-if="game.key === 'grid-conquest'" class="gp-setup-note">
 							{{
 								$t(
-									"Three boards. First to two wins, or the highest score after three. Draws give neither side a point.",
+									"Three boards. First to two wins, or the highest score after three. Draws give neither side a point."
 								)
 							}}
 						</p>
@@ -243,7 +243,7 @@
 									description: p.prompt_count
 										? $t('{count} prompts · ready to play', {
 												count: p.prompt_count,
-											})
+										  })
 										: 'Three conversations · no timer',
 								}))
 							"
@@ -256,6 +256,30 @@
 						>
 							{{ $t("Preview the prompts →") }}
 						</button>
+						<BatchPicker
+							v-if="game.batch_supported && availableCount"
+							v-model="batchCount"
+							:available="availableCount"
+							:seconds="batchSeconds"
+							:minutes="game.key === 'cuecast' ? (2 * (seconds + 10)) / 60 : null"
+						/>
+						<label v-if="game.key === 'story-loom'"
+							>{{ $t("Rounds") }}
+							<input
+								class="field"
+								type="number"
+								v-model.number="batchCount"
+								min="1"
+								:max="availableCount"
+						/></label>
+						<p v-if="game.batch_note" class="gp-caption">{{ $t(game.batch_note) }}</p>
+						<p v-if="game.key === 'cuecast'" class="gp-caption">
+							{{
+								$t(
+									"Two teams play one timed turn each. The prompt pool does not repeat; the game can end early when it runs out."
+								)
+							}}
+						</p>
 						<template v-if="!roomGame && !boardGame && game.key !== 'quiz'">
 							<GatherChoices
 								v-model="seconds"
@@ -314,7 +338,14 @@
 						</p>
 						<button
 							class="gp-button"
-							:disabled="creating || (!selectedPack && !boardGame)"
+							:disabled="
+								creating ||
+								(!selectedPack && !boardGame) ||
+								(game.batch_supported &&
+									(!Number.isInteger(batchCount) ||
+										batchCount < 1 ||
+										batchCount > availableCount))
+							"
 							@click="host"
 						>
 							{{
@@ -322,12 +353,12 @@
 									creating
 										? "Opening your room…"
 										: guest
-											? site.allow_guest_host
-												? "Try hosting a game"
-												: "Sign in to host"
-											: roomGame
-												? "Set up our room"
-												: "Open the lobby",
+										? site.allow_guest_host
+											? "Try hosting a game"
+											: "Sign in to host"
+										: roomGame
+										? "Set up our room"
+										: "Open the lobby"
 								)
 							}}
 							<span aria-hidden="true">→</span>
@@ -336,8 +367,8 @@
 							{{
 								$t(
 									roomGame
-										? "Three playful prompts. No countdown. Passing is welcome."
-										: "Your site’s allowance applies. Visit Your access to see what’s included.",
+										? "Your selected prompts. No countdown. Passing is welcome."
+										: "Your site’s allowance applies. Visit Your access to see what’s included."
 								)
 							}}
 						</p>
@@ -369,7 +400,7 @@
 						<p v-if="roomGame">
 							{{
 								$t(
-									"In a large gathering, let everyone talk in parallel groups. Invite two or three groups to share instead of asking every person. New arrivals can join any conversation; people can step away at any time.",
+									"In a large gathering, let everyone talk in parallel groups. Invite two or three groups to share instead of asking every person. New arrivals can join any conversation; people can step away at any time."
 								)
 							}}
 						</p>
@@ -405,7 +436,7 @@
 						<p>
 							{{
 								$t(
-									"Internet is needed to open and advance the session. If the connection drops, keep talking about the visible prompt; reconnect before continuing. No attendee names or spoken answers are recorded. The public screen contains only prompts.",
+									"Internet is needed to open and advance the session. If the connection drops, keep talking about the visible prompt; reconnect before continuing. No attendee names or spoken answers are recorded. The public screen contains only prompts."
 								)
 							}}
 						</p>
@@ -432,11 +463,24 @@ import { visualFor } from "./gameVisuals";
 import { gpCall, rememberHostedSession } from "@/platform/session/gp";
 import { redirectGuestToLogin } from "@/auth";
 import { site, refreshAccess } from "@/platform/site";
+import BatchPicker from "./BatchPicker.vue";
 import GatherSelect from "@/components/GatherSelect.vue";
 import GatherChoices from "@/components/GatherChoices.vue";
-import { readError } from "@/api";
+import { call, readError } from "@/api";
 import { locale, languageUrl } from "@/i18n";
 const journey = ref(true);
+const batchCount = ref(10);
+const availableCount = computed(
+	() => packs.value.find((p) => p.name === selectedPack.value)?.prompt_count || 0
+);
+const batchSeconds = computed(() =>
+	roomGame.value
+		? 150
+		: game.value?.key === "crowd-compass"
+		? seconds.value * 2 + 15
+		: seconds.value + 20
+);
+
 const route = useRoute(),
 	router = useRouter(),
 	game = ref(null),
@@ -461,10 +505,13 @@ const boardGame = computed(() =>
 		"path-weaver",
 		"hidden-picture",
 		"quilt-puzzle",
-	].includes(game.value?.key),
+	].includes(game.value?.key)
 );
 const boardControl = ref("players");
 const roomGame = computed(() => game.value?.key === "common-ground");
+watch(availableCount, (count) => {
+	batchCount.value = Math.min(roomGame.value ? 3 : 10, count);
+});
 const profile = computed(() => profileFor(game.value));
 const guide = computed(() => (roomGame.value ? {} : guideFor(game.value?.key)));
 const guideVideo = computed(() => guide.value.demos?.find((demo) => demo.video));
@@ -473,23 +520,23 @@ const coverImage = computed(() =>
 	roomGame.value
 		? "/assets/quizzly/images/games/common-ground/how-to-ethiopian-v2.png"
 		: game.value?.key === "bluffline"
-			? "/assets/quizzly/images/games/bluffline/how-to-ethiopian-v1.png"
-			: visual.value?.hero,
+		? "/assets/quizzly/images/games/bluffline/how-to-ethiopian-v1.png"
+		: visual.value?.hero
 );
 const coverAlt = computed(() =>
 	roomGame.value
 		? "Six people of different generations talk in a circle, discovering a shared love of walks, food and music. Only the host needs a device."
-		: visual.value?.summary || `${game.value?.title} illustrated guide`,
+		: visual.value?.summary || `${game.value?.title} illustrated guide`
 );
 const steps = computed(() =>
-	profile.value.steps.length ? profile.value.steps : guide.value.howTo || [],
+	profile.value.steps.length ? profile.value.steps : guide.value.howTo || []
 );
 const times = computed(() =>
 	game.value?.key === "crowd-compass"
 		? [10, 15, 20]
 		: ["cuecast", "doodle-dash"].includes(game.value?.key)
-			? [30, 60, 90]
-			: [15, 30, 45, 60],
+		? [30, 60, 90]
+		: [15, 30, 45, 60]
 );
 const modes = computed(() =>
 	profile.value.devices.map((value) => ({
@@ -499,7 +546,7 @@ const modes = computed(() =>
 			own: "One device per player",
 			shared: "One device per team or household",
 		}[value],
-	})),
+	}))
 );
 const exampleReveal = computed(() =>
 	locale.value === "am"
@@ -513,7 +560,7 @@ const exampleReveal = computed(() =>
 					"Two wobbly circles, a triangle, and handlebars. Someone guesses “bicycle!” The imperfect drawing is half the fun.",
 				"sequence-sprint":
 					"Talk through what has to happen first, then arrange seed, sprout, plant, flower. Each shared device submits one order.",
-			}[game.value?.key] || game.value?.summary,
+		  }[game.value?.key] || game.value?.summary
 );
 function resetExample() {
 	exampleStep.value = 0;
@@ -548,7 +595,7 @@ watch(
 			const list = await gpCall("list_games");
 			if (id !== loadId) return;
 			game.value = list.find(
-				(g) => g.key === key && ["Available", "Beta"].includes(g.status),
+				(g) => g.key === key && ["Available", "Beta"].includes(g.status)
 			);
 			if (!game.value) return;
 			participation.value = profile.value.devices[0];
@@ -556,15 +603,23 @@ watch(
 			const result =
 				key === "common-ground"
 					? [
-							{ name: "everyday", title: "Little things, big connections" },
-							{ name: "imagination", title: "A little imagination" },
-						]
+							{
+								name: "everyday",
+								title: "Little things, big connections",
+								prompt_count: 5,
+							},
+							{
+								name: "imagination",
+								title: "A little imagination",
+								prompt_count: 5,
+							},
+					  ]
 					: await gpCall("list_public_decks", { game_key: key, language: locale.value });
 			if (id !== loadId) return;
 			packs.value = result.sort(
 				(a, b) =>
 					Number((a.demo_key || "").includes("church")) -
-					Number((b.demo_key || "").includes("church")),
+					Number((b.demo_key || "").includes("church"))
 			);
 			selectedPack.value = packs.value[0]?.name || "";
 		} catch (e) {
@@ -573,7 +628,7 @@ watch(
 			if (id === loadId) loading.value = false;
 		}
 	},
-	{ immediate: true },
+	{ immediate: true }
 );
 async function host() {
 	if (guest && !site.allow_guest_host && redirectGuestToLogin()) return;
@@ -586,24 +641,27 @@ async function host() {
 			return;
 		}
 		if (game.value.key === "quiz") {
-			window.location.href = languageUrl(
-				`/play/quizzly/host?quiz=${encodeURIComponent(selectedPack.value)}`,
-			);
+			const created = await call("quizzly.api.create_session", {
+				quiz: selectedPack.value,
+				question_count: batchCount.value,
+			});
+			window.location.href = languageUrl(`/play/quizzly/host?session=${created.session}`);
 			return;
 		}
 		const configuration = roomGame.value
-			? { pack: selectedPack.value, language: locale.value }
+			? { pack: selectedPack.value, language: locale.value, rounds: batchCount.value }
 			: {
 					[guide.value.contentKey || "pack"]: selectedPack.value,
+					rounds: batchCount.value,
 					seconds: seconds.value,
 					teams_count: 2,
 					auto_progress: pace.value === "auto" ? 1 : 0,
-				};
+			  };
 		if (game.value.key === "crowd-compass")
 			Object.assign(configuration, {
 				vote_seconds: seconds.value,
 				prediction_seconds: seconds.value,
-				rounds: 5,
+				rounds: batchCount.value,
 				gathering_arc: journey.value,
 			});
 		if (boardGame.value) {
@@ -622,7 +680,7 @@ async function host() {
 				: {
 						name: "GpHost",
 						query: { session: created.session, participation: participation.value },
-					},
+				  }
 		);
 	} catch (e) {
 		error.value = readError(e);

@@ -147,18 +147,6 @@
 								</button>
 							</div>
 						</div>
-						<label class="flex flex-col gap-2"
-							><span
-								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-							>
-								{{ $t("Rounds") }} </span
-							><input
-								v-model.number="setup.rounds"
-								type="number"
-								min="1"
-								max="30"
-								class="field"
-						/></label>
 					</div>
 				</div>
 
@@ -186,7 +174,7 @@
 					<p v-if="selectedPackRanked" class="-mt-3 text-sm text-ok">
 						{{
 							$t(
-								"Ranked pack: players pick a first and second choice; the room tally is weighted 2/1.",
+								"Ranked pack: players pick a first and second choice; the room tally is weighted 2/1."
 							)
 						}}
 					</p>
@@ -261,7 +249,7 @@
 							:label="$t('Build to a finale')"
 							:hint="
 								$t(
-									'With 3+ pack rounds: +500 per correct prediction, +1,000 in the final round.',
+									'With 3+ pack rounds: +500 per correct prediction, +1,000 in the final round.'
 								)
 							"
 						/>
@@ -283,24 +271,6 @@
 						/>
 					</div>
 					<div class="grid grid-cols-2 gap-5">
-						<label class="flex flex-col gap-2">
-							<span
-								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-							>
-								{{ $t("Rounds") }}
-							</span>
-							<input
-								v-model.number="setup.rounds"
-								type="number"
-								min="0"
-								max="50"
-								class="field"
-								:placeholder="$t('All prompts')"
-							/>
-							<span class="text-xs text-paper/35">
-								{{ $t("0 plays the whole pack") }}
-							</span>
-						</label>
 						<label class="flex flex-col gap-2">
 							<span
 								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
@@ -377,20 +347,28 @@
 								</button>
 							</div>
 						</div>
-						<label class="flex flex-col gap-2"
-							><span
-								class="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/45"
-							>
-								{{ $t("Rounds") }} </span
-							><input
-								v-model.number="setup.rounds"
-								type="number"
-								min="1"
-								max="30"
-								class="field"
-						/></label>
 					</div>
 				</div>
+				<BatchPicker
+					v-if="selectedSetupPack && setupManifest?.batch_supported"
+					v-model="setup.rounds"
+					:available="selectedSetupPack.prompt_count"
+					:seconds="
+						setupGame === 'crowd-compass'
+							? setup.vote_seconds + setup.prediction_seconds + 15
+							: setup.seconds + 20
+					"
+				/>
+				<p v-if="setupManifest?.batch_note">{{ $t(setupManifest.batch_note) }}</p>
+				<label v-if="setupGame === 'story-loom'"
+					>{{ $t("Rounds") }}
+					<input
+						class="field"
+						type="number"
+						v-model.number="setup.rounds"
+						min="1"
+						:max="selectedSetupPack?.prompt_count || 1"
+				/></label>
 				<PremiumToggle
 					class="mt-6"
 					v-model="setup.auto_progress"
@@ -582,8 +560,8 @@
 						starting
 							? $t("Starting…")
 							: configuration.rules_version === 2
-								? $t("Start match")
-								: $t("Start · {count} players", { count: participants.length })
+							? $t("Start match")
+							: $t("Start · {count} players", { count: participants.length })
 					}}
 				</button>
 			</div>
@@ -707,14 +685,11 @@
 					</li>
 				</ol>
 				<div class="mt-2 flex flex-wrap justify-center gap-2">
-					<button
-						v-if="gameKey"
-						class="ctl ctl-go"
-						:disabled="creating"
-						@click="replayRoom"
-					>
-						{{ $t(creating ? "Opening your room…" : "Play again with a new room") }}
-					</button>
+					<ReplayControls
+						:session="session"
+						:batch="replayBatch"
+						@created="replayRoom"
+					/>
 					<button class="ctl" @click="newRoom">{{ $t("New room") }}</button>
 					<RouterLink class="ctl" :to="{ name: 'HostDashboard' }">
 						{{ $t("Dashboard") }}
@@ -724,7 +699,9 @@
 					</RouterLink>
 				</div>
 				<p v-if="gameKey === 'crowd-compass'" class="text-sm text-paper/60">
-					{{ $t("Same settings, reshuffled pack. Everyone joins the new room code.") }}
+					{{
+						$t("Same settings. Unseen prompts. Your group continues in the next room.")
+					}}
 				</p>
 				<p v-if="error" role="alert" class="text-alert">{{ $t(error) }}</p>
 			</template>
@@ -838,7 +815,7 @@
 						$t(
 							configuration.gathering_arc
 								? "Extra prompts play after the finale, with classic scoring."
-								: "It joins the queue after the current prompt. Blank rooms start with these.",
+								: "It joins the queue after the current prompt. Blank rooms start with these."
 						)
 					}}
 				</p>
@@ -872,6 +849,9 @@
 </template>
 
 <script setup>
+import BatchPicker from "@/platform/discovery/BatchPicker.vue";
+import ReplayControls from "@/platform/ending/ReplayControls.vue";
+const replayBatch = ref(null);
 import RoundJourney from "@/platform/ending/RoundJourney.vue";
 import PuzzleBoard from "@/games/puzzles/Board.vue";
 import RoomEnding from "@/games/round_games/Ending.vue";
@@ -944,7 +924,7 @@ onBeforeUnmount(() => stopRoom?.());
 let seqSeen = -1;
 
 watch(composer, (open) =>
-	open ? composerDialog.value?.showModal() : composerDialog.value?.close(),
+	open ? composerDialog.value?.showModal() : composerDialog.value?.close()
 );
 
 const setup = ref({
@@ -967,50 +947,29 @@ const setup = ref({
 
 const teamColors = Object.keys(TEAM_STYLE);
 
-const hostableGames = [
-	{
-		key: "cuecast",
-		title: "CueCast",
-		summary: "Act it or describe it: race through team prompts before the buzzer.",
-	},
-	{
-		key: "crowd-compass",
-		title: "Crowd Compass",
-		summary: "Vote for yourself, predict the room, and see who reads the crowd best.",
-	},
-	{
-		key: "doodle-dash",
-		title: "Doodle Dash",
-		summary: "One artist draws a secret word while everyone else races to guess it.",
-	},
-];
-hostableGames.push(
-	...[
-		"bluffline|Bluffline",
-		"sequence-sprint|Sequence Sprint",
-		"picture-peek|Picture Peek",
-		"sound-snap|Sound Snap",
-		"caption-clash|Caption Clash",
-		"story-loom|Story Loom",
-		"signal-spectrum|Signal Spectrum",
-		"memory-mosaic|Memory Mosaic",
-		"common-thread|Common Thread",
-		"escape-together|Escape Together",
-		"bracket-bash|Bracket Bash",
-		"closest-call|Closest Call",
-		"phrase-forge|Phrase Forge",
-		"seek-and-show|Seek & Show",
-		"one-word-chorus|One Word Chorus",
-	].map((entry) => {
-		const [key, title] = entry.split("|");
-		return { key, title, summary: "Live rounds, scoring, reconnects, and a final podium." };
-	}),
-);
+const hostableGames = ref([]);
+onMounted(async () => {
+	hostableGames.value = (await gpCall("list_games")).filter(
+		(g) =>
+			!["quiz", "common-ground"].includes(g.key) &&
+			g.frontend_key !== "puzzles" &&
+			g.key !== "grid-conquest"
+	);
+});
 
+const selectedSetupPack = computed(() =>
+	packs.value.find(
+		(p) => p.name === (setupGame.value === "cuecast" ? setup.value.deck : setup.value.pack)
+	)
+);
+const setupManifest = computed(() => hostableGames.value.find((g) => g.key === setupGame.value));
+watch(selectedSetupPack, (pack) => {
+	if (pack) setup.value.rounds = Math.min(10, pack.prompt_count);
+});
 const inLiveSession = computed(() => Boolean(session.value));
 const copied = ref(false);
 const setupTitle = computed(
-	() => hostableGames.find((g) => g.key === setupGame.value)?.title || "",
+	() => hostableGames.value.find((g) => g.key === setupGame.value)?.title || ""
 );
 const live = computed(() => liveFor(gameKey.value));
 const gamePhases = computed(() => phasesFor(gameKey.value));
@@ -1021,7 +980,7 @@ const totalTurns = computed(() => {
 });
 const solvedCount = computed(() => view.value.solved ?? 0);
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
 );
 const teamCols = computed(() => {
 	const count = Math.max(1, teams.value.length);
@@ -1030,10 +989,10 @@ const teamCols = computed(() => {
 const teamCapable = computed(
 	() =>
 		gameKey.value === "cuecast" ||
-		(gameKey.value === "crowd-compass" && configuration.value.scoring_mode === "Team average"),
+		(gameKey.value === "crowd-compass" && configuration.value.scoring_mode === "Team average")
 );
 const selectedPackRanked = computed(() =>
-	Boolean(packs.value.find((p) => p.name === setup.value.pack)?.ranked),
+	Boolean(packs.value.find((p) => p.name === setup.value.pack)?.ranked)
 );
 const unassigned = computed(() => participants.value.filter((p) => !p.team));
 const paused = computed(() => Boolean(view.value.paused));
@@ -1101,7 +1060,7 @@ function onEvent(envelopeMessage) {
 async function refresh() {
 	try {
 		await applyState(
-			await gpCall("get_host_state", session.value ? { session: session.value } : {}),
+			await gpCall("get_host_state", session.value ? { session: session.value } : {})
 		);
 	} catch (e) {
 		error.value = readError(e);
@@ -1118,6 +1077,7 @@ async function applyState(state) {
 	gameKey.value = state.game_key || "cuecast";
 	pin.value = state.game_pin;
 	configuration.value = state.configuration || {};
+	replayBatch.value = state.batch;
 	if (state.game_key === "common-ground") {
 		router.replace({ name: "RoomHost", params: { session: state.session } });
 		return;
@@ -1320,14 +1280,10 @@ async function gridCommand({ command, ...payload }) {
 	}
 }
 
-async function replayRoom() {
+async function replayRoom(created) {
 	error.value = "";
 	creating.value = true;
 	try {
-		const created = await gpCall("create_session", {
-			game_key: gameKey.value,
-			configuration: { ...configuration.value },
-		});
 		stopRoom?.();
 		podium.value = null;
 		ending.value = null;
@@ -1448,13 +1404,11 @@ async function togglePause() {
 
 async function reassignPerformer() {
 	const stageTeam = (view.value.teams || []).find(
-		(t) => t.team_name === view.value.actor_team_name,
+		(t) => t.team_name === view.value.actor_team_name
 	);
 	const roster = participants.value.filter(
 		(p) =>
-			stageTeam &&
-			p.team === stageTeam.name &&
-			p.nickname !== view.value.performer?.nickname,
+			stageTeam && p.team === stageTeam.name && p.nickname !== view.value.performer?.nickname
 	);
 	if (!roster.length) return;
 	await hostAction("host_command", {
@@ -1466,7 +1420,7 @@ async function reassignPerformer() {
 async function voidPrompt() {
 	const ok = await confirm(
 		"Void the last prompt? Its points are returned and it counts for nothing.",
-		{ action: "Void it", danger: true },
+		{ action: "Void it", danger: true }
 	);
 	if (!ok) return;
 	await hostAction("host_command", { command: "void_prompt" });

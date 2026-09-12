@@ -106,7 +106,7 @@
 				<p class="max-w-xs text-paper/50">
 					{{
 						$t(
-							"Find your name on the big screen. The host starts when everyone's here.",
+							"Find your name on the big screen. The host starts when everyone's here."
 						)
 					}}
 				</p>
@@ -256,7 +256,7 @@ import LanguageSwitch from "@/components/LanguageSwitch.vue";
 import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { call } from "@/api";
-import { clearPlayer, loadPlayer } from "@/player";
+import { clearPlayer, loadPlayer, savePlayer } from "@/player";
 import { optionOrder, shapeFor, useCountdown, useSessionRoom } from "@/game";
 import AvatarPic from "@/components/AvatarPic.vue";
 import DrainRing from "@/components/DrainRing.vue";
@@ -294,19 +294,19 @@ watch(
 	() => Math.ceil(remaining.value),
 	(secondsLeft) => {
 		if (phase.value === "question" && secondsLeft > 0 && secondsLeft <= 5) playCue("tick");
-	},
+	}
 );
 
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
 );
 
 const urgentColor = computed(() =>
-	remaining.value <= 5 ? "rgb(var(--alert))" : "rgb(var(--ok))",
+	remaining.value <= 5 ? "rgb(var(--alert))" : "rgb(var(--ok))"
 );
 
 const orderedOptions = computed(() =>
-	question.value ? optionOrder(question.value, player.value.token) : [],
+	question.value ? optionOrder(question.value, player.value.token) : []
 );
 
 // Nothing left to follow once the host removes the player, so the room goes too:
@@ -406,6 +406,16 @@ async function restore() {
 		pin: player.value.pin,
 		token: player.value.token,
 	});
+	if (state.continuation) {
+		savePlayer({
+			...state.continuation,
+			participant_token: player.value.token,
+			nickname: player.value.nickname,
+			avatar: player.value.avatar,
+		});
+		window.location.reload();
+		return;
+	}
 	score.value = state.score;
 	if (state.status === "Lobby") {
 		participants.value = state.participants;
@@ -421,7 +431,7 @@ async function restore() {
 			state.question.question_text,
 			state.q_index,
 			state.total,
-			state.remaining_seconds,
+			state.remaining_seconds
 		);
 	} else if (state.phase === "question") {
 		showQuestion(state.question, state.remaining_seconds);

@@ -140,7 +140,14 @@ class CrowdCompassGame(GameModule):
 			order_by="idx asc",
 		)
 		prompts = [self.prompt_row_dict(row) for row in rows]
-		random.shuffle(prompts)
+		from quizzly.batches import selected_ids
+
+		selected = selected_ids(ctx)
+		if selected is not None:
+			by_id = {row["content_id"]: row for row in prompts}
+			prompts = [by_id[i] for i in selected]
+		else:
+			random.shuffle(prompts)
 		if config["rounds"]:
 			prompts = prompts[: config["rounds"]]
 		return prompts
@@ -148,6 +155,7 @@ class CrowdCompassGame(GameModule):
 	def prompt_row_dict(self, row) -> dict:
 		return {
 			"prompt": row.prompt_text,
+			"content_id": row.name,
 			"choices": [
 				{"id": str(number), "text": (row.get(f"choice_{number}") or "").strip()}
 				for number in range(1, 5)
@@ -446,7 +454,7 @@ class CrowdCompassGame(GameModule):
 		estimate = payload.get("estimate")
 		if ctx.configuration["estimation"]:
 			try:
-				estimate = int(round(float(estimate)))
+				estimate = round(float(estimate))
 			except (TypeError, ValueError):
 				return ActionDecision(accepted=False, reason="Slide in your share estimate")
 			estimate = max(0, min(100, estimate))
@@ -529,7 +537,7 @@ class CrowdCompassGame(GameModule):
 			for event in events
 			if event.points
 		]
-		module_state["voided"] = list(module_state.get("voided") or []) + [round_index]
+		module_state["voided"] = [*(module_state.get("voided") or []), round_index]
 		return Transition(
 			phase=state["phase"],
 			next_ts=state["next_ts"],
@@ -795,7 +803,7 @@ class CrowdCompassGame(GameModule):
 		if estimate in (None, ""):
 			return None
 		try:
-			return int(round(float(estimate)))
+			return round(float(estimate))
 		except (TypeError, ValueError):
 			return None
 

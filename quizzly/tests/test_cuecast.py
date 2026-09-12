@@ -196,7 +196,7 @@ class TestHostControls(IntegrationTestCase):
 		frappe.set_user("Administrator")
 		from quizzly.games.api import create_session
 
-		created = create_session("quiz", {})
+		created = create_session("common-ground", {"pack": "everyday"})
 		frappe.set_user("bob@example.com" if frappe.db.exists("User", "bob@example.com") else "Guest")
 		try:
 			with self.assertRaises(frappe.PermissionError):
@@ -211,7 +211,7 @@ class TestHostControls(IntegrationTestCase):
 
 	def test_end_session_from_lobby_cancels(self):
 		frappe.set_user("Administrator")
-		created = create_session("quiz", {})
+		created = create_session("common-ground", {"pack": "everyday"})
 		end_session(created["session"])
 		self.assertEqual(frappe.db.get_value("GP Session", created["session"], "status"), "Cancelled")
 		frappe.delete_doc("GP Session", created["session"], force=True, ignore_permissions=True)

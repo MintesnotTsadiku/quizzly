@@ -14,13 +14,14 @@ from frappe import _
 from frappe.rate_limiter import rate_limit
 from frappe.utils import now_datetime, strip_html_tags
 
-from quizzly import access
+from quizzly import access, batches
 from quizzly.api import generate_game_pin, hash_token
 from quizzly.games import GameContext, get_game_module
 from quizzly.games import engine as gpe
 from quizzly.games.board_session import is_board
 from quizzly.games.round_games.game import PROFILES as ROUND_GAME_PROFILES
 from quizzly.profanity import is_profane
+from quizzly.publishing import check_published, published_keys
 
 NICKNAME_MAX_LENGTH = 20
 
@@ -48,8 +49,11 @@ def list_games() -> list[dict]:
 			"status": m.status,
 			"frontend_key": m.frontend_key,
 			"capabilities": list(m.capabilities),
+			"batch_supported": m.key not in batches.EXCEPTIONS,
+			"batch_note": batches.EXCEPTIONS.get(m.key),
 		}
 		for m in sorted(manifests(), key=lambda m: m.title)
+		if m.key in published_keys()
 	]
 
 
@@ -96,6 +100,8 @@ for _game_key in ROUND_GAME_KEYS:
 @frappe.whitelist(allow_guest=True)
 def list_public_decks(game_key: str | None = None, language: str | None = None) -> list[dict]:
 	"""Demo packs are marketing content: browsable by guests, playable by hosts."""
+	if game_key not in published_keys():
+		return []
 	preview = CONTENT_PREVIEWS.get(game_key or "")
 	if not preview:
 		return []
@@ -153,6 +159,7 @@ def list_public_decks(game_key: str | None = None, language: str | None = None) 
 @frappe.whitelist(methods=["POST"])
 def create_session(game_key: str, configuration: dict | str | None = None) -> dict:
 	configuration = as_dict(configuration)
+	check_published(game_key)
 	if game_key == "quiz":
 		frappe.throw("Use the quiz hosting flow for this format.")
 	preview = CONTENT_PREVIEWS.get(game_key)
@@ -161,7 +168,17 @@ def create_session(game_key: str, configuration: dict | str | None = None) -> di
 		access.check_pack(preview["pack_doctype"], pack)
 	module = get_game_module(game_key)
 	ctx = GameContext(session="", pin="", game_key=game_key, configuration=configuration)
-	normalized = module.validate_configuration(ctx, configuration)
+	try:
+		normalized = module.validate_configuration(ctx, configuration)
+	except (ValueError, TypeError, OverflowError):
+		frappe.throw(_("Choose valid whole-number game settings."))
+	# Validate the original request before module-specific normalization can clamp it.
+	if game_key not in batches.EXCEPTIONS:
+		scope, ids = batches.content_source(game_key, normalized)
+		if scope:
+			batches.count_value(configuration.get("rounds"), len(ids))
+			if configuration.get("rounds") is not None:
+				normalized["rounds"] = configuration["rounds"]
 	normalized["auto_progress"] = (
 		False
 		if "host_only" in module.manifest.capabilities or normalized.get("rules_version") == 2
@@ -194,6 +211,7 @@ def get_host_state(session: str | None = None) -> dict:
 		"game_key": session_doc.game_key,
 		"title": get_game_module(session_doc.game_key).manifest.title,
 		"configuration": frappe.parse_json(session_doc.get("configuration")) or {},
+		"batch": batches.summary(session_doc),
 		**lobby_state(session_doc),
 	}
 	if session_doc.status == "Ended":
@@ -439,6 +457,7 @@ def get_player_state(pin: str, token: str) -> dict:
 			"podium": final_leaderboard(session_doc.name),
 			"rank": participant.rank,
 			"ending": ending_snapshot(session_doc),
+			"continuation": batches.continuation(session_doc, participant),
 		}
 
 	state = gpe.get_state(session_doc.name)
@@ -474,6 +493,7 @@ def get_public_state(pin: str) -> dict:
 			**result,
 			"podium": final_leaderboard(session_doc.name),
 			"ending": ending_snapshot(session_doc),
+			"continuation": batches.continuation(session_doc),
 		}
 	if session_doc.status != "Active":
 		return {**result, **public_lobby_state(session_doc)}
@@ -555,6 +575,7 @@ def submit_action(
 	except frappe.UniqueValidationError:
 		# the DB is the final word on replays that beat the Redis pre-check
 		return decision.result or {"ok": True}
+	batches.observe_transition(session_doc, state)
 	return decision.result or {"ok": True}
 
 

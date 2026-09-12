@@ -6,6 +6,9 @@ from frappe.model.document import Document
 
 class GatherPlaySettings(Document):
 	def validate(self):
+		from quizzly.publishing import validate_policy
+
+		self.published_games = frappe.as_json(validate_policy(self.published_games))
 		if self.default_language not in ("en", "am"):
 			frappe.throw("Choose English (en) or Amharic (am).")
 		if not re.fullmatch(r"#[0-9a-fA-F]{6}", self.accent_color or ""):

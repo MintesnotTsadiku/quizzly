@@ -1,0 +1,7 @@
+{
+  "checks": [
+    "Authenticated CMS iframe uses the same published catalog",
+    "System Manager UI saves; guests cannot inspect or write; catalog, detail and hosting gate consistently; existing room finishes; successor requires publication",
+    "An explicit empty selection publishes no formats"
+  ]
+}

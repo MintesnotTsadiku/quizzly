@@ -66,7 +66,13 @@ class DoodleDashGame(GameModule):
 			filters={"parent": ctx.configuration["pack"], "parenttype": "GP Draw Pack"},
 			pluck="name",
 		)
-		random.shuffle(prompts)
+		from quizzly.batches import selected_ids
+
+		selected = selected_ids(ctx)
+		if selected is not None:
+			prompts = selected
+		else:
+			random.shuffle(prompts)
 		return self.ready(
 			ctx,
 			{

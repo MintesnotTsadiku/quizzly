@@ -25,6 +25,7 @@
 				</div>
 				<RouterLink
 					class="gp-feature"
+					v-if="games.some((g) => g.key === 'common-ground')"
 					:to="{ name: 'GameDetail', params: { game: 'common-ground' } }"
 				>
 					<span class="gp-feature-tag"> {{ $t("NEW · NO PLAYER PHONES NEEDED") }} </span>
@@ -131,7 +132,7 @@
 				<p v-if="showAll" class="gp-caption">
 					{{
 						$t(
-							"More formats include focused puzzle and question-based variants. Check each guide for its current rules.",
+							"More formats include focused puzzle and question-based variants. Check each guide for its current rules."
 						)
 					}}
 				</p>
@@ -143,12 +144,15 @@
 					<p>
 						{{
 							$t(
-								"Make a little room for laughter, a new perspective, or a wonderfully wrong answer.",
+								"Make a little room for laughter, a new perspective, or a wonderfully wrong answer."
 							)
 						}}
 					</p>
 				</div>
-				<RouterLink :to="{ name: 'GameDetail', params: { game: 'common-ground' } }">
+				<RouterLink
+					v-if="games.some((g) => g.key === 'common-ground')"
+					:to="{ name: 'GameDetail', params: { game: 'common-ground' } }"
+				>
 					{{ $t("Try a game without player phones ↗") }}
 				</RouterLink>
 			</section>
@@ -185,7 +189,7 @@ const filtered = computed(() =>
 		.filter(
 			(g) =>
 				["Available", "Beta"].includes(g.status) &&
-				(showAll.value || query.value || featuredKeys.includes(g.key)),
+				(showAll.value || query.value || featuredKeys.includes(g.key))
 		)
 		.filter(
 			(g) =>
@@ -193,13 +197,13 @@ const filtered = computed(() =>
 				(category.value === "All games" || profileFor(g).category === category.value) &&
 				`${g.title} ${g.summary} ${t(g.title)} ${t(profileFor(g).description)}`
 					.toLowerCase()
-					.includes(query.value.trim().toLowerCase()),
+					.includes(query.value.trim().toLowerCase())
 		)
 		.sort(
 			(a, b) =>
 				(featuredKeys.indexOf(a.key) < 0 ? 99 : featuredKeys.indexOf(a.key)) -
-				(featuredKeys.indexOf(b.key) < 0 ? 99 : featuredKeys.indexOf(b.key)),
-		),
+				(featuredKeys.indexOf(b.key) < 0 ? 99 : featuredKeys.indexOf(b.key))
+		)
 );
 function reset() {
 	query.value = "";

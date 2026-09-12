@@ -39,6 +39,10 @@ class TestScoring(IntegrationTestCase):
 
 class GameTestCase(IntegrationTestCase):
 	def setUp(self):
+		# These scoring fixtures use authored order; random selection has its own suite.
+		self.enterContext(
+			patch("quizzly.batches.random.sample", side_effect=lambda rows, count: rows[:count])
+		)
 		frappe.set_user("Administrator")
 		self.quiz = frappe.get_doc(
 			{

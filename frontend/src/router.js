@@ -27,6 +27,11 @@ const quizRoutes = [
 
 const platformRoutes = [
 	{
+		path: "/manage/games",
+		name: "PublishedGames",
+		component: () => import("@/platform/manage/PublishedGames.vue"),
+	},
+	{
 		path: "/",
 		name: "Landing",
 		component: () => import("@/platform/discovery/LandingPage.vue"),

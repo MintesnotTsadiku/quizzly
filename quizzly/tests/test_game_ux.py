@@ -102,9 +102,9 @@ class TestAbandonedSession(GameTestCase):
 		)
 		self.session_doc.reload()
 
-	def test_host_state_reaps_it_and_offers_a_fresh_game(self):
+	def test_host_state_reaps_it_and_preserves_the_ending(self):
 		self.abandon()
-		self.assertEqual(get_host_state(), {})
+		self.assertEqual(get_host_state(self.session)["status"], "Ended")
 		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
 
 	def test_running_game_is_left_alone(self):

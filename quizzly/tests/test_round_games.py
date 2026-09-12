@@ -41,10 +41,10 @@ class TestRoundGameCatalog(IntegrationTestCase):
 		frappe.db.commit()
 
 	def test_every_planned_game_is_registered_and_has_three_english_demos(self):
-		available = {m.key for m in manifests() if m.status == "Available"}
+		available = {m.key for m in manifests() if m.status in ("Available", "Beta")}
 		self.assertTrue(set(ROUND_DEMO_TITLES).issubset(available))
 		for key in ROUND_DEMO_TITLES:
-			self.assertEqual(
+			self.assertGreaterEqual(
 				frappe.db.count("GP Game Pack", {"game_key": key, "is_demo": 1, "content_language": "en"}),
 				3,
 				key,

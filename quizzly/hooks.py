@@ -44,7 +44,10 @@ require_type_annotated_api_methods = True
 
 doc_events = {
 	**{dt: {"before_insert": "quizzly.access.before_create"} for dt in ("GP Session", "QZ Session")},
-	**{dt: {"before_insert": "quizzly.access.before_create", "validate": "quizzly.access.protect_pack"} for dt in ("QZ Quiz", "GP Crowd Pack", "GP Cue Deck", "GP Draw Pack", "GP Game Pack")},
+	**{
+		dt: {"before_insert": "quizzly.access.before_create", "validate": "quizzly.access.protect_pack"}
+		for dt in ("QZ Quiz", "GP Crowd Pack", "GP Cue Deck", "GP Draw Pack", "GP Game Pack")
+	},
 }
 
 # GatherPlay game modules; the registry loads these once per worker (docs/gatherplay)
@@ -78,7 +81,11 @@ quizzly_game_modules = [
 ]
 
 # Additive starter content: an existing demo key is never rewritten.
-after_migrate = ["quizzly.demo.amharic.seed_amharic_starters", "quizzly.demo.curated.seed_curated_starters"]
+after_migrate = [
+	"quizzly.publishing.initialize",
+	"quizzly.demo.amharic.seed_amharic_starters",
+	"quizzly.demo.curated.seed_curated_starters",
+]
 
 # Recover failed/timed-out game jobs and retire rooms whose temporary state expired.
 scheduler_events = {

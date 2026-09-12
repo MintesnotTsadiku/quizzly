@@ -163,7 +163,7 @@ class PlatformTestCase(IntegrationTestCase):
 					"round_key": "turn-1",
 					"actor_team": None,
 					"actor_participant": self.players["ada"]["participant"],
-					"prompt_ids": [],
+					"prompt_ids": [p.name for p in self.deck.prompts],
 					"prompt_pos": 1,
 					"turn_start_pos": 0,
 				},

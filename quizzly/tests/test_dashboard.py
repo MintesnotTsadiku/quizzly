@@ -44,10 +44,19 @@ class TestHostDashboard(IntegrationTestCase):
 				"ended_at": now_datetime(),
 			}
 		).insert()
+		deck = frappe.get_doc(
+			{
+				"doctype": "GP Cue Deck",
+				"title": "Dashboard deck",
+				"mode": "Act",
+				"prompts": [{"prompt_text": "Sunshine"}],
+			}
+		).insert()
 		self.gp_session = frappe.get_doc(
 			{
 				"doctype": "GP Session",
 				"game_key": "cuecast",
+				"configuration": {"deck": deck.name},
 				"host": self.host.name,
 				"game_pin": "731002",
 				"status": "Active",

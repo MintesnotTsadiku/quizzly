@@ -253,7 +253,7 @@ const live = computed(() => liveFor(gameKey.value));
 const gamePhases = computed(() => phasesFor(gameKey.value));
 const joinUrl = `${window.location.origin}/play/join?pin=${pin}&lang=${locale.value}`;
 const timerPercent = computed(() =>
-	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0,
+	windowSeconds.value ? (remaining.value / windowSeconds.value) * 100 : 0
 );
 const solvedCount = computed(() => view.value.solved ?? 0);
 
@@ -326,6 +326,12 @@ async function refresh() {
 }
 
 function applyState(state) {
+	if (state.continuation) {
+		const url = new URL(window.location.href);
+		url.pathname = `/play/s/${state.continuation.game_pin}/screen`;
+		window.location.replace(url);
+		return;
+	}
 	if (state.game_key === "common-ground") {
 		gameKey.value = state.game_key;
 		router.replace({ name: "RoomScreen", params: { pin } });

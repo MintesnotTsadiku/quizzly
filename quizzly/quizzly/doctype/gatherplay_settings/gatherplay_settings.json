@@ -39,7 +39,9 @@
     "plan_days",
     "optimistic_approval",
     "provisional_days",
-    "payment_help"
+    "payment_help",
+    "publication_section",
+    "published_games"
   ],
   "fields": [
     {
@@ -248,6 +250,17 @@
       "fieldtype": "HTML",
       "label": "Payment help",
       "options": "<p>Receipts are private. Review them in GatherPlay Receipt. Rejection revokes provisional access for new games; existing games can finish. One provisional grant per account per calendar month.</p>"
+    },
+    {
+      "fieldname": "publication_section",
+      "fieldtype": "Section Break",
+      "label": "Published game formats"
+    },
+    {
+      "fieldname": "published_games",
+      "fieldtype": "JSON",
+      "label": "Published game keys",
+      "description": "Manage the playable selection at /play/manage/games. Empty uses the starter selection; [] publishes no formats."
     }
   ],
   "permissions": [
