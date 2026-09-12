@@ -101,6 +101,8 @@ def upsert_quiz(data: dict):
 			"questions": data["questions"],
 		}
 	)
+	if data.get("content_language"):
+		quiz.content_language = data["content_language"]
 	quiz.flags.in_demo_seed = True
 	quiz.save(ignore_permissions=True)
 	frappe.db.commit()

@@ -1,0 +1,179 @@
+{
+  "demo_key": "quiz-amharic-riddles-3",
+  "schema_version": 1,
+  "game_key": "quiz",
+  "locale": "am",
+  "content_language": "en",
+  "title": "እንቆቅልሽ · ክፍል 3",
+  "description": "ዘመናዊና የሚያስቁ እንቆቅልሽ። 15 ጥያቄ። ስልክ፣ ፎቶ፣ እና እንቆቅልሹ ራሱ።",
+  "default_time_limit": 25,
+  "show_explanation": true,
+  "explanation_time_limit": 12,
+  "questions": [
+    {
+      "question_text": "1 — ሁልጊዜ ይሮጣል ግን አይደክምም።",
+      "option_1": "አትሌት",
+      "option_2": "ወንዝ",
+      "option_3": "ሰዓት",
+      "option_4": "ነፋስ",
+      "correct_option": "2",
+      "explanation": "ወንዝ ሁልጊዜ ይፈሳል፣ ድካም ግን አያውቅም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "2 — ትንሽ ነው፤ ላብ ያወጣል።",
+      "option_1": "ሩጫ",
+      "option_2": "ፀሐይ",
+      "option_3": "በርበሬ",
+      "option_4": "ፈተና",
+      "correct_option": "3",
+      "explanation": "በርበሬ ትንሽ ነው፣ አፍን ግን ያቃጥላል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "3 — በእግር ይጓዛል፤ ዓለምን ያያል።",
+      "option_1": "አውቶቡስ",
+      "option_2": "ካርታ",
+      "option_3": "ጥላ",
+      "option_4": "ጫማ",
+      "correct_option": "4",
+      "explanation": "ጫማ በእግርህ ላይ ተቀምጦ ዓለምን ያያል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "4 — ነጭ ነኝ፤ በሰማይ እበርራለሁ።",
+      "option_1": "ወተት",
+      "option_2": "ደመና",
+      "option_3": "አውሮፕላን",
+      "option_4": "በረዶ",
+      "correct_option": "2",
+      "explanation": "ደመና ነጭ ነው፣ በሰማይ ይበርራል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "5 — ሳይበላ ይራባል፤ ምግብ ሳይቀምስ ይሞላል።",
+      "option_1": "ሕፃን",
+      "option_2": "እሳት",
+      "option_3": "ስልክ",
+      "option_4": "ቦርሳ",
+      "correct_option": "3",
+      "explanation": "ስልክ ባትሪው ሲያልቅ ይራባል፣ ሲሞላ ግን እንጀራ አይበላም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "6 — ሁለት እህትማማቾች አብረው ይሄዳሉ ግን አይገናኙም።",
+      "option_1": "ጥላ",
+      "option_2": "ወንዝ",
+      "option_3": "የባቡር ሐዲድ",
+      "option_4": "ጫማ",
+      "correct_option": "3",
+      "explanation": "የባቡር ሐዲዶች አብረው ይሄዳሉ፣ አይነኩም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "7 — ፊትህን ይይዛል ግን እጅ የለውም።",
+      "option_1": "ፎቶ",
+      "option_2": "ውኃ",
+      "option_3": "ጓደኛ",
+      "option_4": "መስታወት",
+      "correct_option": "4",
+      "explanation": "መስታወት ፊትህን ይይዛል፣ ለመጨባበጥ ግን እጅ የለውም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "8 — ብዙ ቀዳዳ አለው ግን ውኃ አይይዝም።",
+      "option_1": "ድስት",
+      "option_2": "ጫማ",
+      "option_3": "ወንፊት",
+      "option_4": "ቤት",
+      "correct_option": "3",
+      "explanation": "ወንፊት ቀዳዳው ብዙ ነው፣ ውኃ አያቆምም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "9 — በሁለት እግር ትሄዳለች፤ እንቁላል ትጥላለች።",
+      "option_1": "ሴት",
+      "option_2": "ኳስ",
+      "option_3": "ዶሮ",
+      "option_4": "ጀልባ",
+      "correct_option": "3",
+      "explanation": "ዶሮ በሁለት እግር ትሄዳለች፣ እንቁላል ትጥላለች።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "10 — ሳትናገር ትጮሃለች።",
+      "option_1": "ሕፃን",
+      "option_2": "ደወል",
+      "option_3": "ሬዲዮ",
+      "option_4": "ውሻ",
+      "correct_option": "2",
+      "explanation": "ደወል አፍ የላትም፣ ጩኸቷ ግን ይሰማል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "11 — የማይሮጥ አትሌት።",
+      "option_1": "ወንበር",
+      "option_2": "ሐውልት",
+      "option_3": "ሕልም",
+      "option_4": "ፎቶ",
+      "correct_option": "4",
+      "explanation": "ፎቶ አትሌት ሊመስል ይችላል፣ ከቦታው ግን አይሮጥም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "12 — አንድ አፍ፣ ሁለት ጆሮ፣ አንድ አፍንጫ።",
+      "option_1": "እንስሳ",
+      "option_2": "ቤት",
+      "option_3": "ፊት",
+      "option_4": "ሬዲዮ",
+      "correct_option": "3",
+      "explanation": "የሰው ፊት አንድ አፍ፣ ሁለት ጆሮ፣ አንድ አፍንጫ አለው።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "13 — ረጅም አባት፣ አጭር እናት፣ ብዙ ልጆች።",
+      "option_1": "ቤተሰብ",
+      "option_2": "ዛፍ",
+      "option_3": "መጥረጊያ",
+      "option_4": "ባቡር",
+      "correct_option": "3",
+      "explanation": "መጥረጊያ፦ እጀታው ረጅም፣ ጭንቅላቱ አጭር፣ ገመዶቹ ብዙ ልጆች።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "14 — የማይበላ ምግብ አብሳይ።",
+      "option_1": "እናት",
+      "option_2": "ምጣድ",
+      "option_3": "ሆቴል",
+      "option_4": "ፀሐይ",
+      "correct_option": "4",
+      "explanation": "ፀሐይ ምግብ አትበላም፣ ፍሬውን ግን ታበስላለች።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "15 — ሁልጊዜ ትጠይቃለህ፤ መልሱን ግን አውቀህ ነው የምትመጣው።",
+      "option_1": "መምህር",
+      "option_2": "ፖሊስ",
+      "option_3": "እንቆቅልሽ",
+      "option_4": "ፈተና",
+      "correct_option": "3",
+      "explanation": "እንቆቅልሽ ጥያቄውን ይዞ መልሱንም ይዞ ነው የሚመጣው።",
+      "time_limit": 25,
+      "points_multiplier": "2"
+    }
+  ]
+}

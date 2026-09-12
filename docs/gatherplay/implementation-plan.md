@@ -165,9 +165,11 @@ The titles below are initial product copy; content review may refine individual 
 
 **Simple how-to:** Join, read each question, tap one answer before time expires, learn from the reveal, and finish with the highest score.
 
-- **Church/Bible — Bible Foundations Live:** Creation, Exodus, kings, prophets, parables, Jesus' ministry, Acts, and Bible structure; ten reviewed multiple-choice questions with explanations and references.
-- **Child/Family — Family Fun Mix:** Animals, colors, simple arithmetic, foods, riddles, and everyday science using short language and generous timers.
-- **General Assembly — The Big Room Challenge:** World geography, science, inventions, culture, visual clues, and room-friendly icebreakers for approximately 50 players.
+- **Church/Bible — Bible Composed Challenge:** Fifteen two-part questions (Part 1 opener, Part 2 follow-up, double points) on Creation, Exodus, kings, prophets, parables, Jesus' ministry, Acts, and Bible structure.
+- **General Knowledge — General Knowledge Composed:** Fifteen two-part questions on world geography, science, inventions, languages, history, and culture.
+- **Sports / Football — Football Composed Cup:** Fifteen two-part football questions on the World Cup, clubs, African football, Ethiopia's Walias, and the laws of the game.
+- **Funny / Warm-up — Twenty Laughs Live:** Twenty clean joke questions with mischievous wrong answers; the last two are worth double points.
+- **Amharic riddles — እንቆቅልሽ · ክፍል 1 / 2 / 3:** Three separate 15-question games, not one 45-question run. Part 1 is classic house riddles, Part 2 nature and coffee culture, Part 3 modern and funny.
 
 ### 4.2 CueCast
 

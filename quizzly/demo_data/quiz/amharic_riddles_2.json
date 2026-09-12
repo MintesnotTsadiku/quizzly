@@ -1,0 +1,179 @@
+{
+  "demo_key": "quiz-amharic-riddles-2",
+  "schema_version": 1,
+  "game_key": "quiz",
+  "locale": "am",
+  "content_language": "en",
+  "title": "እንቆቅልሽ · ክፍል 2",
+  "description": "የተፈጥሮ፣ ቡናና እንጀራ። 15 ጥያቄ። ቴሌቪዥንና ሬዲዮ የሚያስቁት እዚህ ናቸው።",
+  "default_time_limit": 25,
+  "show_explanation": true,
+  "explanation_time_limit": 12,
+  "questions": [
+    {
+      "question_text": "1 — ያያል ግን ራሱን አያይም።",
+      "option_1": "መስታወት",
+      "option_2": "ፀሐይ",
+      "option_3": "ዓይን",
+      "option_4": "ካሜራ",
+      "correct_option": "3",
+      "explanation": "ዓይን ሁሉን ያያል፣ ራሱን ግን ለማየት መስታወት ይፈልጋል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "2 — በዋሻ ውስጥ ይኖራል፤ ሁልጊዜ ይናገራል።",
+      "option_1": "አንበሳ",
+      "option_2": "ምላስ",
+      "option_3": "ሬዲዮ",
+      "option_4": "ንብ",
+      "correct_option": "2",
+      "explanation": "ምላስ በአፍ ዋሻ ውስጥ ነው የሚኖረው።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "3 — ውኃ ላይ ያልፋል ግን አይዋኝም።",
+      "option_1": "ጀልባ",
+      "option_2": "ዓሣ",
+      "option_3": "ድልድይ",
+      "option_4": "ድንጋይ",
+      "correct_option": "3",
+      "explanation": "ድልድይ ውኃውን ያልፋል፣ አይዋኝም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "4 — ትንሽ ነው፤ ትልቅ በር ይከፍታል።",
+      "option_1": "ሰላምታ",
+      "option_2": "ቁልፍ",
+      "option_3": "ነፋስ",
+      "option_4": "ፊት",
+      "correct_option": "2",
+      "explanation": "ቁልፍ ትንሽ ነው፣ ትልቁን በር ግን ይከፍታል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "5 — ከሰማይ ይወርዳል፤ ማንም አይወረውረውም።",
+      "option_1": "ቅጠል",
+      "option_2": "ኮከብ",
+      "option_3": "በረዶ",
+      "option_4": "ዝናብ",
+      "correct_option": "4",
+      "explanation": "ዝናብ ከሰማይ ይወርዳል፣ ማንም አይወረውረውም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "6 — ትሰማዋለህ ግን አትይዛትም።",
+      "option_1": "ሽታ",
+      "option_2": "ነፋስ",
+      "option_3": "ጨረቃ",
+      "option_4": "ድምፅ",
+      "correct_option": "2",
+      "explanation": "ነፋስ ይሰማል፣ ለመያዝ ግን እጅ አይደርስም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "7 — ቀይ ቀሚስ ለብሳ በቤት መካከል ተቀምጣለች።",
+      "option_1": "አበባ",
+      "option_2": "ሙሽራ",
+      "option_3": "እሳት",
+      "option_4": "ባንዲራ",
+      "correct_option": "3",
+      "explanation": "እሳት ቀይ ቀሚስ ለብሳ በምድጃ ትቀመጣለች።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "8 — ሌሊት ይመጣል፤ ቅርጹን ይቀይራል።",
+      "option_1": "ደመና",
+      "option_2": "ጥላ",
+      "option_3": "እንጀራ",
+      "option_4": "ጨረቃ",
+      "correct_option": "4",
+      "explanation": "ጨረቃ በሌሊት ትወጣለች፣ ቅርጿንም ትቀይራለች።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "9 — ካፖርት ለብሶ አያወልቅም።",
+      "option_1": "ወታደር",
+      "option_2": "በግ",
+      "option_3": "ንጉሥ",
+      "option_4": "ዛፍ",
+      "correct_option": "2",
+      "explanation": "በግ ሱፍ ካፖርቱን አያወልቅም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "10 — ጥቁር ለብሳ ጣፋጭ ትወልዳለች።",
+      "option_1": "ድስት",
+      "option_2": "ሌሊት",
+      "option_3": "ቡና",
+      "option_4": "ቸኮሌት",
+      "correct_option": "3",
+      "explanation": "የቡና ፍሬ ጥቁር ነው፣ ጣፋጭ መጠጥ ይወልዳል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "11 — ክብ ነኝ እንደ ፀሐይ፤ በየቀኑ ይበሉኛል።",
+      "option_1": "ሳህን",
+      "option_2": "ጨረቃ",
+      "option_3": "ዳቦ",
+      "option_4": "እንጀራ",
+      "correct_option": "4",
+      "explanation": "እንጀራ ክብ ናት፣ የየቀኑ ምግብ ናት።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "12 — ሳይሄድ ዓለምን ያያል።",
+      "option_1": "መስኮት",
+      "option_2": "ሕልም",
+      "option_3": "ቴሌቪዥን",
+      "option_4": "አዛውንት",
+      "correct_option": "3",
+      "explanation": "ቴሌቪዥን ከቤት ሳይወጣ ዓለምን ያሳያል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "13 — ሁልጊዜ ይናገራል ግን አንድ ጓደኛ የለውም።",
+      "option_1": "መምህር",
+      "option_2": "ሬዲዮ",
+      "option_3": "ገበያ",
+      "option_4": "ወንዝ",
+      "correct_option": "2",
+      "explanation": "ሬዲዮ ያወራል፣ የሚመልስለት ጓደኛ ግን የለውም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "14 — አንገት አላት፤ ቡና ታፈሳለች።",
+      "option_1": "ሻይ ማሰሮ",
+      "option_2": "ጠርሙስ",
+      "option_3": "ጀበና",
+      "option_4": "ዶሮ",
+      "correct_option": "3",
+      "explanation": "ጀበና አንገት አላት፣ ቡና ታፈሳለች።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "15 — ያለ እጅ ይሠራል፤ ጣፋጭ ነው።",
+      "option_1": "ስኳር",
+      "option_2": "እንጀራ",
+      "option_3": "ዝናብ",
+      "option_4": "ማር",
+      "correct_option": "4",
+      "explanation": "ንብ ያለ እጃችን ማር ይሠራል።",
+      "time_limit": 25,
+      "points_multiplier": "2"
+    }
+  ]
+}

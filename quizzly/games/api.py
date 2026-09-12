@@ -104,10 +104,13 @@ def list_public_decks(game_key: str | None = None, language: str | None = None) 
 	choice_fields = preview["choice_fields"]
 	text_field = preview.get("text_field", "prompt_text")
 	filters = {"is_demo": 1}
+	preferred = None
 	if language is not None:
 		from quizzly.localization import content_language
 
-		filters["content_language"] = content_language(language)
+		# Interface language only sorts the list. Pack language is independent, so an
+		# English host page still offers Amharic quizzes (and the reverse).
+		preferred = content_language(language)
 	if pack_doctype == "GP Game Pack":
 		filters["game_key"] = game_key
 	roster = frappe.get_all(
@@ -116,7 +119,13 @@ def list_public_decks(game_key: str | None = None, language: str | None = None) 
 		fields=["name", "title", "demo_key", "content_language", preview["metadata_field"]],
 		order_by="title asc",
 	)
-	roster.sort(key=lambda p: (not (p.demo_key or "").startswith("curated-v2-"), p.title))
+	roster.sort(
+		key=lambda p: (
+			bool(preferred) and p.content_language != preferred,
+			not (p.demo_key or "").startswith("curated-v2-"),
+			p.title or "",
+		)
+	)
 	for pack in roster:
 		prompt_fields = [text_field, *choice_fields]
 		rows = frappe.get_all(

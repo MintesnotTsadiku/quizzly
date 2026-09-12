@@ -218,6 +218,7 @@ class TestGameLoop(GameTestCase):
 			patch("frappe.db.commit"),
 			patch("frappe.enqueue"),
 			patch.object(engine, "STATS_SECONDS", 0.25),
+			patch.object(engine, "SCOREBOARD_SECONDS", 0.25),
 			patch.object(engine, "GETREADY_SECONDS", 0.25),
 			patch.object(engine, "GRACE_SECONDS", 0.25),
 			patch.object(engine, "TICK_SECONDS", 0.05),
@@ -279,6 +280,24 @@ class TestGameLoop(GameTestCase):
 		self.assertEqual(bob.rank, 2)
 		self.assertEqual(frappe.db.get_value("QZ Session", self.session, "status"), "Ended")
 
+	def test_ticker_reveals_as_soon_as_everyone_answers(self):
+		self.activate()
+		quiz = frappe.get_doc("QZ Quiz", self.quiz.name)
+		for question in quiz.questions:
+			question.time_limit = 30
+		quiz.save()
+		self.questions = frappe.get_doc("QZ Quiz", self.quiz.name).questions
+
+		def answer_both(message):
+			choice = "2" if message["q_index"] == 0 else "1"
+			submit_answer(self.pin, self.alice["participant_token"], message["question_row"], choice)
+			submit_answer(self.pin, self.bob["participant_token"], message["question_row"], "3")
+
+		started = time.time()
+		events = self.run_loop(on_question=answer_both)
+		self.assertLess(time.time() - started, 8)
+		self.assertEqual(events[-1]["type"], "podium")
+
 	def test_wrong_answer_scores_zero_and_resets_streak(self):
 		self.activate()
 		question = self.open_question()
@@ -302,6 +321,42 @@ class TestGameLoop(GameTestCase):
 		control = engine.pop_control(self.session, ("skip", "advance", "end"))
 		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
 			engine.advance_session(self.session_doc, state, control)
+		self.assertEqual(engine.get_state(self.session)["phase"], "stats")
+
+	def test_question_stays_open_until_every_player_answers(self):
+		self.activate()
+		question = self.open_question(window=60)
+		submit_answer(self.pin, self.alice["participant_token"], question.name, "2")
+		state = engine.get_state(self.session)
+		self.assertFalse(engine.everyone_answered(self.session, state))
+		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
+			engine.advance_session(self.session_doc, state, None)
+		self.assertEqual(engine.get_state(self.session)["phase"], "question")
+
+	def test_question_closes_when_every_player_has_answered(self):
+		self.activate()
+		question = self.open_question(window=60)
+		submit_answer(self.pin, self.alice["participant_token"], question.name, "2")
+		submit_answer(self.pin, self.bob["participant_token"], question.name, "3")
+		state = engine.get_state(self.session)
+		self.assertTrue(engine.everyone_answered(self.session, state))
+		events = []
+		with patch("frappe.publish_realtime", side_effect=self.record_events(events)):
+			with patch("frappe.db.commit"):
+				engine.advance_session(self.session_doc, state, None)
+		self.assertEqual(engine.get_state(self.session)["phase"], "stats")
+		self.assertEqual(events[0]["type"], "question_closed")
+		self.assertEqual(events[0]["correct_option"], "2")
+		self.assertGreater(state["next_ts"] - time.time(), 10)
+
+	def test_kicked_player_does_not_block_the_reveal(self):
+		self.activate()
+		question = self.open_question(window=60)
+		submit_answer(self.pin, self.alice["participant_token"], question.name, "2")
+		kick_participant(self.session, self.bob["participant"])
+		state = engine.get_state(self.session)
+		with patch("frappe.publish_realtime"), patch("frappe.db.commit"):
+			engine.advance_session(self.session_doc, state, None)
 		self.assertEqual(engine.get_state(self.session)["phase"], "stats")
 
 	def test_stats_holds_for_host_when_auto_advance_off(self):

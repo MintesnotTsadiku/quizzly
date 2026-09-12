@@ -66,7 +66,7 @@ def run_ticker() -> None:
 					frappe.cache.srem(ACTIVE_SESSIONS_KEY, session)
 					continue
 				control = pop_control(session, ("skip", "advance", "end"))
-				if control or time.time() >= state["next_ts"]:
+				if control or time.time() >= state["next_ts"] or everyone_answered(session, state):
 					advance_session(frappe.get_doc("QZ Session", session), state, control)
 				else:
 					maybe_push_answer_count(session, state, answer_count_state, pin_cache)
@@ -130,7 +130,7 @@ def advance_session(session_doc, state: dict, control: str | None) -> None:
 		if due:
 			open_question(session_doc, questions[index], index, total)
 	elif phase == "question":
-		if due or control == "skip":
+		if due or control == "skip" or everyone_answered(session_doc.name, state):
 			close_question(session_doc, questions[index], index, total)
 	elif phase == "explanation":
 		if due or control in ("advance", "skip"):
@@ -530,6 +530,21 @@ def has_answered(session: str, question_row: str, participant: str) -> bool:
 
 def answered_count(session: str, question_row: str) -> int:
 	return len(frappe.cache.smembers(answered_key(session, question_row)))
+
+
+def everyone_answered(session: str, state: dict | None = None) -> bool:
+	"""True when every player still in the room has locked in, so the reveal can start."""
+	state = state or get_state(session)
+	if not state or state.get("phase") != "question":
+		return False
+	question_row = state["question_row"]
+	count = answered_count(session, question_row)
+	if count == 0:
+		return False
+	participants = get_live_participants(session)
+	if not participants or count < len(participants):
+		return False
+	return all(has_answered(session, question_row, participant.name) for participant in participants)
 
 
 def question_payload(session_doc, question, index: int, total: int, deadline_ts: float) -> dict:

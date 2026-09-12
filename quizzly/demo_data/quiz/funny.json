@@ -1,0 +1,233 @@
+{
+  "demo_key": "quiz-funny",
+  "schema_version": 1,
+  "game_key": "quiz",
+  "locale": "en",
+  "title": "Twenty Laughs Live",
+  "description": "Twenty clean, room-friendly joke questions. Wrong answers are part of the fun; the last two are worth double points.",
+  "default_time_limit": 25,
+  "show_explanation": true,
+  "explanation_time_limit": 10,
+  "questions": [
+    {
+      "question_text": "Why did the scarecrow win an award?",
+      "option_1": "He had a great suit",
+      "option_2": "He was outstanding in his field",
+      "option_3": "The crows voted for him",
+      "option_4": "He brought the snacks",
+      "correct_option": "2",
+      "explanation": "He was outstanding in his field — standing in a field, outstanding at the job.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "What do you call cheese that isn’t yours?",
+      "option_1": "Borrowed brie",
+      "option_2": "Guest gouda",
+      "option_3": "Nacho cheese",
+      "option_4": "Klepto cheddar",
+      "correct_option": "3",
+      "explanation": "Nacho cheese. As in, ‘not yo’ cheese.’",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "Why don’t scientists trust atoms?",
+      "option_1": "They make up everything",
+      "option_2": "They’re too small to interview",
+      "option_3": "They keep splitting on them",
+      "option_4": "They hang out with neutrons",
+      "correct_option": "1",
+      "explanation": "Atoms make up everything, so of course they can’t be trusted.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "What has many keys but can’t open a single door?",
+      "option_1": "A locksmith on holiday",
+      "option_2": "A piano",
+      "option_3": "A hotel receptionist",
+      "option_4": "A very organised octopus",
+      "correct_option": "2",
+      "explanation": "A piano has plenty of keys and still won’t get you into the house.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "Why did the bicycle fall over?",
+      "option_1": "The kickstand quit its job",
+      "option_2": "It saw a stop sign and panicked",
+      "option_3": "It was two-tired",
+      "option_4": "Gravity asked nicely",
+      "correct_option": "3",
+      "explanation": "It was two-tired. Two tyres, too tired — pick your spelling.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "What do you call a bear with no teeth?",
+      "option_1": "A hush puppy",
+      "option_2": "A quiet cub",
+      "option_3": "A marshmallow",
+      "option_4": "A gummy bear",
+      "correct_option": "4",
+      "explanation": "A gummy bear. No teeth, all chew.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "Why can’t your nose be 12 inches long?",
+      "option_1": "It wouldn’t fit in a selfie",
+      "option_2": "Because then it would be a foot",
+      "option_3": "Glasses would slide straight off",
+      "option_4": "The doctor already said no",
+      "correct_option": "2",
+      "explanation": "Twelve inches is a foot, and one nose per face is already plenty.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "What gets wetter the more it dries?",
+      "option_1": "A swimming pool",
+      "option_2": "Rain with ambition",
+      "option_3": "A towel",
+      "option_4": "A sponge in denial",
+      "correct_option": "3",
+      "explanation": "A towel. The more it dries you, the wetter it becomes.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "Why did the coffee file a police report?",
+      "option_1": "Someone stole its beans",
+      "option_2": "It got mugged",
+      "option_3": "It was too bitter to talk",
+      "option_4": "The filter snitched",
+      "correct_option": "2",
+      "explanation": "It got mugged. Baristas hear this one every morning.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "What do you call a fish with no eyes?",
+      "option_1": "A wish",
+      "option_2": "Sushi",
+      "option_3": "Blind trout",
+      "option_4": "Fsh",
+      "correct_option": "4",
+      "explanation": "Take the ‘i’s out of fish and you get fsh.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "Why did the student eat his homework?",
+      "option_1": "He forgot his lunch",
+      "option_2": "The dog refused to help",
+      "option_3": "The teacher said it was a piece of cake",
+      "option_4": "It was extra credit",
+      "correct_option": "3",
+      "explanation": "If the teacher calls it a piece of cake, a hungry student may take that literally.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "What building has the most stories?",
+      "option_1": "A skyscraper",
+      "option_2": "A cinema",
+      "option_3": "A gossip column",
+      "option_4": "A library",
+      "correct_option": "4",
+      "explanation": "A library. Storeys, stories — either way, the books win.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "Why don’t eggs tell jokes?",
+      "option_1": "They’d crack each other up",
+      "option_2": "They’re too chicken",
+      "option_3": "The yolk would be on them",
+      "option_4": "Shell shock",
+      "correct_option": "1",
+      "explanation": "They’d crack each other up, and breakfast would never recover.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "What do you call an alligator in a vest?",
+      "option_1": "A fancy reptile",
+      "option_2": "An investigator",
+      "option_3": "Croc formal",
+      "option_4": "A scale model",
+      "correct_option": "2",
+      "explanation": "An investigator. Vest on a gator. You’re welcome.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "Why did the banana go to the doctor?",
+      "option_1": "It had a split personality",
+      "option_2": "It was too yellow",
+      "option_3": "It wasn’t peeling well",
+      "option_4": "Potassium emergency",
+      "correct_option": "3",
+      "explanation": "It wasn’t peeling well. A classic fruit checkup.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "What has a neck but no head?",
+      "option_1": "A giraffe that forgot",
+      "option_2": "A turtleneck",
+      "option_3": "A bottle",
+      "option_4": "A guitar on a break",
+      "correct_option": "3",
+      "explanation": "A bottle has a neck and still no opinions.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "Why did the golfer bring two pairs of trousers?",
+      "option_1": "Laundry day at the club",
+      "option_2": "In case of a hole in one",
+      "option_3": "Wind on the 18th",
+      "option_4": "One pair for the clubhouse",
+      "correct_option": "2",
+      "explanation": "In case of a hole in one. Golf jokes never go out of bounds.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "What do you call a boomerang that doesn’t come back?",
+      "option_1": "Lost property",
+      "option_2": "Australian toast",
+      "option_3": "A stick",
+      "option_4": "A sad souvenir",
+      "correct_option": "3",
+      "explanation": "If it doesn’t come back, congratulations: you now own a stick.",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "Why are ghosts terrible liars?",
+      "option_1": "They vanish mid-sentence",
+      "option_2": "You can see right through them",
+      "option_3": "Sheets have no pockets for notes",
+      "option_4": "They have nobody to back them up",
+      "correct_option": "2",
+      "explanation": "You can see right through them. Honesty is easier when you’re transparent.",
+      "time_limit": 25,
+      "points_multiplier": "2"
+    },
+    {
+      "question_text": "What’s the best day to cook chicken?",
+      "option_1": "Sunday roast day",
+      "option_2": "Market day",
+      "option_3": "Any day with rice",
+      "option_4": "Fry-day",
+      "correct_option": "4",
+      "explanation": "Fry-day. The calendar’s funniest kitchen holiday.",
+      "time_limit": 25,
+      "points_multiplier": "2"
+    }
+  ]
+}

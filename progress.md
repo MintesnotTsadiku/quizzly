@@ -1,5 +1,45 @@
 # Progress
 
+## Amharic riddle games split (2026-09-11)
+
+The 45 riddles are three separate quizzes of 15: `quiz-amharic-riddles-1`,
+`-2` and `-3`. The combined 45-question pack is no longer a demo.
+
+## Quiz pack picker shows every language (2026-09-11)
+
+The English quiz page filtered ready-to-play packs to `content_language=en`, so
+the Amharic riddle bundle never appeared. Discovery now lists every demo pack
+and only uses the interface language to sort.
+
+## Amharic riddle bundle (2026-09-11)
+
+Added `quiz-amharic-riddles` / እንቆቅልሽ · ሦስት ክፍሎች: three parts of 15 riddles
+each, including the classic house-with-no-door egg riddle and a handful of
+funny modern clues.
+
+## Funny quiz pack (2026-09-11)
+
+Added `quiz-funny` / Twenty Laughs Live: twenty clean joke questions for a
+room warm-up, seeded with the other Quizzly demos.
+
+## Quiz reveals when everyone has answered (2026-09-11)
+
+The question clock no longer has to run out if every live player has locked in.
+The shared ticker closes the question and moves to the answer/explanation beat
+the same way a host skip does. A kicked player does not hold the room.
+
+## Quiz composed starter packs (2026-09-11)
+
+Replaced the three Quizzly demo quizzes with 15 two-part composed questions each
+(30 items per pack). Part 1 is standard points; Part 2 is the related follow-up
+at double points.
+
+- Church/Bible: `quiz-church-bible` → Bible Composed Challenge
+- General knowledge: `quiz-family-general` → General Knowledge Composed
+- Sports/football: `quiz-big-room` → Football Composed Cup
+
+Idempotent seed remains `bench --site … execute quizzly.demo.seed.seed_all`.
+
 ## GatherPlay Phase 3: Crowd Compass (2026-08-25)
 
 Spec: `specs/gatherplay/phase-3-crowd-compass.md`. Crowd Compass is the first

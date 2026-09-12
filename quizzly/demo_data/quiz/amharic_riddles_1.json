@@ -1,0 +1,179 @@
+{
+  "demo_key": "quiz-amharic-riddles-1",
+  "schema_version": 1,
+  "game_key": "quiz",
+  "locale": "am",
+  "content_language": "en",
+  "title": "እንቆቅልሽ · ክፍል 1",
+  "description": "የቤት እንቆቅልሽ። 15 ጥያቄ። እንቁላል፣ በቆሎ፣ ሰው፣ ውኃ፣ ከሰልና እሳት፣ እና ሁለት የሚያስቁ።",
+  "default_time_limit": 25,
+  "show_explanation": true,
+  "explanation_time_limit": 12,
+  "questions": [
+    {
+      "question_text": "1 — ቤት አላት፤ በር የላት።",
+      "option_1": "ድስት",
+      "option_2": "እንቁላል",
+      "option_3": "ዋሻ",
+      "option_4": "ሳጥን",
+      "correct_option": "2",
+      "explanation": "እንቁላል ቤት አላት ግን በር የላት።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "2 — አንድ እናት ብዙ ልጆች አሏት፤ ልጆቿ ሁሉ አንድ ልብስ ይለብሳሉ።",
+      "option_1": "በግ",
+      "option_2": "ጫማ",
+      "option_3": "በቆሎ",
+      "option_4": "ትምህርት ቤት",
+      "correct_option": "3",
+      "explanation": "በቆሎ፦ ቆሎዎቹ ሁሉ በአንድ ቅጠል ተጠቅልለዋል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "3 — ሲወለድ አራት እግር፣ ሲያድግ ሁለት እግር፣ ሲያረጅ ሦስት እግር።",
+      "option_1": "ውሻ",
+      "option_2": "ወንበር",
+      "option_3": "ድመት",
+      "option_4": "ሰው",
+      "correct_option": "4",
+      "explanation": "ሰው፦ ሕፃን በአራት፣ ትልቅ በሁለት፣ ሽማግሌ በሦስት (በበትር) ይሄዳል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "4 — እግር የለውም ይሮጣል፤ አፍ የለውም ያጉረመርማል።",
+      "option_1": "ነፋስ",
+      "option_2": "ውኃ",
+      "option_3": "መኪና",
+      "option_4": "ሬዲዮ",
+      "correct_option": "2",
+      "explanation": "ውኃ ይፈሳል፣ ያጉረመርማል፣ እግር ግን የለውም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "5 — እናቷ ጥቁር፣ ልጇ ቀይ።",
+      "option_1": "ሌሊትና ቀን",
+      "option_2": "ቡናና ሻይ",
+      "option_3": "ከሰልና እሳት",
+      "option_4": "ዶሮና እንቁላል",
+      "correct_option": "3",
+      "explanation": "ከሰል ጥቁር እናት፣ እሳት ቀይ ልጅ።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "6 — ሳይነካህ ያስለቅሳል።",
+      "option_1": "ፊልም",
+      "option_2": "ሽንኩርት",
+      "option_3": "ዝናብ",
+      "option_4": "ሳሙና",
+      "correct_option": "2",
+      "explanation": "ሽንኩርት ሳትነካው ዓይንህን ያስለቅሳል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "7 — ጭንቅላቱ በሰማይ፣ እግሩ በምድር።",
+      "option_1": "ዝናብ",
+      "option_2": "ተራራ",
+      "option_3": "ዛፍ",
+      "option_4": "ቤተ ክርስቲያን",
+      "correct_option": "3",
+      "explanation": "ዛፍ ሥሩ በምድር፣ ቅርንጫፉ ወደ ሰማይ ነው።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "8 — ቀን ይተኛል፣ ሌሊት ይሰራል።",
+      "option_1": "ጠባቂ",
+      "option_2": "ኮከብ",
+      "option_3": "ድመት",
+      "option_4": "ምጣድ",
+      "correct_option": "2",
+      "explanation": "ኮከብ በቀን ይደበቃል፣ በሌሊት ይበራል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "9 — እጅ አለው ግን አያጨበጭብም።",
+      "option_1": "ሰዓት",
+      "option_2": "ፖሊስ",
+      "option_3": "ሕፃን",
+      "option_4": "ወንበር",
+      "correct_option": "1",
+      "explanation": "ሰዓት እጅ አለው፣ ጭብጨባ ግን አያውቅም።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "10 — ራሱን እየበላ ብርሃን ይሰጣል።",
+      "option_1": "ፀሐይ",
+      "option_2": "ሻማ",
+      "option_3": "መብራት",
+      "option_4": "እሳት",
+      "correct_option": "2",
+      "explanation": "ሻማ ራሱን እየቀለጠ ብርሃን ይሰጣል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "11 — ትንሽ ነኝ፤ ሁሉን እለብሳለሁ።",
+      "option_1": "ሳሙና",
+      "option_2": "ንጉሥ",
+      "option_3": "አየር",
+      "option_4": "መርፌ",
+      "correct_option": "4",
+      "explanation": "መርፌ ትንሽ ናት፣ ልብስ ግን ሁሉን ትሰፋለች።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "12 — ነጭ ወታደሮች በቀይ ቤት ውስጥ።",
+      "option_1": "ወተት",
+      "option_2": "ጥርስ",
+      "option_3": "በረዶ",
+      "option_4": "ሩዝ",
+      "correct_option": "2",
+      "explanation": "ጥርሶች ነጭ ወታደሮች፣ አፍ ቀይ ቤት።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "13 — ሁልጊዜ ይከተልሃል፤ ስትዞር ይዞራል።",
+      "option_1": "ውሻ",
+      "option_2": "ስም",
+      "option_3": "ጥላ",
+      "option_4": "ጫማ",
+      "correct_option": "3",
+      "explanation": "ጥላህ ከፊትህ አይቀድም፣ ሁልጊዜ ይከተልሃል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "14 — ሁሉን ያውቃል ግን አንድ ቃል አይናገርም።",
+      "option_1": "መምህር",
+      "option_2": "መጽሐፍ",
+      "option_3": "ሬዲዮ",
+      "option_4": "ሕፃን",
+      "correct_option": "2",
+      "explanation": "መጽሐፍ ጸጥ ብሎ ብዙ ያውቃል።",
+      "time_limit": 25,
+      "points_multiplier": "1"
+    },
+    {
+      "question_text": "15 — አምስት ወንድማማቾች አንድ ቤት ይኖራሉ፤ ሁልጊዜ አብረው ይሄዳሉ።",
+      "option_1": "ጫማ",
+      "option_2": "ባቡር",
+      "option_3": "ጣቶች",
+      "option_4": "እንጀራ",
+      "correct_option": "3",
+      "explanation": "አምስቱ ጣቶች አንድ እጅ ቤት ነው የሚኖሩት።",
+      "time_limit": 25,
+      "points_multiplier": "2"
+    }
+  ]
+}

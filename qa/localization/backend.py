@@ -40,8 +40,10 @@ try:
 		am = list_public_decks(row["game"], "am")
 		en = list_public_decks(row["game"], "en")
 		assert any(p["name"] == row["pack"] for p in am), row["game"]
-		assert all(p["content_language"] == "am" for p in am)
-		assert en and all(p["content_language"] == "en" for p in en), row["game"]
+		assert any(p["content_language"] == "am" for p in am)
+		assert en and any(p["content_language"] == "en" for p in en), row["game"]
+		assert am[0]["content_language"] == "am"
+		assert en[0]["content_language"] == "en"
 	print("PASS: 25 Amharic packs; English packs remain available; repeat seed changes nothing")
 	with patch("frappe.get_cached_doc", return_value=frappe._dict(default_language="am")):
 		assert content_language() == "am"
