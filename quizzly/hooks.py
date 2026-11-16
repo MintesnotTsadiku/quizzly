@@ -5,13 +5,18 @@ app_description = "Real-time multiplayer quiz platform"
 app_email = "gajendra@bwh.tech"
 app_license = "mit"
 app_logo_url = "/assets/quizzly/images/quizzly-logo.svg"
+app_home = "/desk/quizzly"
 
+# The tile opens the play app; "Open in Desk" goes to the Quizzly workspace.
 add_to_apps_screen = [
 	{
 		"name": "quizzly",
 		"logo": app_logo_url,
 		"title": "Quizzly",
 		"route": "/play",
+		"desk_route": app_home,
+		"has_permission": "quizzly.permissions.has_app_permission",
+		"sequence_id": 50,
 	}
 ]
 
