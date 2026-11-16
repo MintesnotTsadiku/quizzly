@@ -14,6 +14,14 @@ Frappe v17 Desk. This file lists what the app ships for the Desk: the apps-scree
 - Order: quizzes and game sessions, then game content, players and teams, access, logs (answers, rounds, score events, player actions).
 - The GatherPlay DocTypes (GP, GatherPlay) were not reachable from the Desk before. They are now.
 
+## Standalone screens
+
+| Screen | Route | Who can open it | Linked from |
+|---|---|---|---|
+| Play app (host, projector, phone views) | `/play` | Hosts; players join by code | Tile, sidebar and home |
+
+How the links are limited to roles: a sidebar URL item in Frappe v17 has no role list, and it makes its area visible to every app user. So each "Open ..." sidebar item is a Page item: it opens a small redirect page (`<app>-open-...`, one per audience) with the screen path, and the page sends the browser to that path on the same site. Frappe shows a Page item only to the page's roles, so a user sees a link only when they may open the screen, and no area appears for a role that cannot use it. The home-page shortcuts are URL shortcuts; the workspace role list limits them. A System Manager (and the app manager role) is in every page's roles and sees every link. The screens still check roles themselves.
+
 ## Exemptions
 
 None. Child tables are not listed.
@@ -35,7 +43,7 @@ Module `Quizzly`, header icon `zap`.
 | Item | Opens | Icon |
 |---|---|---|
 | Home | Workspace `Quizzly` | `house` |
-| Open Play | URL `/play` | `gamepad-2` |
+| Open Play | Page `quizzly-open` | `app-window` |
 | Quizzes | DocType `QZ Quiz` | `circle-question-mark` |
 | Quiz Sessions | DocType `QZ Session` | `presentation` |
 | Game Sessions | DocType `GP Session` | `party-popper` |
@@ -63,9 +71,9 @@ Module `Quizzly`, header icon `zap`.
 
 ### Quizzly
 
-Icon `zap`. Roles: everyone with module access.
+Icon `zap`. Roles: System Manager, Quiz Host.
 
-- Shortcuts: Open Play (`gamepad-2`), Quizzes (`circle-question-mark`), Quiz Sessions (`presentation`), Game Sessions (`party-popper`), Game Packs (`package`)
+- Shortcuts: Open Play (`app-window`), Quizzes (`circle-question-mark`), Quiz Sessions (`presentation`), Game Sessions (`party-popper`), Game Packs (`package`)
 - Card Game content: Game Packs, Crowd Packs, Cue Decks, Draw Packs
 - Card Players and teams: Quiz Participants, Game Participants, Teams, Team Memberships
 - Card Access: Access Passes, Receipts, GatherPlay Settings

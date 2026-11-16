@@ -223,7 +223,7 @@
    "parenttype": "Workspace"
   }
  ],
- "modified": "2026-11-16 10:38:23.000000",
+ "modified": "2026-11-16 13:07:22.000000",
  "modified_by": "Administrator",
  "module": "Quizzly",
  "name": "Quizzly",
@@ -233,13 +233,28 @@
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
- "roles": [],
+ "roles": [
+  {
+   "role": "System Manager",
+   "idx": 1,
+   "doctype": "Has Role",
+   "parentfield": "roles",
+   "parenttype": "Workspace"
+  },
+  {
+   "role": "Quiz Host",
+   "idx": 2,
+   "doctype": "Has Role",
+   "parentfield": "roles",
+   "parenttype": "Workspace"
+  }
+ ],
  "sequence_id": 1.0,
  "shortcuts": [
   {
    "label": "Open Play",
    "type": "URL",
-   "icon": "gamepad-2",
+   "icon": "app-window",
    "color": "Green",
    "doc_view": "",
    "url": "/play",
