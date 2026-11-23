@@ -5,7 +5,7 @@ frappe.pages["quizzly-open"].on_page_load = function (wrapper) {
 };
 
 frappe.pages["quizzly-open"].on_page_show = function () {
-	// Only a path on this site: leading slashes are dropped, so the target can never be another host.
-	const path = frappe.get_route().slice(1).join("/").replace(/^\/+/, "");
+	// Only a path on this site: leading slashes, backslashes and white space are dropped, so the target can never be another host.
+	const path = frappe.get_route().slice(1).join("/").replace(/^[\s\\/]+/, "");
 	window.location.replace("/" + path);
 };
