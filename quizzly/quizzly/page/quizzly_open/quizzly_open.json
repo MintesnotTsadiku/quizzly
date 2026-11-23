@@ -1,0 +1,32 @@
+{
+ "creation": "2026-11-16 13:07:22.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "icon": "app-window",
+ "idx": 0,
+ "modified": "2026-11-16 13:07:22.000000",
+ "modified_by": "Administrator",
+ "module": "Quizzly",
+ "name": "quizzly-open",
+ "owner": "Administrator",
+ "page_name": "quizzly-open",
+ "roles": [
+  {
+   "role": "System Manager",
+   "idx": 1,
+   "doctype": "Has Role",
+   "parentfield": "roles",
+   "parenttype": "Page"
+  },
+  {
+   "role": "Quiz Host",
+   "idx": 2,
+   "doctype": "Has Role",
+   "parentfield": "roles",
+   "parenttype": "Page"
+  }
+ ],
+ "standard": "Yes",
+ "system_page": 0,
+ "title": "Open app screens"
+}
